@@ -13,12 +13,13 @@ namespace DiscordLog
         public static void SendWebhook(string objcontent)
         {
             HttpClient http = new HttpClient();
-            DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook();
-            
-            webhook.AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar;
-            webhook.Content = objcontent;
-            webhook.IsTTS = false;
-            webhook.Username = DiscordLog.Instance.Config.WebhookName;
+            DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook
+            {
+                AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
+                Content = objcontent,
+                IsTTS = false,
+                Username = DiscordLog.Instance.Config.WebhookName
+            };
             string webhookstr = webhook.ToJson();
             Console.WriteLine(webhookstr);
             var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
@@ -29,15 +30,32 @@ namespace DiscordLog
         {
             objcontent = string.Format(objcontent, objects);
             HttpClient http = new HttpClient();
-            DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook();
-            webhook.AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar;
-            webhook.Content = objcontent;
-            webhook.IsTTS = false;
-            webhook.Username = DiscordLog.Instance.Config.WebhookName;
+            DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook
+            {
+                AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
+                Content = objcontent,
+                IsTTS = false,
+                Username = DiscordLog.Instance.Config.WebhookName
+            };
             string webhookstr = webhook.ToJson();
             Console.WriteLine(webhookstr);
             var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
             http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogJoueur, content);
+        }
+        public static void SendWebhookStaff(string objcontent)
+        {
+            HttpClient http = new HttpClient();
+            DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook
+            {
+                AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
+                Content = objcontent,
+                IsTTS = false,
+                Username = DiscordLog.Instance.Config.WebhookName
+            };
+            string webhookstr = webhook.ToJson();
+            Console.WriteLine(webhookstr);
+            var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
+            http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogStaff, content);
         }
     }
 }
