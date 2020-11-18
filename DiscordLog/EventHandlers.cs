@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features;
 using Exiled.Events.EventArgs;
+using Newtonsoft.Json.Serialization;
 using Respawning;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace DiscordLog
         }
         public void OnRoundEnd(RoundEndedEventArgs ev)
         {
-            Webhook.SendWebhook($":checkered_flag: Fin de la partie.\nWin :{ev.LeadingTeam}");
+            Webhook.SendWebhook($":checkered_flag: Fin de la partie.\nWin : {ev.LeadingTeam}");
         }
         public void OnRoundRestart()
         {
@@ -31,10 +32,30 @@ namespace DiscordLog
         }
         public void OnTeamRespawn(RespawningTeamEventArgs ev)
         {
-            string objcontent = ":helicopter: L’équipe Epsilon est arrivée sur le site.";
-            foreach (Player playerrespawn in ev.Players)
+            string objcontent;
+            if (ev.NextKnownTeam == SpawnableTeamType.NineTailedFox)
             {
-                objcontent += $"\n- {playerrespawn.Nickname} ({playerrespawn.UserId})";
+                objcontent = ":helicopter: L’équipe Epsilon est arrivée sur le site.";
+                foreach (Player playerrespawn in ev.Players)
+                {
+                    objcontent += $"\n- {playerrespawn.Nickname} ({playerrespawn.UserId})";
+                }
+            }
+            else if (ev.NextKnownTeam == SpawnableTeamType.ChaosInsurgency)
+            {
+                objcontent = ":articulated_lorry: L’insurrection du chaos est arrivée sur le site.";
+                foreach (Player playerrespawn in ev.Players)
+                {
+                    objcontent += $"\n- {playerrespawn.Nickname} ({playerrespawn.UserId})";
+                }
+            }
+            else
+            {
+                objcontent = "ERROR NO TEAM DETECTED";
+                foreach (Player playerrespawn in ev.Players)
+                {
+                    objcontent += $"\n- {playerrespawn.Nickname} ({playerrespawn.UserId})";
+                }
             }
             Webhook.SendWebhook(objcontent);
         }
@@ -160,7 +181,7 @@ namespace DiscordLog
             string str = "";
             foreach (Pickup item in ev.Items)
             {
-                str += string.Format($"\n- {item}");
+                str += string.Format($"\n- {item.itemId}");
             }
             Webhook.SendWebhook($":gear: Scp-914 a été enclenché en {ev.KnobSetting}:{str}");
         }
@@ -194,8 +215,8 @@ namespace DiscordLog
                     return;
                 string str1 = null;
                 foreach (string str2 in ev.Arguments)
-                    str1 = str1 + " " + str2;
-                Webhook.SendWebhookStaff(ev.Sender.Nickname + " (" + ev.Sender.UserId + ") a envoyé ``" + ev.Name + str1 + "``");
+                    str1 += $" {str2}";
+                Webhook.SendWebhookStaff($"{ev.Sender.Nickname} ({ev.Sender.UserId}) a envoyé ``{ev.Name} {str1}``");
             }
         }
     }
