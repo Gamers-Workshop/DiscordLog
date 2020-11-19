@@ -122,6 +122,7 @@
   <ItemGroup>
     <Compile Include="DiscordWebhook.cs" />
     <Compile Include="EventHandlers.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Configs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

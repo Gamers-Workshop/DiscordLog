@@ -12,6 +12,7 @@ namespace DiscordLog
     {
         internal readonly DiscordLog plugin;
         public float IntercomDelay;
+        public string bloodwebhook;
 
         public EventHandlers(DiscordLog plugin) => this.plugin = plugin;
         public void OnWaintingForPlayers()
@@ -101,7 +102,8 @@ namespace DiscordLog
         }
         public void OnPlayerHurt(HurtingEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Target != null && ev.Attacker != ev.Target && ev.Target.Role != RoleType.Spectator && ev.HitInformations.Amount < ev.Target.Health + ev.Target.AdrenalineHealth)
+            if (ev.IsAllowed && ev.Target != null && ev.Attacker != ev.Target && ev.Target.Role != RoleType.Spectator && ev.HitInformations.Amount < ev.Target.Health + ev.Target.AdrenalineHealth && !ev.Attacker.IsEnemy(ev.Target.Team))
+                if (bloodwebhook != $":drop_of_blood: {ev.Target.Nickname} ({ev.Target.UserId}) est blessé par {ev.Attacker.Nickname} ({ev.Attacker.UserId}) avec {ev.DamageType.name}")
                 Webhook.SendWebhook($":drop_of_blood: {ev.Target.Nickname} ({ev.Target.UserId}) est blessé par {ev.Attacker.Nickname} ({ev.Attacker.UserId}) avec {ev.DamageType.name}");
         }
         public void OnPlayerDeath(DiedEventArgs ev)
