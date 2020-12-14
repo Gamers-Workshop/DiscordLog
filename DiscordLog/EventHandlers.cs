@@ -125,7 +125,7 @@ namespace DiscordLog
             }
             else if (ev.NextKnownTeam == SpawnableTeamType.ChaosInsurgency)
             {
-                objcontent = ":articulated_lorry: L’insurrection du chaos est arrivée sur le site.";
+                objcontent = ":articulated_lorry: L’Insurrection du Chaos est arrivée sur le site.";
                 foreach (Player playerrespawn in ev.Players)
                 {
                     objcontent += $"\n- {playerrespawn.Nickname} ({playerrespawn.UserId})";
@@ -133,7 +133,7 @@ namespace DiscordLog
             }
             else
             {
-                objcontent = "ERROR NO TEAM DETECTED";
+                objcontent = ":snake: La Mains du Serpent est arrivée sur le site";
                 foreach (Player playerrespawn in ev.Players)
                 {
                     objcontent += $"\n- {playerrespawn.Nickname} ({playerrespawn.UserId})";

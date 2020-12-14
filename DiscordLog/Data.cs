@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DiscordLog
 {
-	public class Serverinfo
+	/*public class Serverinfo
 	{
 		public Serverinfo() { players = new List<Playerinfo>(); }
 
@@ -48,5 +48,5 @@ namespace DiscordLog
 		public string role { get; set; }
 
 		public string rank { get; set; }
-	}
+	}*/
 }

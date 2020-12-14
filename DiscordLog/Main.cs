@@ -22,7 +22,7 @@ namespace DiscordLog
 		public override string Name => "DiscordLog";
 		public override string Prefix => "DiscordLog";
 		public override string Author => "Husky/Corentin & Louis1706";
-		public override PluginPriority Priority => PluginPriority.Low;
+		public override PluginPriority Priority => PluginPriority.Lowest;
 		public override Version Version => new Version(2, 9, 1);
 		public override Version RequiredExiledVersion => new Version(2, 1, 9);
 
