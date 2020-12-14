@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Features;
+using NorthwoodLib.Pools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,18 @@ namespace DiscordLog
 				&&
 				((player.Team != Team.CDP && player.Team != Team.CHI) || (target != Team.CDP && target != Team.CHI))
 			;
+		}
+		public static string FormatArguments(ArraySegment<string> sentence, int index)
+		{
+			StringBuilder SB = StringBuilderPool.Shared.Rent();
+			foreach (string word in sentence.Segment(index))
+			{
+				SB.Append(word);
+				SB.Append(" ");
+			}
+			string msg = SB.ToString();
+			StringBuilderPool.Shared.Return(SB);
+			return msg;
 		}
 	}
 }

@@ -9,9 +9,8 @@
 namespace DiscordWebhookData
 {
     using System;
-    using System.Collections.Generic;
-
     using System.Globalization;
+    using DiscordLog;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
@@ -44,6 +43,7 @@ namespace DiscordWebhookData
         public string Avatar { get; set; }
     }
 
+
     public partial class DiscordWebhook
     {
         public static DiscordWebhook FromJson(string json) => JsonConvert.DeserializeObject<DiscordWebhook>(json, Converter.Settings);
@@ -52,6 +52,8 @@ namespace DiscordWebhookData
     public static class Serialize
     {
         public static string ToJson(this DiscordWebhook self) => JsonConvert.SerializeObject(self, Converter.Settings);
+        public static string ToJson(this Serverinfo self) => JsonConvert.SerializeObject(self, Converter.Settings);
+
     }
 
     internal static class Converter

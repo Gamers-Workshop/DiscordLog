@@ -40,19 +40,15 @@ C:\Users\Corentin\source\repos\PluginBETA\PluginBETA\obj\Debug\DiscordLog.csproj
 C:\Users\Corentin\source\repos\PluginBETA\PluginBETA\obj\Debug\DiscordLog.csproj.CopyComplete
 C:\Users\Corentin\source\repos\PluginBETA\PluginBETA\obj\Debug\PluginBETA.dll
 C:\Users\Corentin\source\repos\PluginBETA\PluginBETA\obj\Debug\PluginBETA.pdb
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Assembly-CSharp-firstpass.dll
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Assembly-CSharp_publicized.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Newtonsoft.Json.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\RestSharp.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Serilog.dll
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.CoreModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.PhysicsModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.ParticleSystemModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.AudioModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.AnimationModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.InputLegacyModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.IMGUIModule.dll
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Mirror.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.TerrainModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.UnityWebRequestModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.UI.dll
@@ -77,8 +73,6 @@ D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Serilog.xml
 D:\1-Plugin\DiscordLog\DiscordLog\obj\Debug\DiscordLog.csprojAssemblyReference.cache
 D:\1-Plugin\DiscordLog\DiscordLog\obj\Debug\DiscordLog.csproj.CoreCompileInputs.cache
 D:\1-Plugin\DiscordLog\DiscordLog\obj\Debug\DiscordLog.csproj.CopyComplete
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Mirror.Components.dll
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.DSPGraphModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.AndroidJNIModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.AccessibilityModule.dll
@@ -118,3 +112,4 @@ D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\DiscordLog.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\DiscordLog.pdb
 D:\1-Plugin\DiscordLog\DiscordLog\obj\Debug\DiscordLog.dll
 D:\1-Plugin\DiscordLog\DiscordLog\obj\Debug\DiscordLog.pdb
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\NorthwoodLib.dll

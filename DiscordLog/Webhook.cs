@@ -1,10 +1,12 @@
 ﻿using DiscordWebhookData;
+using MEC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace DiscordLog
 {
@@ -43,6 +45,21 @@ namespace DiscordLog
             http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogJoueur, content);
         }
         public static void SendWebhookStaff(string objcontent)
+        {
+            HttpClient http = new HttpClient();
+            DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook
+            {
+                AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
+                Content = objcontent,
+                IsTTS = false,
+                Username = DiscordLog.Instance.Config.WebhookName
+            };
+            string webhookstr = webhook.ToJson();
+            Console.WriteLine(webhookstr);
+            var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
+            http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogStaff, content);
+        }
+        public static void LogStaff(string objcontent)
         {
             HttpClient http = new HttpClient();
             DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook
