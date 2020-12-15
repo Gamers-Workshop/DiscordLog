@@ -11,6 +11,7 @@ using Scp079Events = Exiled.Events.Handlers.Scp079;
 using Scp914Events = Exiled.Events.Handlers.Scp914;
 using Scp106Events = Exiled.Events.Handlers.Scp106;
 using Scp096Events = Exiled.Events.Handlers.Scp096;
+
 using System.Collections.Generic;
 using System.IO;
 using MEC;
@@ -115,6 +116,7 @@ namespace DiscordLog
 
 			Scp914Events.Activating += Handlers.On914Activating;
 			Scp914Events.UpgradingItems += Handlers.On914Upgrade;
+
 			//LogStaff
 			PlayerEvents.Banning += Handlers.OnBanning;
 			PlayerEvents.Kicking += Handlers.OnKicking;

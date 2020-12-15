@@ -231,12 +231,12 @@ namespace DiscordLog
         }
         public void OnActivatingWarheadPanel(ActivatingWarheadPanelEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player.UserId == null && !UnityEngine.Object.FindObjectOfType<AlphaWarheadOutsitePanel>().keycardEntered)
+            if (ev.IsAllowed && ev.Player != null && !UnityEngine.Object.FindObjectOfType<AlphaWarheadOutsitePanel>().keycardEntered)
                 plugin.LOG +=$":radioactive: {ev.Player.Nickname} ({ev.Player.UserId}) a ouvert le lock pour activé l'alpha warhead\n";
         }
         public void OnIntercomSpeaking(IntercomSpeakingEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player == null && !Intercom.host.speaking && Time.time > IntercomDelay + 5.1)
+            if (ev.IsAllowed && ev.Player != null && !Intercom.host.speaking && Time.time > IntercomDelay + 5.1)
             { 
                 IntercomDelay += Time.time;
                 plugin.LOG +=$":loudspeaker: {ev.Player.Nickname} ({ev.Player.UserId}) Utilise l'intercom\n";
@@ -250,7 +250,7 @@ namespace DiscordLog
         public void OnRemovingHandcuffs(RemovingHandcuffsEventArgs ev)
         {
             if (ev.IsAllowed && ev.Cuffer != null)
-                plugin.LOG +=$":chains: {ev.Target.Nickname} ({ev.Target.UserId}) a été libéré par {ev.Cuffer.Nickname} ({ev.Cuffer.UserId})";
+                plugin.LOG +=$":chains: {ev.Target.Nickname} ({ev.Target.UserId}) a été libéré par {ev.Cuffer.Nickname} ({ev.Cuffer.UserId})\n";
             else if (ev.IsAllowed)
                 plugin.LOG +=$":chains: {ev.Target.Nickname} ({ev.Target.UserId}) a été libéré\n";
         }
