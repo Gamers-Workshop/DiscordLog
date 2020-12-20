@@ -98,8 +98,7 @@ namespace DiscordLog
                 Timing.KillCoroutines(handle);
             Coroutines.Add(Timing.RunCoroutine(plugin.RunSendWebhook()));
             plugin.LOG += ":zzz: Attente des joueurs...\n";
-        //    loaded = true;
-        }
+        }   
         public void OnRoundStart()
         {
             plugin.LOG += ":triangular_flag_on_post: Démarage de la partie.\n";
@@ -143,14 +142,13 @@ namespace DiscordLog
         }
         public void OnWarheadStart(StartingEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player == null)
+            if (ev.IsAllowed && ev.Player != null)
                 plugin.LOG +=$":radioactive: la détonation de l’alpha warhead a été déclenchée par {ev.Player.Nickname} ({ev.Player.UserId})\n";
         }
         public void OnWarheadCancel(StoppingEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player == null)
+            if (ev.IsAllowed && ev.Player != null)
                 plugin.LOG +=$":radioactive: la détonation de l’alpha warhead a été désactivée par {ev.Player.Nickname} ({ev.Player.UserId})\n";
-
         }
         public void OnDetonated()
         {
@@ -176,10 +174,9 @@ namespace DiscordLog
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
             if (ev.IsEscaped)
-                plugin.LOG +=string.Format($":new: {ev.Player.Nickname} ({ev.Player.UserId}) c'est échaper Il est devenue : {ev.NewRole}\n");
+                plugin.LOG +=$":new: {ev.Player.Nickname} ({ev.Player.UserId}) c'est échaper Il est devenue : {ev.NewRole}\n";
             else
-                plugin.LOG +=string.Format($":new: {ev.Player.Nickname} ({ev.Player.UserId}) a spawn : {ev.NewRole}\n");
-
+                plugin.LOG += $":new: {ev.Player.Nickname} ({ev.Player.UserId}) a spawn : {ev.NewRole}\n";
         }
         public void OnPlayerHurt(HurtingEventArgs ev)
         {
@@ -244,15 +241,17 @@ namespace DiscordLog
         }
         public void OnHandcuffing(HandcuffingEventArgs ev)
         {
+            Log.Info($"[OnHandcuffing] IsAllow : {ev.IsAllowed} Target : {ev.Target}");
             if (ev.IsAllowed && ev.Cuffer != null)
                 plugin.LOG += $":chains: {ev.Target.Nickname} ({ev.Target.UserId}) a été menoté par {ev.Cuffer.Nickname} ({ev.Cuffer.UserId})\n";
         }
         public void OnRemovingHandcuffs(RemovingHandcuffsEventArgs ev)
         {
+            Log.Info($"[OnHandcuffing] IsAllow : {ev.IsAllowed} Target : {ev.Target}");
             if (ev.IsAllowed && ev.Cuffer != null)
-                plugin.LOG +=$":chains: {ev.Target.Nickname} ({ev.Target.UserId}) a été libéré par {ev.Cuffer.Nickname} ({ev.Cuffer.UserId})\n";
+                plugin.LOG +=$":chains: {ev.Target.Nickname} ({ev.Target.UserId}) a été démenoté par {ev.Cuffer.Nickname} ({ev.Cuffer.UserId})\n";
             else if (ev.IsAllowed)
-                plugin.LOG +=$":chains: {ev.Target.Nickname} ({ev.Target.UserId}) a été libéré\n";
+                plugin.LOG +=$":chains: {ev.Target.Nickname} ({ev.Target.UserId}) a été démenoté\n";
         }
         public void On914Activating(ActivatingEventArgs ev)
         {
@@ -281,25 +280,47 @@ namespace DiscordLog
         public void OnSendingRemoteAdminCommand(SendingRemoteAdminCommandEventArgs ev)
         {
             if (!ev.Success && ev.Name.ToLower() == "ban" && ev.Name.ToLower() == "kick" && ev.Name == null) return;
-            if (ev.Name.ToLower() == "jail" && int.TryParse(ev.Arguments[0], out int result))
+            switch (ev.Name.ToLower())
             {
-                foreach (Player player in Player.List)
-                {
-                    if (result == player.Id)
+                case "jail":
                     {
-                        Webhook.SendWebhookStaff($"{ev.Sender.Nickname} ({ev.Sender.UserId}) a jail {player.Nickname} {player.UserId})");
-                        break;
+                        if (int.TryParse(ev.Arguments[0], out int result))
+                        {
+                            foreach (Player player in Player.List)
+                            {
+                                if (result == player.Id)
+                                {
+                                    Webhook.SendWebhookStaff($"{ev.Sender.Nickname} ({ev.Sender.UserId}) a jail {player.Nickname} ({player.UserId})");
+                                    return;
+                                }
+                            }
+                        }
                     }
-                }
-            }
-            else
-            {
-                if (ev.Name.ToLower() == "jail")
                     return;
-                string str1 = null;
-                foreach (string str2 in ev.Arguments)
-                    str1 += $" {str2}";
-                Webhook.SendWebhookStaff($"{ev.Sender.Nickname} ({ev.Sender.UserId}) a envoyé ``{ev.Name}{str1}``");
+                case "forceclass":
+                    {
+                        if (int.TryParse(ev.Arguments[1], out int result1))
+                        {
+                            Webhook.SendWebhookStaff($"{ev.Sender.Nickname} ({ev.Sender.UserId}) a changer le rôle de {ev.Arguments[0]} {(RoleType)result1}");
+                        }
+                    }
+                    return;
+                case "give":
+                    {
+                        if (int.TryParse(ev.Arguments[1], out int result2))
+                        {
+                            Webhook.SendWebhookStaff($"{ev.Sender.Nickname} ({ev.Sender.UserId}) a changer le rôle de {ev.Arguments[0]} {(ItemType)result2}");
+                        }
+                    }
+                    return;
+                default:
+                    {
+                        string str1 = null;
+                        foreach (string str2 in ev.Arguments)
+                            str1 += $" {str2}";
+                        Webhook.SendWebhookStaff($"{ev.Sender.Nickname} ({ev.Sender.UserId}) a envoyé ``{ev.Name}{str1}``");
+                    }
+                    return;
             }
         }
         /*public static IEnumerator<float> DoSanction(Player Sanctioned,Player Sanctionneur,string Reason,string Type, int SanctionTime)
