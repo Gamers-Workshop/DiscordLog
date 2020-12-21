@@ -114,6 +114,8 @@ namespace DiscordLog
 			PlayerEvents.Handcuffing -= Handlers.OnHandcuffing;
 			PlayerEvents.RemovingHandcuffs -= Handlers.OnRemovingHandcuffs;
 
+			PlayerEvents.EnteringPocketDimension -= Handlers.OnEnteringPocketDimension;
+			PlayerEvents.EscapingPocketDimension -= Handlers.OnEscapingPocketDimension;
 			Scp914Events.Activating += Handlers.On914Activating;
 			Scp914Events.UpgradingItems += Handlers.On914Upgrade;
 
