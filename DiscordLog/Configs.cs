@@ -21,8 +21,11 @@ namespace DiscordLog
 
         [Description("WebhookName")]
         public string WebhookName { get; set; } = string.Empty;
-
+        [Description("Server Info Name")]
+        public string SIName { get; set; } = "none";
         [Description("Webhook URL Serveur info")]
         public string WebhookSi { get; set; } = "none";
+        [Description("Webhook URL Serveur info")]
+        public string IdMessage { get; set; } = "none";
     }
 }

@@ -15,6 +15,7 @@ using Scp096Events = Exiled.Events.Handlers.Scp096;
 using System.Collections.Generic;
 using System.IO;
 using MEC;
+using System.Linq;
 
 namespace DiscordLog
 {
@@ -97,6 +98,7 @@ namespace DiscordLog
 			MapEvents.AnnouncingDecontamination += Handlers.OnAnnounceDecont;
 			MapEvents.GeneratorActivated += Handlers.OnGeneratorFinish;
 
+			PlayerEvents.PreAuthenticating += Handlers.OnPlayerAuth;
 			PlayerEvents.Joined += Handlers.OnPlayerJoin;
 			PlayerEvents.Left += Handlers.OnPlayerLeave;
 			PlayerEvents.ChangingRole += Handlers.OnChangingRole;
@@ -111,11 +113,11 @@ namespace DiscordLog
 			PlayerEvents.InsertingGeneratorTablet += Handlers.OnGeneratorInsert;
 			PlayerEvents.ActivatingWarheadPanel += Handlers.OnActivatingWarheadPanel;
 			PlayerEvents.IntercomSpeaking += Handlers.OnIntercomSpeaking;
-			PlayerEvents.Handcuffing -= Handlers.OnHandcuffing;
-			PlayerEvents.RemovingHandcuffs -= Handlers.OnRemovingHandcuffs;
+			PlayerEvents.Handcuffing += Handlers.OnHandcuffing;
+			PlayerEvents.RemovingHandcuffs += Handlers.OnRemovingHandcuffs;
 
-			PlayerEvents.EnteringPocketDimension -= Handlers.OnEnteringPocketDimension;
-			PlayerEvents.EscapingPocketDimension -= Handlers.OnEscapingPocketDimension;
+			PlayerEvents.EnteringPocketDimension += Handlers.OnEnteringPocketDimension;
+			PlayerEvents.EscapingPocketDimension += Handlers.OnEscapingPocketDimension;
 			Scp914Events.Activating += Handlers.On914Activating;
 			Scp914Events.UpgradingItems += Handlers.On914Upgrade;
 
@@ -141,6 +143,7 @@ namespace DiscordLog
 			MapEvents.AnnouncingDecontamination -= Handlers.OnAnnounceDecont;
 			MapEvents.GeneratorActivated -= Handlers.OnGeneratorFinish;
 
+			//PlayerEvents.PreAuthenticating -= Handlers.OnPlayerAuth;
 			PlayerEvents.Joined -= Handlers.OnPlayerJoin;
 			PlayerEvents.Left -= Handlers.OnPlayerLeave;
 			PlayerEvents.ChangingRole -= Handlers.OnChangingRole;
@@ -157,6 +160,9 @@ namespace DiscordLog
 			PlayerEvents.IntercomSpeaking -= Handlers.OnIntercomSpeaking;
 			PlayerEvents.Handcuffing -= Handlers.OnHandcuffing;
 			PlayerEvents.RemovingHandcuffs -= Handlers.OnRemovingHandcuffs;
+
+			PlayerEvents.EnteringPocketDimension -= Handlers.OnEnteringPocketDimension;
+			PlayerEvents.EscapingPocketDimension -= Handlers.OnEscapingPocketDimension;
 
 			Scp914Events.Activating -= Handlers.On914Activating;
 			Scp914Events.UpgradingItems -= Handlers.On914Upgrade;
@@ -187,13 +193,68 @@ namespace DiscordLog
 
 		public IEnumerator<float> RunSendWebhook()
 		{
-
 			for (; ; )
 			{
 				yield return Timing.WaitForSeconds(0.5f);
 				if (LOG != null)
 					Webhook.SendWebhook(LOG);
 				LOG = null;
+			}
+		}
+		public IEnumerator<float> RunUpdateWebhook()
+		{
+			for (; ; )
+			{
+				yield return Timing.WaitForSeconds(1f);
+				string RoundInfo;
+				string RoundTime;
+				if (Round.IsStarted)
+				{
+					if (Round.IsLocked)
+					{
+						RoundInfo = "La partie est bloquée";
+						RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+					}
+					else
+					{
+						RoundInfo = "La partie est en cours";
+						RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+					}
+				}
+				else if (!Round.IsStarted)
+				{
+					if (Round.IsLobbyLocked)
+					{
+						RoundInfo = "La partie est en pause";
+						RoundTime = "** **";
+					}
+					else if (GameCore.RoundStart.singleton.NetworkTimer == -1)
+					{
+						RoundInfo = "La partie se termine";
+						RoundTime = $"{RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+					}
+					else if (GameCore.RoundStart.singleton.NetworkTimer == -2)
+					{
+						RoundInfo = "En attente des joueurs";
+						RoundTime = $"{2 - Player.List.ToList().Count} {(2 - Player.List.ToList().Count <= 1 ? "joueur manquant" : "joueurs manquants")}";
+					}
+					else if (GameCore.RoundStart.singleton.NetworkTimer < 0)
+					{
+						RoundInfo = "En attente des joueurs";
+						RoundTime = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
+					}
+					else
+					{
+						RoundInfo = "Error";
+						RoundTime = "Error";
+					}
+				}
+				else
+				{
+					RoundInfo = "Error";
+					RoundTime = "Error";
+				}
+				Webhook.Test(RoundInfo, RoundTime);
 			}
 		}
 	}

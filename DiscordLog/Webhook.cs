@@ -1,15 +1,20 @@
 ﻿using DiscordWebhookData;
+using Exiled.API.Features;
 using MEC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using Utf8Json;
+using Utf8Json.Formatters;
 
 namespace DiscordLog
 {
+
     class Webhook
     {
         public static void SendWebhook(string objcontent)
@@ -59,20 +64,42 @@ namespace DiscordLog
             var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
             http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogStaff, content);
         }
-        public static void LogStaff(string objcontent)
+        public static void Test(string RoundInfo, string RoundTime)
         {
-            HttpClient http = new HttpClient();
-            DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook
+            try
             {
-                AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
-                Content = objcontent,
-                IsTTS = false,
-                Username = DiscordLog.Instance.Config.WebhookName
+                HttpClient http = new HttpClient();
+                string payload = JsonSerializer.ToJsonString(new DiscordWebhook(
+                    null, "SCP:SL", null, false, 
+                    new DiscordEmbed[1]
+                    {
+                        new DiscordEmbed(DiscordLog.Instance.Config.SIName, "rich", null,
+                            14310235, new DiscordEmbedField[2]
+                            {
+                                new DiscordEmbedField(RoundInfo, RoundTime, false),
+                                new DiscordEmbedField($"{(Player.List.ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}", $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}", false),
+                            })
+                    }));
+                var content = new StringContent(payload, Encoding.UTF8, "application/json");
+                http.PatchAsync($"{DiscordLog.Instance.Config.WebhookSi}/messages/{DiscordLog.Instance.Config.IdMessage}", content).GetAwaiter();
+            }
+            catch (Exception ex)
+            {
+                ServerConsole.AddLog("Failed to send The TEST by webhook: \n" + ex.Message, ConsoleColor.Red);
+                Log.Error(ex);
+            }
+        }
+    }
+    public static class HttpPatchClientExtensions
+    {
+        public static async Task<HttpResponseMessage> PatchAsync(this HttpClient client, string requestUri, HttpContent content)
+        {
+            var method = new HttpMethod("PATCH");
+            var request = new HttpRequestMessage(method, requestUri)
+            {
+                Content = content
             };
-            string webhookstr = webhook.ToJson();
-            Console.WriteLine(webhookstr);
-            var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
-            http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogStaff, content);
+            return await client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
         }
     }
 }
