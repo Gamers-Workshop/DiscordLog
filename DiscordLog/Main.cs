@@ -197,8 +197,10 @@ namespace DiscordLog
 			{
 				yield return Timing.WaitForSeconds(0.5f);
 				if (LOG != null)
+				{
 					Webhook.SendWebhook(LOG);
-				LOG = null;
+					LOG = null;
+				}
 			}
 		}
 		public IEnumerator<float> RunUpdateWebhook()
@@ -206,56 +208,60 @@ namespace DiscordLog
 			for (; ; )
 			{
 				yield return Timing.WaitForSeconds(1f);
-				string RoundInfo;
-				string RoundTime;
-				if (Round.IsStarted)
+				UpdateWebhook();
+			}
+		}
+		public void UpdateWebhook()
+		{
+			string RoundInfo;
+			string RoundTime;
+			if (Round.IsStarted)
+			{
+				if (Round.IsLocked)
 				{
-					if (Round.IsLocked)
-					{
-						RoundInfo = "La partie est bloquée";
-						RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
-					}
-					else
-					{
-						RoundInfo = "La partie est en cours";
-						RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
-					}
+					RoundInfo = "La partie est bloquée";
+					RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
 				}
-				else if (!Round.IsStarted)
+				else
 				{
-					if (Round.IsLobbyLocked)
-					{
-						RoundInfo = "La partie est en pause";
-						RoundTime = "** **";
-					}
-					else if (GameCore.RoundStart.singleton.NetworkTimer == -1)
-					{
-						RoundInfo = "La partie se termine";
-						RoundTime = $"{RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
-					}
-					else if (GameCore.RoundStart.singleton.NetworkTimer == -2)
-					{
-						RoundInfo = "En attente des joueurs";
-						RoundTime = $"{2 - Player.List.ToList().Count} {(2 - Player.List.ToList().Count <= 1 ? "joueur manquant" : "joueurs manquants")}";
-					}
-					else if (GameCore.RoundStart.singleton.NetworkTimer < 0)
-					{
-						RoundInfo = "En attente des joueurs";
-						RoundTime = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
-					}
-					else
-					{
-						RoundInfo = "Error";
-						RoundTime = "Error";
-					}
+					RoundInfo = "La partie est en cours";
+					RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+				}
+			}
+			else if (!Round.IsStarted)
+			{
+				if (Round.IsLobbyLocked)
+				{
+					RoundInfo = "La partie est en pause";
+					RoundTime = "** **";
+				}
+				else if (GameCore.RoundStart.singleton.NetworkTimer == -1)
+				{
+					RoundInfo = "La partie se termine";
+					RoundTime = $"{RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+				}
+				else if (GameCore.RoundStart.singleton.NetworkTimer == -2)
+				{
+					RoundInfo = "En attente des joueurs";
+					RoundTime = $"{2 - Player.List.ToList().Count} {(2 - Player.List.ToList().Count <= 1 ? "joueur manquant" : "joueurs manquants")}";
+				}
+				else if (GameCore.RoundStart.singleton.NetworkTimer <= 0)
+				{
+					RoundInfo = "En attente des joueurs";
+					RoundTime = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
 				}
 				else
 				{
 					RoundInfo = "Error";
 					RoundTime = "Error";
 				}
-				Webhook.Test(RoundInfo, RoundTime);
 			}
+			else
+			{
+				RoundInfo = "Error";
+				RoundTime = "Error";
+			}
+			Webhook.UpdateServerInfo(RoundInfo, RoundTime);
 		}
 	}
 }

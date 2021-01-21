@@ -175,6 +175,15 @@ namespace DiscordLog
         public void OnPlayerLeave(LeftEventArgs ev)
         {
             plugin.LOG += $":chart_with_downwards_trend: ``{ev.Player.Nickname}`` ({ev.Player.UserId}) a quitter le serveur\n";
+            if (Player.List.ToList().Count == 0)
+            {
+                if (plugin.LOG != null && DiscordLog.Instance.Config.WebhookUrlLogJoueur != string.Empty)
+                {
+                    Webhook.SendWebhook(plugin.LOG);
+                    plugin.LOG = null;
+                }
+                if (DiscordLog.Instance.Config.WebhookSi != "null" || DiscordLog.Instance.Config.IdMessage != "null")  plugin.UpdateWebhook();
+            }
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {

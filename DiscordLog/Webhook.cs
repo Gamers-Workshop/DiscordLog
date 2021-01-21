@@ -64,7 +64,7 @@ namespace DiscordLog
             var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
             http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogStaff, content);
         }
-        public static void Test(string RoundInfo, string RoundTime)
+        public static void UpdateServerInfo(string RoundInfo, string RoundTime)
         {
             try
             {
