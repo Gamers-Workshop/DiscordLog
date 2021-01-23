@@ -166,7 +166,7 @@ namespace DiscordLog
         }
         public void OnPlayerAuth(PreAuthenticatingEventArgs ev)
         {
-            Webhook.SendWebhookStaff($":flag_{ev.Country.ToLower()}: {ev.UserId} tente une connexion sur le serveur\n");
+            Webhook.SendWebhookStaff($":flag_{ev.Country.ToLower()}: {ev.UserId} ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur\n");
         }
         public void OnPlayerJoin(JoinedEventArgs ev)
         {
@@ -175,7 +175,7 @@ namespace DiscordLog
         public void OnPlayerLeave(LeftEventArgs ev)
         {
             plugin.LOG += $":chart_with_downwards_trend: ``{ev.Player.Nickname}`` ({ev.Player.UserId}) a quitter le serveur\n";
-            if (Player.List.ToList().Count == 0)
+            if (Player.List.ToList().Count < 2)
             {
                 if (plugin.LOG != null && DiscordLog.Instance.Config.WebhookUrlLogJoueur != string.Empty)
                 {

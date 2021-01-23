@@ -143,7 +143,7 @@ namespace DiscordLog
 			MapEvents.AnnouncingDecontamination -= Handlers.OnAnnounceDecont;
 			MapEvents.GeneratorActivated -= Handlers.OnGeneratorFinish;
 
-			//PlayerEvents.PreAuthenticating -= Handlers.OnPlayerAuth;
+			PlayerEvents.PreAuthenticating -= Handlers.OnPlayerAuth;
 			PlayerEvents.Joined -= Handlers.OnPlayerJoin;
 			PlayerEvents.Left -= Handlers.OnPlayerLeave;
 			PlayerEvents.ChangingRole -= Handlers.OnChangingRole;
