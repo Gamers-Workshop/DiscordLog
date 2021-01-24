@@ -89,6 +89,46 @@ namespace DiscordLog
                 Log.Error(ex);
             }
         }
+        public static void UpdateServerInfoStaff(string RoundInfo, string RoundTime, string PlayerNameList, string PlayerRoleList, string UserIdList)
+        {
+            if (PlayerNameList != "" || PlayerRoleList != "" || UserIdList != "")
+            {
+                HttpClient http = new HttpClient();
+                string payload = JsonSerializer.ToJsonString(new DiscordWebhook(
+                    null, "SCP:SL", null, false,
+                    new DiscordEmbed[1]
+                    {
+                        new DiscordEmbed(DiscordLog.Instance.Config.SIName, "rich", null,
+                            14310235, new DiscordEmbedField[5]
+                            {
+                                new DiscordEmbedField(RoundInfo, RoundTime, false),
+                                new DiscordEmbedField("Pseudo", PlayerNameList, true),
+                                new DiscordEmbedField("Rôle", PlayerRoleList, true),
+                                new DiscordEmbedField("UserId", UserIdList, true),
+                                new DiscordEmbedField($"{(Player.List.ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}", $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}", false),
+                            })
+                    }));
+                var content = new StringContent(payload, Encoding.UTF8, "application/json");
+                http.PatchAsync($"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}", content).GetAwaiter();
+            }
+            else
+            {
+                HttpClient http = new HttpClient();
+                string payload = JsonSerializer.ToJsonString(new DiscordWebhook(
+                    null, "SCP:SL", null, false,
+                    new DiscordEmbed[1]
+                    {
+                        new DiscordEmbed(DiscordLog.Instance.Config.SIName, "rich", null,
+                            14310235, new DiscordEmbedField[2]
+                            {
+                                new DiscordEmbedField(RoundInfo, RoundTime, false),
+                                new DiscordEmbedField($"{(Player.List.ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}", $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}", false),
+                            })
+                    }));
+                var content = new StringContent(payload, Encoding.UTF8, "application/json");
+                http.PatchAsync($"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}", content).GetAwaiter();
+            }
+        }
     }
     public static class HttpPatchClientExtensions
     {

@@ -3,6 +3,7 @@ using Exiled.Events.EventArgs;
 using MEC;
 using Newtonsoft.Json.Serialization;
 using Respawning;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -89,6 +90,7 @@ namespace DiscordLog
         {
             foreach (CoroutineHandle handle in Coroutines)
                 Timing.KillCoroutines(handle);
+            plugin.NormalisedName.Clear();
             if (DiscordLog.Instance.Config.WebhookUrlLogJoueur != string.Empty)
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunSendWebhook()));
             if (DiscordLog.Instance.Config.WebhookSi != "null" || DiscordLog.Instance.Config.IdMessage != "null" )
@@ -171,10 +173,17 @@ namespace DiscordLog
         public void OnPlayerJoin(JoinedEventArgs ev)
         {
             plugin.LOG += $":chart_with_upwards_trend: ``{ev.Player.Nickname}`` ({ev.Player.UserId}) [{ev.Player.Id}] a rejoint le serveur\n";
+            string PlayerName = ev.Player.Nickname.Normalize(System.Text.NormalizationForm.FormKD);
+            if (PlayerName.Length < 18)
+              plugin.NormalisedName.Add(ev.Player, $"[{ev.Player.Id}] {PlayerName}");
+            else
+              plugin.NormalisedName.Add(ev.Player, $"[{ev.Player.Id}] {PlayerName.Remove(17)}");
+
         }
         public void OnPlayerLeave(LeftEventArgs ev)
         {
             plugin.LOG += $":chart_with_downwards_trend: ``{ev.Player.Nickname}`` ({ev.Player.UserId}) a quitter le serveur\n";
+            plugin.NormalisedName.Remove(ev.Player);
             if (Player.List.ToList().Count < 2)
             {
                 if (plugin.LOG != null && DiscordLog.Instance.Config.WebhookUrlLogJoueur != string.Empty)
@@ -187,7 +196,10 @@ namespace DiscordLog
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
-            if (ev.IsEscaped && RoundIsStart)
+            if (!RoundIsStart) return;
+            if (SerpentsHand.API.SerpentsHand.GetSHPlayers().Contains(ev.Player))
+                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ev.Player.UserId}) a spawn : SerpentHand\n";
+            else if (ev.IsEscaped)
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ev.Player.UserId}) c'est échaper Il est devenue : {ev.NewRole}\n";
             else
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ev.Player.UserId}) a spawn : {ev.NewRole}\n";

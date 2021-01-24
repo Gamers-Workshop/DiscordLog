@@ -35,6 +35,8 @@ namespace DiscordLog
 		public Harmony Harmony { get; private set; }
 		public string LOG = null;
 		public static List<Sanction> SanctionedPlayer = new List<Sanction>();
+		public Dictionary<Player, string> NormalisedName = new Dictionary<Player, string>();
+
 
 		private int patchCounter;
 
@@ -235,20 +237,28 @@ namespace DiscordLog
 					RoundInfo = "La partie est en pause";
 					RoundTime = "** **";
 				}
+				else if (GameCore.RoundStart.singleton.NetworkTimer >= 0)
+				{
+					RoundInfo = "En attente des joueurs";
+					RoundTime = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
+				}
 				else if (GameCore.RoundStart.singleton.NetworkTimer == -1)
 				{
-					RoundInfo = "La partie se termine";
-					RoundTime = $"{RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+					if (RoundSummary.roundTime == 0)
+					{
+						RoundInfo = "La partie est en cours";
+						RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+					}
+					else
+					{
+						RoundInfo = "La partie se termine";
+						RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+					}
 				}
 				else if (GameCore.RoundStart.singleton.NetworkTimer == -2)
 				{
 					RoundInfo = "En attente des joueurs";
 					RoundTime = $"{2 - Player.List.ToList().Count} {(2 - Player.List.ToList().Count <= 1 ? "joueur manquant" : "joueurs manquants")}";
-				}
-				else if (GameCore.RoundStart.singleton.NetworkTimer <= 0)
-				{
-					RoundInfo = "En attente des joueurs";
-					RoundTime = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
 				}
 				else
 				{
@@ -262,6 +272,23 @@ namespace DiscordLog
 				RoundTime = "Error";
 			}
 			Webhook.UpdateServerInfo(RoundInfo, RoundTime);
+			string PlayerNameList = "";
+			string PlayerRoleList = "";
+			string UserIdList = "";
+			if (Player.List.ToList().Count != 0)
+			{
+				foreach (Player player in Player.List) 
+				{
+					NormalisedName.TryGetValue(player, out string PlayerName);
+					PlayerNameList += $"{PlayerName}\n";
+					if (SerpentsHand.API.SerpentsHand.GetSHPlayers().Contains(player))
+						PlayerRoleList += "SerpentsHand\n";
+					else
+						PlayerRoleList += $"{player.Role}\n";
+					UserIdList += $"{player.UserId}\n";
+				}
+			}
+			Webhook.UpdateServerInfoStaff(RoundInfo, RoundTime, PlayerNameList, PlayerRoleList, UserIdList);
 		}
 	}
 }

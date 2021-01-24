@@ -120,3 +120,5 @@ D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Threading.Tasks.Extensions.xm
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Buffers.xml
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Memory.xml
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Numerics.Vectors.xml
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\SerpentsHandExiled.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\SerpentsHandExiled.pdb

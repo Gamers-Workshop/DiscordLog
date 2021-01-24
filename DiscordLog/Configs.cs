@@ -25,7 +25,11 @@ namespace DiscordLog
         public string SIName { get; set; } = "none";
         [Description("Webhook URL Serveur info")]
         public string WebhookSi { get; set; } = "none";
-        [Description("Webhook URL Serveur info")]
+        [Description("Webhook Id Message")]
         public string IdMessage { get; set; } = "none";
+        [Description("Webhook URL Serveur info Staff")]
+        public string WebhookSiStaff { get; set; } = "none";
+        [Description("Webhook Id Message")]
+        public string IdMessageStaff { get; set; } = "none";
     }
 }
