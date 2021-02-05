@@ -100,8 +100,8 @@ namespace DiscordLog
         }
         public void OnRoundStart()
         {
-            string RoundStart = $":triangular_flag_on_post: Démarage de la partie avec {Player.List.ToList().Count} joueurs\n";
-            foreach (Player player in Player.List)
+            string RoundStart = $":triangular_flag_on_post: Démarage de la partie avec {Player.List.Where((p) => p.Role != RoleType.None).Count()} joueurs\n";
+            foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None))
                 RoundStart += $"- ``{player.Nickname}`` ({player.UserId}) a spawn {player.Role}\n";
             plugin.LOG += RoundStart;
             RoundIsStart = true;
@@ -170,7 +170,7 @@ namespace DiscordLog
         {
             Webhook.SendWebhookStaff($":flag_{ev.Country.ToLower()}: {ev.UserId} ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur\n");
         }
-        public void OnPlayerJoin(JoinedEventArgs ev)
+        public void OnPlayerVerified(VerifiedEventArgs ev)
         {
             plugin.LOG += $":chart_with_upwards_trend: ``{ev.Player.Nickname}`` ({ev.Player.UserId}) [{ev.Player.Id}] a rejoint le serveur\n";
             string PlayerName = ev.Player.Nickname.Normalize(System.Text.NormalizationForm.FormKD);
@@ -180,8 +180,9 @@ namespace DiscordLog
               plugin.NormalisedName.Add(ev.Player, $"[{ev.Player.Id}] {PlayerName.Remove(17)}");
 
         }
-        public void OnPlayerLeave(LeftEventArgs ev)
+        public void OnPlayerDestroying(DestroyingEventArgs ev)
         {
+            if (ev.Player == null || ev.Player.Role == RoleType.None) return;
             plugin.LOG += $":chart_with_downwards_trend: ``{ev.Player.Nickname}`` ({ev.Player.UserId}) a quitter le serveur\n";
             plugin.NormalisedName.Remove(ev.Player);
             if (Player.List.ToList().Count < 2)
@@ -191,12 +192,12 @@ namespace DiscordLog
                     Webhook.SendWebhook(plugin.LOG);
                     plugin.LOG = null;
                 }
-                if (DiscordLog.Instance.Config.WebhookSi != "null" || DiscordLog.Instance.Config.IdMessage != "null")  plugin.UpdateWebhook();
+                if (DiscordLog.Instance.Config.WebhookSi != "null" && DiscordLog.Instance.Config.IdMessage != "null")  plugin.UpdateWebhook();
             }
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
-            if (!RoundIsStart) return;
+            if (!RoundIsStart || ev.Player == null) return;
             if (SerpentsHand.API.SerpentsHand.GetSHPlayers().Contains(ev.Player))
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ev.Player.UserId}) a spawn : SerpentHand\n";
             else if (ev.IsEscaped)
@@ -212,7 +213,7 @@ namespace DiscordLog
         }
         public void OnPlayerDeath(DiedEventArgs ev)
         {
-            if (ev.Target == null) return;
+            if (ev.Target.Role == RoleType.None || ev.HitInformations.Attacker == "DISCONNECT") return;
             if (ev.Killer != null && ev.Killer != ev.Target)
             {
                 plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ev.Target.UserId}) est mort par ``{ev.Killer.Nickname}`` ({ev.Killer.UserId}) avec {ev.HitInformations.GetDamageName()}\n";

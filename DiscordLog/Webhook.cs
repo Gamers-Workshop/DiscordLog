@@ -77,7 +77,7 @@ namespace DiscordLog
                             14310235, new DiscordEmbedField[2]
                             {
                                 new DiscordEmbedField(RoundInfo, RoundTime, false),
-                                new DiscordEmbedField($"{(Player.List.ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}", $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}", false),
+                                new DiscordEmbedField($"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}", $"{Player.List.Where((p) => p.Role != RoleType.None).ToList().Count}/{CustomNetworkManager.slots}", false),
                             })
                     }));
                 var content = new StringContent(payload, Encoding.UTF8, "application/json");
@@ -105,7 +105,7 @@ namespace DiscordLog
                                 new DiscordEmbedField("Pseudo", PlayerNameList, true),
                                 new DiscordEmbedField("Rôle", PlayerRoleList, true),
                                 new DiscordEmbedField("UserId", UserIdList, true),
-                                new DiscordEmbedField($"{(Player.List.ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}", $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}", false),
+                                new DiscordEmbedField($"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}", $"{Player.List.Where((p) => p.Role != RoleType.None).ToList().Count}/{CustomNetworkManager.slots}", false),
                             })
                     }));
                 var content = new StringContent(payload, Encoding.UTF8, "application/json");

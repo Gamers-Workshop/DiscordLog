@@ -101,8 +101,8 @@ namespace DiscordLog
 			MapEvents.GeneratorActivated += Handlers.OnGeneratorFinish;
 
 			PlayerEvents.PreAuthenticating += Handlers.OnPlayerAuth;
-			PlayerEvents.Joined += Handlers.OnPlayerJoin;
-			PlayerEvents.Left += Handlers.OnPlayerLeave;
+			PlayerEvents.Verified += Handlers.OnPlayerVerified;
+			PlayerEvents.Destroying += Handlers.OnPlayerDestroying;
 			PlayerEvents.ChangingRole += Handlers.OnChangingRole;
 			PlayerEvents.Hurting += Handlers.OnPlayerHurt;
 			PlayerEvents.Died += Handlers.OnPlayerDeath;
@@ -146,8 +146,8 @@ namespace DiscordLog
 			MapEvents.GeneratorActivated -= Handlers.OnGeneratorFinish;
 
 			PlayerEvents.PreAuthenticating -= Handlers.OnPlayerAuth;
-			PlayerEvents.Joined -= Handlers.OnPlayerJoin;
-			PlayerEvents.Left -= Handlers.OnPlayerLeave;
+			PlayerEvents.Verified -= Handlers.OnPlayerVerified;
+			PlayerEvents.Destroying -= Handlers.OnPlayerDestroying;
 			PlayerEvents.ChangingRole -= Handlers.OnChangingRole;
 			PlayerEvents.Hurting -= Handlers.OnPlayerHurt;
 			PlayerEvents.Died -= Handlers.OnPlayerDeath;
@@ -217,6 +217,7 @@ namespace DiscordLog
 		{
 			string RoundInfo;
 			string RoundTime;
+			int PlayerCount = Player.List.Where((p) => p.Role != RoleType.None).ToList().Count;
 			if (Round.IsStarted)
 			{
 				if (Round.IsLocked)
@@ -237,11 +238,7 @@ namespace DiscordLog
 					RoundInfo = "La partie est en pause";
 					RoundTime = "** **";
 				}
-				else if (GameCore.RoundStart.singleton.NetworkTimer >= 0)
-				{
-					RoundInfo = "En attente des joueurs";
-					RoundTime = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
-				}
+
 				else if (GameCore.RoundStart.singleton.NetworkTimer == -1)
 				{
 					if (RoundSummary.roundTime == 0)
@@ -257,8 +254,21 @@ namespace DiscordLog
 				}
 				else if (GameCore.RoundStart.singleton.NetworkTimer == -2)
 				{
+					if (PlayerCount < 2)
+					{
+						RoundInfo = "En attente des joueurs";
+						RoundTime = $"{2 - PlayerCount} {(2 - PlayerCount <= 1 ? "joueur manquant" : "joueurs manquants")}";
+					}
+					else
+					{
+						RoundInfo = "En attente des joueurs";
+						RoundTime = $"Départ de la game dans 30 secondes";
+					}
+				}
+				else if (GameCore.RoundStart.singleton.NetworkTimer >= 0 || GameCore.RoundStart.singleton.NetworkTimer == -2)
+				{
 					RoundInfo = "En attente des joueurs";
-					RoundTime = $"{2 - Player.List.ToList().Count} {(2 - Player.List.ToList().Count <= 1 ? "joueur manquant" : "joueurs manquants")}";
+					RoundTime = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
 				}
 				else
 				{
@@ -275,9 +285,9 @@ namespace DiscordLog
 			string PlayerNameList = "";
 			string PlayerRoleList = "";
 			string UserIdList = "";
-			if (Player.List.ToList().Count != 0)
+			if (Player.List.Where((p) => p.Role != RoleType.None).ToList().Count != 0)
 			{
-				foreach (Player player in Player.List) 
+				foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None)) 
 				{
 					NormalisedName.TryGetValue(player, out string PlayerName);
 					PlayerNameList += $"{PlayerName}\n";
