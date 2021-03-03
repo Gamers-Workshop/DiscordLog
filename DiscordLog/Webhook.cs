@@ -1,16 +1,14 @@
 ﻿using DiscordWebhookData;
 using Exiled.API.Features;
-using MEC;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using Utf8Json;
-using Utf8Json.Formatters;
 
 namespace DiscordLog
 {
@@ -66,70 +64,218 @@ namespace DiscordLog
         }
         public static void UpdateServerInfo(string RoundInfo, string RoundTime)
         {
-            try
+            WebRequest wr = (HttpWebRequest)WebRequest.Create($"{DiscordLog.Instance.Config.WebhookSi}/messages/{DiscordLog.Instance.Config.IdMessage}");
+            wr.ContentType = "application/json";
+            wr.Method = "PATCH";
+
+            using (var sw = new StreamWriter(wr.GetRequestStream()))
             {
-                HttpClient http = new HttpClient();
-                string payload = JsonSerializer.ToJsonString(new DiscordWebhook(
-                    null, "SCP:SL", null, false, 
-                    new DiscordEmbed[1]
+                string json = JsonConvert.SerializeObject(new
+                {
+                    username = "SCP:SL",
+                    embeds = new[]
                     {
-                        new DiscordEmbed(DiscordLog.Instance.Config.SIName, "rich", null,
-                            14310235, new DiscordEmbedField[2]
+                        new
                             {
-                                new DiscordEmbedField(RoundInfo, RoundTime, false),
-                                new DiscordEmbedField($"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}", $"{Player.List.Where((p) => p.Role != RoleType.None).ToList().Count}/{CustomNetworkManager.slots}", false),
-                            })
-                    }));
-                var content = new StringContent(payload, Encoding.UTF8, "application/json");
-                http.PatchAsync($"{DiscordLog.Instance.Config.WebhookSi}/messages/{DiscordLog.Instance.Config.IdMessage}", content).GetAwaiter();
+                                title = DiscordLog.Instance.Config.SIName,
+                                description = "",
+                                color = 14310235,
+                                fields = new[]
+                                {
+                                new
+                                {
+                                    name = RoundInfo,
+                                    value = RoundTime,
+                                    inline = false,
+                                },
+                                new
+                                {
+                                    name = $"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
+                                    value = $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}",
+                                    inline = false,
+                                },
+                                },
+                                footer = new
+                                {
+                                    icon_url = "",
+                                    text = "Actualisé à",
+                                },
+                                timestamp = DateTime.Now,
+                            },
+                    }
+                });
+                sw.Write(json);
             }
-            catch (Exception ex)
-            {
-                ServerConsole.AddLog("Failed to send The TEST by webhook: \n" + ex.Message, ConsoleColor.Red);
-                Log.Error(ex);
-            }
+            var response = (HttpWebResponse)wr.GetResponse();
+            wr.Abort();
         }
         public static void UpdateServerInfoStaff(string RoundInfo, string RoundTime, string PlayerNameList, string PlayerRoleList, string UserIdList)
         {
             if (PlayerNameList != "" || PlayerRoleList != "" || UserIdList != "")
             {
-                HttpClient http = new HttpClient();
-                string payload = JsonSerializer.ToJsonString(new DiscordWebhook(
-                    null, "SCP:SL", null, false,
-                    new DiscordEmbed[1]
+                WebRequest wr = (HttpWebRequest)WebRequest.Create($"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}");
+                wr.ContentType = "application/json";
+                wr.Method = "PATCH";
+                using (var sw = new StreamWriter(wr.GetRequestStream()))
+                {
+                    string json = JsonConvert.SerializeObject(new
                     {
-                        new DiscordEmbed(DiscordLog.Instance.Config.SIName, "rich", null,
-                            14310235, new DiscordEmbedField[5]
+                        username = "SCP:SL",
+                        embeds = new[]
+                        {
+                        new
                             {
-                                new DiscordEmbedField(RoundInfo, RoundTime, false),
-                                new DiscordEmbedField("Pseudo", PlayerNameList, true),
-                                new DiscordEmbedField("Rôle", PlayerRoleList, true),
-                                new DiscordEmbedField("UserId", UserIdList, true),
-                                new DiscordEmbedField($"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}", $"{Player.List.Where((p) => p.Role != RoleType.None).ToList().Count}/{CustomNetworkManager.slots}", false),
-                            })
-                    }));
-                var content = new StringContent(payload, Encoding.UTF8, "application/json");
-                http.PatchAsync($"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}", content).GetAwaiter();
+                                title = DiscordLog.Instance.Config.SIName,
+                                description = "",
+                                color = 14310235,
+                                fields = new[]
+                                {
+                                new
+                                {
+                                    name = RoundInfo,
+                                    value = RoundTime,
+                                    inline = false,
+                                },
+                                new
+                                {
+                                    name = "Pseudo",
+                                    value = PlayerNameList,
+                                    inline = true,
+                                },
+                                new
+                                {
+                                    name = "Rôle",
+                                    value = PlayerRoleList,
+                                    inline = true,
+                                },
+                                new
+                                {
+                                    name = "UserID",
+                                    value = UserIdList,
+                                    inline = true,
+                                },
+                                new
+                                {
+                                    name = $"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
+                                    value = $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}",
+                                    inline = false,
+                                },
+                                },
+                                footer = new
+                                {
+                                    icon_url = "",
+                                    text = "Actualisé à",
+                                },
+                                timestamp = DateTime.Now,
+                            },
+                        }
+                    });
+                    sw.Write(json);
+                }
+                var response = (HttpWebResponse)wr.GetResponse();
+                wr.Abort();
             }
             else
             {
-                HttpClient http = new HttpClient();
-                string payload = JsonSerializer.ToJsonString(new DiscordWebhook(
-                    null, "SCP:SL", null, false,
-                    new DiscordEmbed[1]
+                WebRequest wr = (HttpWebRequest)WebRequest.Create($"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}");
+                wr.ContentType = "application/json";
+                wr.Method = "PATCH";
+                using (var sw = new StreamWriter(wr.GetRequestStream()))
+                {
+                    string json = JsonConvert.SerializeObject(new
                     {
-                        new DiscordEmbed(DiscordLog.Instance.Config.SIName, "rich", null,
-                            14310235, new DiscordEmbedField[2]
+                        username = "SCP:SL",
+                        embeds = new[]
+                        {
+                        new
                             {
-                                new DiscordEmbedField(RoundInfo, RoundTime, false),
-                                new DiscordEmbedField($"{(Player.List.ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}", $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}", false),
-                            })
-                    }));
-                var content = new StringContent(payload, Encoding.UTF8, "application/json");
-                http.PatchAsync($"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}", content).GetAwaiter();
+                                title = DiscordLog.Instance.Config.SIName,
+                                description = "",
+                                color = 14310235,
+                                fields = new[]
+                                {
+                                new
+                                {
+                                    name = RoundInfo,
+                                    value = RoundTime,
+                                    inline = false,
+                                },
+                                new
+                                {
+                                    name = $"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
+                                    value = $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}",
+                                    inline = false,
+                                },
+                                },
+                                footer = new
+                                {
+                                    icon_url = "",
+                                    text = "Actualisé à",
+                                },
+                                timestamp = DateTime.Now,
+                            },
+                        }
+                    });
+                    sw.Write(json);
+                }
+                var response = (HttpWebResponse)wr.GetResponse();
+                wr.Abort();
             }
         }
+        public static void BanPlayer(Player player,Player sanctioned,string reason,int Duration)
+        {
+            WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
+            wr.ContentType = "application/json";
+            wr.Method = "POST";
+            using (var sw = new StreamWriter(wr.GetRequestStream()))
+            {
+                string json = JsonConvert.SerializeObject(new
+                {
+                    username = "SCP:SL",
+                    embeds = new[]
+                    {
+                        new
+                            {
+                                title = DiscordLog.Instance.Config.SIName,
+                                description = "",
+                                color = 14310235,
+                                fields = new[]
+                                {
+                                new
+                                {
+                                    name = $"BAN",
+                                    value = $"``{sanctioned.Nickname}`` ({sanctioned.UserId})",
+                                    inline = false,
+                                },
+                                new
+                                {
+                                    name = $"Raison",
+                                    value = $"{reason}",
+                                    inline = false,
+                                },
+                                new
+                                {
+                                    name = $"Temps du ban",
+                                    value = $"Durée : {TimeSpan.FromSeconds(Duration).Duration()}\nUnBan : {DateTime.Now.AddSeconds(Duration)}",
+                                    inline = false,
+                                },
+                                },
+                                footer = new
+                                {
+                                    icon_url = "",
+                                    text = $"Bannie par {player.Nickname} ({player.UserId})",
+                                },
+                                timestamp = DateTime.Now,
+                            },
+                        }
+                });
+                sw.Write(json);
+            }
+            var response = (HttpWebResponse)wr.GetResponse();
+            wr.Abort();
+        }
     }
+
     public static class HttpPatchClientExtensions
     {
         public static async Task<HttpResponseMessage> PatchAsync(this HttpClient client, string requestUri, HttpContent content)

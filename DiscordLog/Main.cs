@@ -238,7 +238,6 @@ namespace DiscordLog
 					RoundInfo = "La partie est en pause";
 					RoundTime = "** **";
 				}
-
 				else if (GameCore.RoundStart.singleton.NetworkTimer == -1)
 				{
 					if (RoundSummary.roundTime == 0)

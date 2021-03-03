@@ -7,13 +7,15 @@ namespace DiscordLog
     {
         public bool IsEnabled { get; set; }
 
-        [Description("Webhook url")]
+        [Description("Debug Plugin")]
         public bool Debugplugin { get; set; }
 
         [Description("Webhook url")]
         public string WebhookUrlLogJoueur { get; set; } = string.Empty;
-
         [Description("Webhook url")]
+        public string WebhookUrlLogSanction { get; set; } = string.Empty;
+
+        [Description("Webhook Log STAFF (Ip of player)")]
         public string WebhookUrlLogStaff { get; set; } = string.Empty;
 
         [Description("Webhook Avatar")]

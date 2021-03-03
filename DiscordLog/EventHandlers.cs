@@ -308,7 +308,10 @@ namespace DiscordLog
         public void OnBanning(BanningEventArgs ev)
         {
             if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
+            {
+                Webhook.BanPlayer(ev.Issuer, ev.Target,ev.Reason, ev.Duration);
                 Webhook.SendWebhookStaff($":hammer: ``{ev.Target.Nickname}`` ({ev.Target.UserId}) a été bannie car ``{ev.Reason}`` pendant {ev.Duration} secondes par ``{ev.Issuer.Nickname}`` ({ev.Issuer.UserId})");
+            } 
         }
         public void OnKicking(KickingEventArgs ev)
         {
