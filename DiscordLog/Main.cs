@@ -297,7 +297,7 @@ namespace DiscordLog
 					UserIdList += $"{player.UserId}\n";
 				}
 			}
-			Webhook.UpdateServerInfoStaff(RoundInfo, RoundTime, PlayerNameList, PlayerRoleList, UserIdList);
+			Webhook.UpdateServerInfoStaffAsync(RoundInfo, RoundTime, PlayerNameList, PlayerRoleList, UserIdList);
 		}
 	}
 }

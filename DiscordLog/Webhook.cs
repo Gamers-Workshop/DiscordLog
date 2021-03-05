@@ -62,13 +62,13 @@ namespace DiscordLog
             var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
             http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogStaff, content);
         }
-        public static void UpdateServerInfo(string RoundInfo, string RoundTime)
+        public static async Task UpdateServerInfo(string RoundInfo, string RoundTime)
         {
             WebRequest wr = (HttpWebRequest)WebRequest.Create($"{DiscordLog.Instance.Config.WebhookSi}/messages/{DiscordLog.Instance.Config.IdMessage}");
             wr.ContentType = "application/json";
             wr.Method = "PATCH";
 
-            using (var sw = new StreamWriter(wr.GetRequestStream()))
+            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
             {
                 string json = JsonConvert.SerializeObject(new
                 {
@@ -104,62 +104,61 @@ namespace DiscordLog
                             },
                     }
                 });
-                sw.Write(json);
+                await sw.WriteAsync(json);
             }
-            var response = (HttpWebResponse)wr.GetResponse();
             wr.Abort();
         }
-        public static void UpdateServerInfoStaff(string RoundInfo, string RoundTime, string PlayerNameList, string PlayerRoleList, string UserIdList)
+        public static async Task UpdateServerInfoStaffAsync(string RoundInfo, string RoundTime, string PlayerNameList, string PlayerRoleList, string UserIdList)
         {
             if (PlayerNameList != "" || PlayerRoleList != "" || UserIdList != "")
             {
                 WebRequest wr = (HttpWebRequest)WebRequest.Create($"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}");
                 wr.ContentType = "application/json";
                 wr.Method = "PATCH";
-                using (var sw = new StreamWriter(wr.GetRequestStream()))
+                using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
                 {
                     string json = JsonConvert.SerializeObject(new
                     {
                         username = "SCP:SL",
                         embeds = new[]
                         {
-                        new
+                            new
                             {
                                 title = DiscordLog.Instance.Config.SIName,
                                 description = "",
                                 color = 14310235,
                                 fields = new[]
                                 {
-                                new
-                                {
-                                    name = RoundInfo,
-                                    value = RoundTime,
-                                    inline = false,
-                                },
-                                new
-                                {
-                                    name = "Pseudo",
-                                    value = PlayerNameList,
-                                    inline = true,
-                                },
-                                new
-                                {
-                                    name = "Rôle",
-                                    value = PlayerRoleList,
-                                    inline = true,
-                                },
-                                new
-                                {
-                                    name = "UserID",
-                                    value = UserIdList,
-                                    inline = true,
-                                },
-                                new
-                                {
-                                    name = $"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
-                                    value = $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}",
-                                    inline = false,
-                                },
+                                    new
+                                    {
+                                        name = RoundInfo,
+                                        value = RoundTime,
+                                        inline = false,
+                                    },
+                                    new
+                                    {
+                                        name = "Pseudo",
+                                        value = PlayerNameList,
+                                        inline = true,
+                                    },
+                                    new
+                                    {
+                                        name = "Rôle",
+                                        value = PlayerRoleList,
+                                        inline = true,
+                                    },
+                                    new
+                                    {
+                                        name = "UserID",
+                                        value = UserIdList,
+                                        inline = true,
+                                    },
+                                    new
+                                    {
+                                        name = $"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
+                                        value = $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}",
+                                        inline = false,
+                                    },
                                 },
                                 footer = new
                                 {
@@ -170,9 +169,8 @@ namespace DiscordLog
                             },
                         }
                     });
-                    sw.Write(json);
+                    await sw.WriteAsync(json);
                 }
-                var response = (HttpWebResponse)wr.GetResponse();
                 wr.Abort();
             }
             else
@@ -180,7 +178,7 @@ namespace DiscordLog
                 WebRequest wr = (HttpWebRequest)WebRequest.Create($"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}");
                 wr.ContentType = "application/json";
                 wr.Method = "PATCH";
-                using (var sw = new StreamWriter(wr.GetRequestStream()))
+                using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
                 {
                     string json = JsonConvert.SerializeObject(new
                     {
@@ -216,18 +214,17 @@ namespace DiscordLog
                             },
                         }
                     });
-                    sw.Write(json);
+                    await sw.WriteAsync(json);
                 }
-                var response = (HttpWebResponse)wr.GetResponse();
                 wr.Abort();
             }
         }
-        public static void BanPlayer(Player player,Player sanctioned,string reason,int Duration)
+        public static async Task BanPlayerAsync(Player player,Player sanctioned,string reason,int Duration)
         {
             WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
             wr.ContentType = "application/json";
             wr.Method = "POST";
-            using (var sw = new StreamWriter(wr.GetRequestStream()))
+            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
             {
                 string json = JsonConvert.SerializeObject(new
                 {
@@ -269,9 +266,8 @@ namespace DiscordLog
                             },
                         }
                 });
-                sw.Write(json);
+                await sw.WriteAsync(json);
             }
-            var response = (HttpWebResponse)wr.GetResponse();
             wr.Abort();
         }
     }
