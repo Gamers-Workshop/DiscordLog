@@ -116,6 +116,7 @@ namespace DiscordLog
         }
         public void OnTeamRespawn(RespawningTeamEventArgs ev)
         {
+            if (ev.Players.Count == 0) return;
             string objcontent;
             if (ev.NextKnownTeam == SpawnableTeamType.NineTailedFox)
             {
@@ -178,7 +179,6 @@ namespace DiscordLog
               plugin.NormalisedName.Add(ev.Player, $"[{ev.Player.Id}] {PlayerName}");
             else
               plugin.NormalisedName.Add(ev.Player, $"[{ev.Player.Id}] {PlayerName.Remove(17)}");
-
         }
         public void OnPlayerDestroying(DestroyingEventArgs ev)
         {
@@ -269,13 +269,11 @@ namespace DiscordLog
         }
         public void OnHandcuffing(HandcuffingEventArgs ev)
         {
-            Log.Info($"[OnHandcuffing] IsAllow : {ev.IsAllowed} Target : {ev.Target}");
             if (ev.Cuffer != null)
                 plugin.LOG += $":chains: ``{ev.Target.Nickname}`` ({ev.Target.UserId}) a été menoté par ``{ev.Cuffer.Nickname}`` ({ev.Cuffer.UserId})\n";
         }
         public void OnRemovingHandcuffs(RemovingHandcuffsEventArgs ev)
         {
-            Log.Info($"[OnHandcuffing] IsAllow : {ev.IsAllowed} Target : {ev.Target}");
             if (ev.Cuffer != null)
                 plugin.LOG += $":chains: ``{ev.Target.Nickname}`` ({ev.Target.UserId}) a été démenoté par ``{ev.Cuffer.Nickname}`` ({ev.Cuffer.UserId})\n";
             else
@@ -316,7 +314,10 @@ namespace DiscordLog
         public void OnKicking(KickingEventArgs ev)
         {
             if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
+            { 
                 Webhook.SendWebhookStaff($":mans_shoe: ``{ev.Target.Nickname}`` ({ev.Target.UserId}) a été kick car ``{ev.Reason}`` par ``{ev.Issuer.Nickname}`` ({ev.Issuer.UserId})");
+                Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
+            }
         }
         public void OnSendingRemoteAdminCommand(SendingRemoteAdminCommandEventArgs ev)
         {

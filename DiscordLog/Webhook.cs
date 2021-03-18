@@ -98,7 +98,7 @@ namespace DiscordLog
                                 footer = new
                                 {
                                     icon_url = "",
-                                    text = "Actualisé à",
+                                    text = "Actualisé",
                                 },
                                 timestamp = DateTime.Now,
                             },
@@ -106,6 +106,7 @@ namespace DiscordLog
                 });
                 await sw.WriteAsync(json);
             }
+            var response = (HttpWebResponse)await wr.GetResponseAsync();
             wr.Abort();
         }
         public static async Task UpdateServerInfoStaffAsync(string RoundInfo, string RoundTime, string PlayerNameList, string PlayerRoleList, string UserIdList)
@@ -163,7 +164,7 @@ namespace DiscordLog
                                 footer = new
                                 {
                                     icon_url = "",
-                                    text = "Actualisé à",
+                                    text = "Actualisé",
                                 },
                                 timestamp = DateTime.Now,
                             },
@@ -171,6 +172,7 @@ namespace DiscordLog
                     });
                     await sw.WriteAsync(json);
                 }
+                var response = (HttpWebResponse)await wr.GetResponseAsync();
                 wr.Abort();
             }
             else
@@ -208,7 +210,7 @@ namespace DiscordLog
                                 footer = new
                                 {
                                     icon_url = "",
-                                    text = "Actualisé à",
+                                    text = "Actualisé",
                                 },
                                 timestamp = DateTime.Now,
                             },
@@ -216,10 +218,11 @@ namespace DiscordLog
                     });
                     await sw.WriteAsync(json);
                 }
+                var response = (HttpWebResponse)await wr.GetResponseAsync();
                 wr.Abort();
             }
         }
-        public static async Task BanPlayerAsync(Player player,Player sanctioned,string reason,int Duration)
+        public static async Task BanPlayerAsync(Player player, Player sanctioned, string reason, int Duration)
         {
             WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
             wr.ContentType = "application/json";
@@ -247,13 +250,13 @@ namespace DiscordLog
                                 new
                                 {
                                     name = $"Raison",
-                                    value = $"{reason}",
+                                    value = $"``{reason}``",
                                     inline = false,
                                 },
                                 new
                                 {
                                     name = $"Temps du ban",
-                                    value = $"Durée : {TimeSpan.FromSeconds(Duration).Duration()}\nUnBan : {DateTime.Now.AddSeconds(Duration)}",
+                                    value = $"Durée : {TimeSpan.FromSeconds(Duration).Duration()}\nUnBan : {DateTime.UtcNow.AddSeconds(Duration)}",
                                     inline = false,
                                 },
                                 },
@@ -268,20 +271,54 @@ namespace DiscordLog
                 });
                 await sw.WriteAsync(json);
             }
+            var response = (HttpWebResponse)await wr.GetResponseAsync();
             wr.Abort();
         }
-    }
-
-    public static class HttpPatchClientExtensions
-    {
-        public static async Task<HttpResponseMessage> PatchAsync(this HttpClient client, string requestUri, HttpContent content)
+        public static async Task KickPlayerAsync(Player player, Player sanctioned, string reason)
         {
-            var method = new HttpMethod("PATCH");
-            var request = new HttpRequestMessage(method, requestUri)
+            WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
+            wr.ContentType = "application/json";
+            wr.Method = "POST";
+            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
             {
-                Content = content
-            };
-            return await client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+                string json = JsonConvert.SerializeObject(new
+                {
+                    username = "SCP:SL",
+                    embeds = new[]
+                    {
+                        new
+                            {
+                                title = DiscordLog.Instance.Config.SIName,
+                                description = "",
+                                color = 14310235,
+                                fields = new[]
+                                {
+                                new
+                                {
+                                    name = $"Kick",
+                                    value = $"``{sanctioned.Nickname}`` ({sanctioned.UserId})",
+                                    inline = false,
+                                },
+                                new
+                                {
+                                    name = $"Raison",
+                                    value = $"``{reason}``",
+                                    inline = false,
+                                },
+                                },
+                                footer = new
+                                {
+                                    icon_url = "",
+                                    text = $"kick par {player.Nickname} ({player.UserId})",
+                                },
+                                timestamp = DateTime.Now,
+                            },
+                        }
+                });
+                await sw.WriteAsync(json);
+            }
+            var response = (HttpWebResponse)await wr.GetResponseAsync();
+            wr.Abort();
         }
     }
 }
