@@ -64,7 +64,25 @@ namespace DiscordLog
 
 			Log.Info($"[OnDisable] DiscordLog({Version}) Disabled Complete.");
 		}
-
+		public override void OnReloaded()
+		{
+            foreach (CoroutineHandle handle in EventHandlers.Coroutines)
+                Timing.KillCoroutines(handle);
+			base.OnReloaded();
+			NormalisedName.Clear();
+            if (Instance.Config.WebhookUrlLogJoueur != string.Empty)
+				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendWebhook()));
+            if (Instance.Config.WebhookSi != "null" || Instance.Config.IdMessage != "null" )
+				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunUpdateWebhook()));
+			foreach (Player p in Player.List)
+			{
+				string PlayerName = p.Nickname.Normalize(System.Text.NormalizationForm.FormKD);
+				if (PlayerName.Length < 18)
+					NormalisedName.Add(p, $"[{p.Id}] {PlayerName}");
+				else
+					NormalisedName.Add(p, $"[{p.Id}] {PlayerName.Remove(17)}");
+			}
+		}
 		private void RegistEvents()
 		{
 			try
@@ -294,7 +312,7 @@ namespace DiscordLog
 						PlayerRoleList += "SerpentsHand\n";
 					else
 						PlayerRoleList += $"{player.Role}\n";
-					UserIdList += $"{player.UserId}\n";
+					UserIdList += $"{EventHandlers.ConvertID(player.UserId)}\n";
 				}
 			}
 			Webhook.UpdateServerInfoStaffAsync(RoundInfo, RoundTime, PlayerNameList, PlayerRoleList, UserIdList);

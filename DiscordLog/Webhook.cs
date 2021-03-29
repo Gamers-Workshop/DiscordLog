@@ -244,7 +244,7 @@ namespace DiscordLog
                                 new
                                 {
                                     name = $"BAN",
-                                    value = $"``{sanctioned.Nickname}`` ({sanctioned.UserId})",
+                                    value = $"``{sanctioned.Nickname}`` ({EventHandlers.ConvertID(sanctioned.UserId)})",
                                     inline = false,
                                 },
                                 new
@@ -263,7 +263,7 @@ namespace DiscordLog
                                 footer = new
                                 {
                                     icon_url = "",
-                                    text = $"Bannie par {player.Nickname} ({player.UserId})",
+                                    text = $"Bannie par {player.Nickname} ({EventHandlers.ConvertID(player.UserId)})",
                                 },
                                 timestamp = DateTime.Now,
                             },
@@ -296,7 +296,7 @@ namespace DiscordLog
                                 new
                                 {
                                     name = $"Kick",
-                                    value = $"``{sanctioned.Nickname}`` ({sanctioned.UserId})",
+                                    value = $"``{sanctioned.Nickname}`` ({EventHandlers.ConvertID(sanctioned.UserId)})",
                                     inline = false,
                                 },
                                 new
@@ -309,7 +309,7 @@ namespace DiscordLog
                                 footer = new
                                 {
                                     icon_url = "",
-                                    text = $"kick par {player.Nickname} ({player.UserId})",
+                                    text = $"kick par {player.Nickname} ({EventHandlers.ConvertID(player.UserId)})",
                                 },
                                 timestamp = DateTime.Now,
                             },
