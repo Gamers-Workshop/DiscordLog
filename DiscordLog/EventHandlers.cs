@@ -132,7 +132,7 @@ namespace DiscordLog
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
             if (!RoundIsStart || ev.Player == null) return;
-            if (SerpentsHand.API.SerpentsHand.GetSHPlayers().Contains(ev.Player))
+            if (SerpentsHand.API.IsSerpent(ev.Player))
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn : SerpentHand\n";
             else if (ev.IsEscaped)
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) c'est échaper Il est devenue : {ev.NewRole}\n";
@@ -301,6 +301,7 @@ namespace DiscordLog
         }
         public static string ConvertID(string UserID)
         {
+            if (string.IsNullOrEmpty(UserID)) return string.Empty;
             if (UserID.EndsWith("@discord"))
             {
                 return $"<@{UserID.Replace("@discord", "")}>";

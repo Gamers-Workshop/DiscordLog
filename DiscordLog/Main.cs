@@ -308,7 +308,7 @@ namespace DiscordLog
 				{
 					NormalisedName.TryGetValue(player, out string PlayerName);
 					PlayerNameList += $"{PlayerName}\n";
-					if (SerpentsHand.API.SerpentsHand.GetSHPlayers().Contains(player))
+					if (SerpentsHand.API.IsSerpent(player))
 						PlayerRoleList += "SerpentsHand\n";
 					else
 						PlayerRoleList += $"{player.Role}\n";
