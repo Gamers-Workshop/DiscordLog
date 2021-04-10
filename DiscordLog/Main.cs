@@ -122,6 +122,8 @@ namespace DiscordLog
 			PlayerEvents.Verified += Handlers.OnPlayerVerified;
 			PlayerEvents.Destroying += Handlers.OnPlayerDestroying;
 			PlayerEvents.ChangingRole += Handlers.OnChangingRole;
+			PlayerEvents.Spawning -= Handlers.OnSpawning;
+
 			PlayerEvents.Hurting += Handlers.OnPlayerHurt;
 			PlayerEvents.Died += Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem += Handlers.OnDroppingItem;
@@ -167,6 +169,7 @@ namespace DiscordLog
 			PlayerEvents.Verified -= Handlers.OnPlayerVerified;
 			PlayerEvents.Destroying -= Handlers.OnPlayerDestroying;
 			PlayerEvents.ChangingRole -= Handlers.OnChangingRole;
+			PlayerEvents.Spawning -= Handlers.OnSpawning;
 			PlayerEvents.Hurting -= Handlers.OnPlayerHurt;
 			PlayerEvents.Died -= Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem -= Handlers.OnDroppingItem;
@@ -215,7 +218,7 @@ namespace DiscordLog
 		{
 			for (; ; )
 			{
-				yield return Timing.WaitForSeconds(0.5f);
+				yield return Timing.WaitForSeconds(1f);
 				if (LOG != null)
 				{
 					Webhook.SendWebhook(LOG);
@@ -235,7 +238,7 @@ namespace DiscordLog
 		{
 			string RoundInfo;
 			string RoundTime;
-			int PlayerCount = Player.List.Where((p) => p.Role != RoleType.None).ToList().Count;
+			int PlayerCount = Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().Count;
 			if (Round.IsStarted)
 			{
 				if (Round.IsLocked)
@@ -310,9 +313,11 @@ namespace DiscordLog
 					PlayerNameList += $"{PlayerName}\n";
 					if (SerpentsHand.API.IsSerpent(player))
 						PlayerRoleList += "SerpentsHand\n";
+					else if (player.IsOverwatchEnabled)
+						PlayerRoleList += "Overwatch\n";
 					else
 						PlayerRoleList += $"{player.Role}\n";
-					UserIdList += $"{EventHandlers.ConvertID(player.UserId)}\n";
+					UserIdList += $"{player.UserId}\n";
 				}
 			}
 			Webhook.UpdateServerInfoStaffAsync(RoundInfo, RoundTime, PlayerNameList, PlayerRoleList, UserIdList);

@@ -241,33 +241,35 @@ namespace DiscordLog
                                 color = 14310235,
                                 fields = new[]
                                 {
-                                new
-                                {
-                                    name = $"BAN",
-                                    value = $"``{sanctioned.Nickname}`` ({EventHandlers.ConvertID(sanctioned.UserId)})",
-                                    inline = false,
-                                },
-                                new
-                                {
-                                    name = $"Raison",
-                                    value = $"``{reason}``",
-                                    inline = false,
-                                },
-                                new
-                                {
-                                    name = $"Temps du ban",
-                                    value = $"Durée : {TimeSpan.FromSeconds(Duration).Duration()}\nUnBan : {DateTime.UtcNow.AddSeconds(Duration)}",
-                                    inline = false,
-                                },
+                                    new
+                                    {
+                                        name = $"Ban",
+                                        value = $"``{sanctioned.Nickname}`` ({EventHandlers.ConvertID(sanctioned.UserId)})",
+                                        inline = false,
+                                    },
+                                    new
+                                    {
+                                        name = $"Raison",
+                                        value = $"``{reason}``",
+                                        inline = false,
+                                    },
+                                    new
+                                    {
+                                        name = $"Random donne moi une idée pour ça",
+                                        value = $"Le    : {DateTime.Now}" +
+                                                $"Durée : {(Duration < 31536000 ? TimeSpan.FromSeconds(Duration).ToString() : $"{Duration/31536000} ans")}" +
+                                                $"Unban : {DateTime.Now.AddSeconds(Duration)}",
+                                        inline = false,
+                                    },
                                 },
                                 footer = new
                                 {
                                     icon_url = "",
-                                    text = $"Bannie par {player.Nickname} ({EventHandlers.ConvertID(player.UserId)})",
+                                    text = $"kick par {player.Nickname} ({player.UserId})",
                                 },
-                                timestamp = DateTime.Now,
+                                timestamp = DateTime.Today,
                             },
-                        }
+                    }
                 });
                 await sw.WriteAsync(json);
             }
@@ -293,27 +295,27 @@ namespace DiscordLog
                                 color = 14310235,
                                 fields = new[]
                                 {
-                                new
-                                {
-                                    name = $"Kick",
-                                    value = $"``{sanctioned.Nickname}`` ({EventHandlers.ConvertID(sanctioned.UserId)})",
-                                    inline = false,
-                                },
-                                new
-                                {
-                                    name = $"Raison",
-                                    value = $"``{reason}``",
-                                    inline = false,
-                                },
+                                    new
+                                    {
+                                        name = $"Kick",
+                                        value = $"``{sanctioned.Nickname}`` ({EventHandlers.ConvertID(sanctioned.UserId)})",
+                                        inline = false,
+                                    },
+                                    new
+                                    {
+                                        name = $"Raison",
+                                        value = $"``{reason}``",
+                                        inline = false,
+                                    },
                                 },
                                 footer = new
                                 {
                                     icon_url = "",
-                                    text = $"kick par {player.Nickname} ({EventHandlers.ConvertID(player.UserId)})",
+                                    text = $"kick par {player.Nickname} ({player.UserId})",
                                 },
-                                timestamp = DateTime.Now,
+                                timestamp = DateTime.Today,
                             },
-                        }
+                    }
                 });
                 await sw.WriteAsync(json);
             }
