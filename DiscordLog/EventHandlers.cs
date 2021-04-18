@@ -17,8 +17,7 @@ namespace DiscordLog
 
         public bool RoundIsStart = false;
         public float IntercomDelay;
-        public string bloodwebhook;
-
+        public Player IntercomPlayerSpeek;
         public EventHandlers(DiscordLog plugin) => this.plugin = plugin;
         public void OnWaintingForPlayers()
         {
@@ -140,12 +139,6 @@ namespace DiscordLog
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {ev.NewRole}.\n";
         }
 
-        public void OnSpawning(SpawningEventArgs ev)
-        {
-            if (!RoundIsStart || ev.Player == null) return;
-            if (ev.RoleType == RoleType.Scp0492)
-                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {ev.RoleType}.\n";
-        }
         public void OnPlayerHurt(HurtingEventArgs ev)
         {
             /*if (ev.IsAllowed && ev.Target != null && ev.Attacker != ev.Target && ev.Target.Role != RoleType.Spectator && ev.HitInformations.Amount < ev.Target.Health + ev.Target.AdrenalineHealth && !ev.Attacker.IsEnemy(ev.Target.Team))
@@ -186,7 +179,7 @@ namespace DiscordLog
         }
         public void OnEjectingGeneratorTablet(EjectingGeneratorTabletEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player != null && ev.Generator.isTabletConnected)
                 plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a ejecté la tablette du générateur de la salle : {ev.Generator.CurRoom}.\n";
         }
         public void OnGeneratorInsert(InsertingGeneratorTabletEventArgs ev)
@@ -198,15 +191,20 @@ namespace DiscordLog
         {
             if (ev.IsAllowed && ev.Player != null && !UnityEngine.Object.FindObjectOfType<AlphaWarheadOutsitePanel>().keycardEntered)
                 plugin.LOG += $":radioactive: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a ouvert la protection pour activé l'Alpha Warhead.\n";
+            else if (ev.IsAllowed && ev.Player != null && UnityEngine.Object.FindObjectOfType<AlphaWarheadOutsitePanel>().keycardEntered)
+                plugin.LOG += $":radioactive: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a fermer la protection pour activé l'Alpha Warhead.\n";
         }
         public void OnIntercomSpeaking(IntercomSpeakingEventArgs ev)
         {
             var intercom = UnityEngine.Object.FindObjectOfType<Intercom>();
-            if (intercom.speaker != null && !intercom.Muted && intercom.remainingCooldown <= 0f && Time.time > IntercomDelay + 5.1)
+
+            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && intercom._inUse)
             {
-                IntercomDelay += Time.time;
+                IntercomPlayerSpeek = ev.Player;
                 plugin.LOG += $":loudspeaker: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) utilise l'intercom.\n";
             }
+            else if (ev.Player == null)
+                IntercomPlayerSpeek = null;
         }
         public void OnHandcuffing(HandcuffingEventArgs ev)
         {
@@ -238,11 +236,36 @@ namespace DiscordLog
         public void On914Upgrade(UpgradingItemsEventArgs ev)
         {
             string str = $":gear: SCP-914 a été enclenché en {ev.KnobSetting} :\n";
-            foreach (Pickup item in ev.Items)
+            bool Item = ev.Items.Count != 0;
+            bool PlayerItem = ev.Players.Where(x => x.CurrentItemIndex != -1).Count() != 0;
+            if (Item || PlayerItem)
             {
-                str += $"- {item.itemId}\n";
+                str += $"**Item{(ev.Items.Count + ev.Players.Where(x => x.CurrentItemIndex != -1).Count() <= 1 ? "" : "s")}**\n";
+                if (Item)
+                    foreach (Pickup item in ev.Items)
+                    {
+                        str += $"- {item.itemId}\n";
+                    }
+                if (PlayerItem)
+                    foreach (Player player in ev.Players.Where(x => x.CurrentItemIndex != -1))
+                    {
+                        str += $"- {player.CurrentItem.id}\n";
+                    }
+            }
+            if (ev.Players.Count != 0)
+            {
+                str += $"**Joueur{(ev.Players.Count() <= 1 ? "" : "s")}**\n";
+                foreach (Player player in ev.Players)
+                {
+                    str += $"- ``{player.Nickname}`` ({ConvertID(player.UserId)})\n";
+                }
             }
             plugin.LOG += str;
+        }
+        public void OnFinishingRecall(FinishingRecallEventArgs ev)
+        {
+            if (ev.IsAllowed && ev.Target != null && ev.Scp049 != null)
+                plugin.LOG += $":zombie: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été ressuscité en Scp049-2 par ``{ev.Scp049.Nickname}`` ({ConvertID(ev.Scp049.UserId)}).\n";
         }
         public void OnBanning(BanningEventArgs ev)
         {
@@ -262,21 +285,26 @@ namespace DiscordLog
         }
         public void OnSendingRemoteAdminCommand(SendingRemoteAdminCommandEventArgs ev)
         {
-            if (!ev.Success && ev.Name.ToLower() == "ban" && ev.Name.ToLower() == "kick" && ev.Name == null) return;
+            if (!ev.Success || ev.Name.ToLower() == "ban" || ev.Name.ToLower() == "kick" || ev.Name == null) return;
             switch (ev.Name.ToLower())
             {
+                case "oban":
+                    {
+                        if (string.IsNullOrEmpty(ev.Arguments[0]) && int.TryParse(ev.Arguments[1], out int Duration))
+                        {
+                            string str1 = null;
+                            foreach (string str2 in ev.Arguments)
+                                str1 += $" {str2}";
+                            str1 = str1.Replace($"{ev.Arguments[0]} {ev.Arguments[1]}", string.Empty);
+                            Webhook.OBanPlayerAsync(ev.Sender, ev.Arguments[0], str1, Duration);
+                        }
+                    }
+                    return;
                 case "jail":
                     {
-                        if (int.TryParse(ev.Arguments[0], out int result))
                         {
-                            foreach (Player player in Player.List)
-                            {
-                                if (result == player.Id)
-                                {
-                                    Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a jail ``{player.Nickname}`` ({player.UserId}).\n");
-                                    return;
-                                }
-                            }
+                            Player player = Player.Get(ev.Arguments[0]);
+                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a jail ``{player.Nickname}`` ({player.UserId}).\n");
                         }
                     }
                     return;
@@ -284,7 +312,22 @@ namespace DiscordLog
                     {
                         if (int.TryParse(ev.Arguments[1], out int Role))
                         {
-                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a changé le rôle de {ev.Arguments[0]} en {(RoleType)Role}.\n");
+                            string Receiver = string.Empty;
+
+                            string[] Users = ev.Arguments[0].Split('.');
+                            List<Player> PlyList = new List<Player>();
+                            foreach (string s in Users)
+                            {
+                                if (int.TryParse(s, out int id) && Player.Get(id) != null)
+                                    PlyList.Add(Player.Get(id));
+                                else if (Player.Get(s) != null)
+                                    PlyList.Add(Player.Get(s));
+                            }
+                            foreach (Player ply in PlyList)
+                            {
+                                Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
+                            }
+                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a changé en {(RoleType)Role} : {Receiver}");
                         }
                     }
                     return;
@@ -292,8 +335,123 @@ namespace DiscordLog
                     {
                         if (int.TryParse(ev.Arguments[1], out int Item))
                         {
-                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a donné a {ev.Arguments[0]} : {(ItemType)Item}.\n");
+                            string Receiver = string.Empty;
+
+                            string[] Users = ev.Arguments[0].Split('.');
+                            List<Player> PlyList = new List<Player>();
+                            foreach (string s in Users)
+                            {
+                                if (int.TryParse(s, out int id) && Player.Get(id) != null)
+                                    PlyList.Add(Player.Get(id));
+                                else if (Player.Get(s) != null)
+                                    PlyList.Add(Player.Get(s));
+                            }
+                            foreach (Player ply in PlyList)
+                            {
+                                Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})\n";
+                            }
+                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a donné : {(ItemType)Item} {Receiver}");
                         }
+                    }
+                    return;
+                case "overwatch":
+                    {
+                        string Receiver = string.Empty;
+
+                        string[] Users = ev.Arguments[0].Split('.');
+                        List<Player> PlyList = new List<Player>();
+                        foreach (string s in Users)
+                        {
+                            if (int.TryParse(s, out int id) && Player.Get(id) != null)
+                                PlyList.Add(Player.Get(id));
+                            else if (Player.Get(s) != null)
+                                PlyList.Add(Player.Get(s));
+                        }
+                        foreach (Player ply in PlyList)
+                        {
+                            Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
+                        }
+                        if (ev.Arguments[1] == "0")
+                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à enlever l'overwatch : {Receiver}");
+                        else if (ev.Arguments[1] == "1")
+                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à mis l'overwatch : {Receiver}");
+                    }
+                    return;
+                case "bring":
+                    {
+                        string Receiver = string.Empty;
+
+                        string[] Users = ev.Arguments[0].Split('.');
+                        List<Player> PlyList = new List<Player>();
+                        foreach (string s in Users)
+                        {
+                            if (int.TryParse(s, out int id) && Player.Get(id) != null)
+                                PlyList.Add(Player.Get(id));
+                            else if (Player.Get(s) != null)
+                                PlyList.Add(Player.Get(s));
+                        }
+                        foreach (Player ply in PlyList)
+                        {
+                            Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
+                        }
+                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à tp les joueurs sur lui : {Receiver}");
+                    }
+                    return;
+                case "goto":
+                    {
+                        Player player = Player.Get(ev.Arguments[0]);
+                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) se tp à ``{player.Nickname}`` ({player.UserId}).");
+                    }
+                    return;
+                case "request_data":
+                    {
+                        Player player = Player.Get(ev.Arguments[1]);
+                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a demandé les donnée de {player.Nickname}`` ({ConvertID(player.UserId)}) : {ev.Arguments[0]}");
+                    }
+                    return;
+                case "effect":
+                    {
+                        string Receiver = string.Empty;
+
+                        string[] Users = ev.Arguments[0].Split('.');
+                        List<Player> PlyList = new List<Player>();
+                        foreach (string s in Users)
+                        {
+                            if (int.TryParse(s, out int id) && Player.Get(id) != null)
+                                PlyList.Add(Player.Get(id));
+                            else if (Player.Get(s) != null)
+                                PlyList.Add(Player.Get(s));
+                        }
+                        foreach (Player ply in PlyList)
+                        {
+                            Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
+                        }
+                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé {ev.Name} {ev.Arguments[1]} : {Receiver}");
+                    }
+                    return;
+                case "mute":
+                case "unmute":
+                case "imute":
+                case "iunmute":
+                case "disarm":
+                case "release":
+                    {
+                        string Receiver = string.Empty;
+
+                        string[] Users = ev.Arguments[0].Split('.');
+                        List<Player> PlyList = new List<Player>();
+                        foreach (string s in Users)
+                        {
+                            if (int.TryParse(s, out int id) && Player.Get(id) != null)
+                                PlyList.Add(Player.Get(id));
+                            else if (Player.Get(s) != null)
+                                PlyList.Add(Player.Get(s));
+                        }
+                        foreach (Player ply in PlyList)
+                        {
+                            Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
+                        }
+                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à {ev.Name} : {Receiver}");
                     }
                     return;
                 default:

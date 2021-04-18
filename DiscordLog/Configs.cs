@@ -9,13 +9,16 @@ namespace DiscordLog
 
         [Description("Debug Plugin")]
         public bool Debugplugin { get; set; }
-
-        [Description("Webhook url")]
+        [Description("Webhook url : Bug par les joueurs")]
+        public string WebhookUrlLogBug { get; set; } = string.Empty;
+        [Description("Webhook url : Suggestion par les joueurs")]
+        public string WebhookUrlLogSuggestion { get; set; } = string.Empty;
+        [Description("Webhook url : Log de toute les action joueurs")]
         public string WebhookUrlLogJoueur { get; set; } = string.Empty;
-        [Description("Webhook url")]
+        [Description("Webhook url : De toute les sanction")]
         public string WebhookUrlLogSanction { get; set; } = string.Empty;
 
-        [Description("Webhook Log STAFF (Ip of player)")]
+        [Description("Webhook url : Log Des IP et des commande Staff")]
         public string WebhookUrlLogStaff { get; set; } = string.Empty;
 
         [Description("Webhook Avatar")]

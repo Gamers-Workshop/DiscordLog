@@ -11,6 +11,8 @@ using Scp079Events = Exiled.Events.Handlers.Scp079;
 using Scp914Events = Exiled.Events.Handlers.Scp914;
 using Scp106Events = Exiled.Events.Handlers.Scp106;
 using Scp096Events = Exiled.Events.Handlers.Scp096;
+using Scp049Events = Exiled.Events.Handlers.Scp049;
+
 
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +36,7 @@ namespace DiscordLog
 		public DiscordLog() => Instance = this;
 		public Harmony Harmony { get; private set; }
 		public string LOG = null;
-		public static List<Sanction> SanctionedPlayer = new List<Sanction>();
+
 		public Dictionary<Player, string> NormalisedName = new Dictionary<Player, string>();
 
 
@@ -85,25 +87,6 @@ namespace DiscordLog
 		}
 		private void RegistEvents()
 		{
-			try
-			{
-				string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-				string pluginPath = Path.Combine(appData, "Plugins");
-				string path = Path.Combine(Paths.Plugins, "DiscordLog");
-				string sanctionedPlayer = Path.Combine(path, "DiscordLog-SanctionedPlayer.txt");
-
-				if (!Directory.Exists(path))
-					Directory.CreateDirectory(path);
-
-				if (!File.Exists(sanctionedPlayer))
-					File.Create(sanctionedPlayer).Close();
-
-			//	SanctionedPlayer = sanctionedPlayer;
-			}
-			catch (Exception e)
-			{
-				Log.Error($"Loading error: {e}");
-			}
 			Handlers = new EventHandlers(this);
 			ServerEvents.WaitingForPlayers += Handlers.OnWaintingForPlayers;
 			ServerEvents.RoundStarted += Handlers.OnRoundStart;
@@ -122,7 +105,6 @@ namespace DiscordLog
 			PlayerEvents.Verified += Handlers.OnPlayerVerified;
 			PlayerEvents.Destroying += Handlers.OnPlayerDestroying;
 			PlayerEvents.ChangingRole += Handlers.OnChangingRole;
-			PlayerEvents.Spawning -= Handlers.OnSpawning;
 
 			PlayerEvents.Hurting += Handlers.OnPlayerHurt;
 			PlayerEvents.Died += Handlers.OnPlayerDeath;
@@ -142,6 +124,8 @@ namespace DiscordLog
 			PlayerEvents.EscapingPocketDimension += Handlers.OnEscapingPocketDimension;
 			Scp914Events.Activating += Handlers.On914Activating;
 			Scp914Events.UpgradingItems += Handlers.On914Upgrade;
+
+			Scp049Events.FinishingRecall += Handlers.OnFinishingRecall;
 
 			//LogStaff
 			PlayerEvents.Banning += Handlers.OnBanning;
@@ -169,7 +153,6 @@ namespace DiscordLog
 			PlayerEvents.Verified -= Handlers.OnPlayerVerified;
 			PlayerEvents.Destroying -= Handlers.OnPlayerDestroying;
 			PlayerEvents.ChangingRole -= Handlers.OnChangingRole;
-			PlayerEvents.Spawning -= Handlers.OnSpawning;
 			PlayerEvents.Hurting -= Handlers.OnPlayerHurt;
 			PlayerEvents.Died -= Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem -= Handlers.OnDroppingItem;
@@ -189,6 +172,9 @@ namespace DiscordLog
 
 			Scp914Events.Activating -= Handlers.On914Activating;
 			Scp914Events.UpgradingItems -= Handlers.On914Upgrade;
+
+			Scp049Events.FinishingRecall -= Handlers.OnFinishingRecall;
+
 			//LogStaff
 			PlayerEvents.Banning -= Handlers.OnBanning;
 			PlayerEvents.Kicking -= Handlers.OnKicking;
@@ -221,8 +207,39 @@ namespace DiscordLog
 				yield return Timing.WaitForSeconds(1f);
 				if (LOG != null)
 				{
-					Webhook.SendWebhook(LOG);
-					LOG = null;
+					if (LOG.Length < 2001)
+					{
+						Webhook.SendWebhook(LOG);
+						LOG = null;
+					}
+					else
+                    {
+						int Limiteur = 0;
+						string LogLimite = string.Empty;
+						string logs = LOG;
+						LOG = null;
+						List<string> LogToSend = new List<string>();
+						foreach (string ligne in logs.Split('\n'))
+						{
+							if (ligne.Count() + Limiteur < 1999)
+							{
+								Limiteur += ligne.Count() + 1;
+								LogLimite += ligne + "\n";
+							}
+							else
+                            {
+								LogToSend.Add(LogLimite);
+								Limiteur = ligne.Count() + 1;
+								LogLimite = ligne + "\n";
+							}
+						}
+						LogToSend.Add(LogLimite);
+						foreach (string SendLog in LogToSend)
+                        {
+							Webhook.SendWebhook(SendLog);
+							yield return Timing.WaitForSeconds(0.25f);
+						}
+					}
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-﻿/*using CommandSystem;
+﻿using CommandSystem;
 using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
 using MEC;
@@ -13,7 +13,7 @@ namespace DiscordLog.Command.Warn
 {
 	[CommandHandler(typeof(GameConsoleCommandHandler))]
 	[CommandHandler(typeof(RemoteAdminCommandHandler))]
-	class Commands : ICommand
+	class Warn : ICommand
 	{
 		public string Command { get; } = "warn";
 
@@ -25,7 +25,7 @@ namespace DiscordLog.Command.Warn
 		{
             Player sanctionneur = null;
             if (sender is PlayerCommandSender playerCommandSender) sanctionneur = Player.Get(playerCommandSender.SenderId);
-            if (sanctionneur != null && !sanctionneur.CheckPermission("at.warn"))
+            if (sanctionneur != null && !sanctionneur.CheckPermission("log.warn"))
             {
                 response = "Permission denied.";
                 return false;
@@ -36,15 +36,14 @@ namespace DiscordLog.Command.Warn
                 response = $"Player not found: {arguments.At(0)}";
                 return false;
             }
-            if (string.IsNullOrEmpty(arguments.At(1)))
+            if (string.IsNullOrWhiteSpace(Extensions.FormatArguments(arguments, 1)))
             {
                 response = $"Vous devez donner une raison a votre warn";
                 return false;
             }
-            Timing.RunCoroutine(EventHandlers.DoSanction(Sanctioned, sanctionneur, Extensions.FormatArguments(arguments, 1), "warn",0));
+            Webhook.WarnPlayerAsync(Sanctioned, sanctionneur, Extensions.FormatArguments(arguments, 1));
             response = $"Player {Sanctioned.Nickname} has been warned : {Extensions.FormatArguments(arguments, 1)}";
             return true;
         }
 	}
 }
-*/
