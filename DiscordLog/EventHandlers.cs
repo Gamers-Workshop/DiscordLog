@@ -134,7 +134,7 @@ namespace DiscordLog
             if (SerpentsHand.API.IsSerpent(ev.Player))
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : SerpentHand.\n";
             else if (ev.IsEscaped)
-                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {ev.Player.ReferenceHub.footstepSync._ccm.AliveTime / 60:00}:{ev.Player.ReferenceHub.footstepSync._ccm.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
             else
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {ev.NewRole}.\n";
         }
@@ -196,9 +196,7 @@ namespace DiscordLog
         }
         public void OnIntercomSpeaking(IntercomSpeakingEventArgs ev)
         {
-            var intercom = UnityEngine.Object.FindObjectOfType<Intercom>();
-
-            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && intercom._inUse)
+            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && Intercom.host.remainingCooldown <= 0f && !ev.Player.IsIntercomMuted && !ev.Player.IsMuted)
             {
                 IntercomPlayerSpeek = ev.Player;
                 plugin.LOG += $":loudspeaker: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) utilise l'intercom.\n";
