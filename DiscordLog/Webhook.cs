@@ -277,7 +277,7 @@ namespace DiscordLog
             var response = (HttpWebResponse)await wr.GetResponseAsync();
             wr.Abort();
         }
-        public static async Task OBanPlayerAsync(Player player, string sanctioned, string reason, int Duration)
+        public static async Task OBanPlayerAsync(Player player, string sanctioned, string reason, uint Duration)
         {
             WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
             wr.ContentType = "application/json";

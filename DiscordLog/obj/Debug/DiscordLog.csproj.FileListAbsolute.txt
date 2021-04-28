@@ -122,5 +122,4 @@ D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Memory.xml
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Numerics.Vectors.xml
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\SerpentsHand.pdb
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\SerpentsHand.dll
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.Loader.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.CustomItems.dll

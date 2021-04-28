@@ -134,7 +134,7 @@ namespace DiscordLog
             if (SerpentsHand.API.IsSerpent(ev.Player))
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : SerpentHand.\n";
             else if (ev.IsEscaped)
-                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {ev.Player.ReferenceHub.footstepSync._ccm.AliveTime / 60:00}:{ev.Player.ReferenceHub.footstepSync._ccm.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
             else
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {ev.NewRole}.\n";
         }
@@ -196,7 +196,7 @@ namespace DiscordLog
         }
         public void OnIntercomSpeaking(IntercomSpeakingEventArgs ev)
         {
-            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && Intercom.host.remainingCooldown <= 0f && !ev.Player.IsIntercomMuted && !ev.Player.IsMuted)
+            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && Intercom.host.remainingCooldown <= 0f && !ev.Player.IsIntercomMuted && !ev.Player.IsMuted && Player.Dictionary.TryGetValue(Intercom.host.speaker,out Player speaker) && speaker == ev.Player)
             {
                 IntercomPlayerSpeek = ev.Player;
                 plugin.LOG += $":loudspeaker: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) utilise l'intercom.\n";
@@ -283,18 +283,25 @@ namespace DiscordLog
         }
         public void OnSendingRemoteAdminCommand(SendingRemoteAdminCommandEventArgs ev)
         {
+            bool success = false;
             if (!ev.Success || ev.Name.ToLower() == "ban" || ev.Name.ToLower() == "kick" || ev.Name == null) return;
             switch (ev.Name.ToLower())
             {
                 case "oban":
                     {
-                        if (string.IsNullOrEmpty(ev.Arguments[0]) && int.TryParse(ev.Arguments[1], out int Duration))
+                        if (!string.IsNullOrEmpty(ev.Arguments[0]) && uint.TryParse(ev.Arguments[1], out uint Duration))
                         {
+                            int l = 2;
                             string str1 = null;
                             foreach (string str2 in ev.Arguments)
-                                str1 += $" {str2}";
-                            str1 = str1.Replace($"{ev.Arguments[0]} {ev.Arguments[1]}", string.Empty);
+                            {
+                                if (l == 0)
+                                    str1 += $" {str2}";
+                                else
+                                    l--;
+                            }
                             Webhook.OBanPlayerAsync(ev.Sender, ev.Arguments[0], str1, Duration);
+                            success = true;
                         }
                     }
                     return;
@@ -303,6 +310,7 @@ namespace DiscordLog
                         {
                             Player player = Player.Get(ev.Arguments[0]);
                             Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a jail ``{player.Nickname}`` ({player.UserId}).\n");
+                            success = true;
                         }
                     }
                     return;
@@ -326,6 +334,7 @@ namespace DiscordLog
                                 Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                             }
                             Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a changé en {(RoleType)Role} : {Receiver}");
+                            success = true;
                         }
                     }
                     return;
@@ -349,6 +358,7 @@ namespace DiscordLog
                                 Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})\n";
                             }
                             Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a donné : {(ItemType)Item} {Receiver}");
+                            success = true;
                         }
                     }
                     return;
@@ -370,9 +380,15 @@ namespace DiscordLog
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
                         if (ev.Arguments[1] == "0")
+                        {
                             Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à enlever l'overwatch : {Receiver}");
+                            success = true; 
+                        }
                         else if (ev.Arguments[1] == "1")
+                        {
                             Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à mis l'overwatch : {Receiver}");
+                            success = true; 
+                        }
                     }
                     return;
                 case "bring":
@@ -393,18 +409,21 @@ namespace DiscordLog
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
                         Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à tp les joueurs sur lui : {Receiver}");
+                        success = true;
                     }
                     return;
                 case "goto":
                     {
                         Player player = Player.Get(ev.Arguments[0]);
                         Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) se tp à ``{player.Nickname}`` ({player.UserId}).");
+                        success = true;
                     }
                     return;
                 case "request_data":
                     {
                         Player player = Player.Get(ev.Arguments[1]);
                         Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a demandé les donnée de {player.Nickname}`` ({ConvertID(player.UserId)}) : {ev.Arguments[0]}");
+                        success = true;
                     }
                     return;
                 case "effect":
@@ -425,6 +444,7 @@ namespace DiscordLog
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
                         Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé {ev.Name} {ev.Arguments[1]} : {Receiver}");
+                        success = true;
                     }
                     return;
                 case "mute":
@@ -450,16 +470,16 @@ namespace DiscordLog
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
                         Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à {ev.Name} : {Receiver}");
+                        success = true;
                     }
                     return;
-                default:
-                    {
-                        string str1 = null;
-                        foreach (string str2 in ev.Arguments)
-                            str1 += $" {str2}";
-                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé ``{ev.Name}{str1}``.\n");
-                    }
-                    return;
+            }
+            if (!success)
+            {
+                string str1 = null;
+                foreach (string str2 in ev.Arguments)
+                    str1 += $" {str2}";
+                Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé ``{ev.Name}{str1}``.\n");
             }
         }
         public static string ConvertID(string UserID)
