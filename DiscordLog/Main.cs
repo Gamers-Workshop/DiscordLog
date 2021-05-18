@@ -130,8 +130,9 @@ namespace DiscordLog
 			//LogStaff
 			PlayerEvents.Banning += Handlers.OnBanning;
 			PlayerEvents.Kicking += Handlers.OnKicking;
-
 			ServerEvents.SendingRemoteAdminCommand += Handlers.OnSendingRemoteAdminCommand;
+			//PingStaff
+			ServerEvents.LocalReporting += Handlers.OnLocalReporting;
 		}
 
 		private void UnRegistEvents()
@@ -169,7 +170,6 @@ namespace DiscordLog
 
 			PlayerEvents.EnteringPocketDimension -= Handlers.OnEnteringPocketDimension;
 			PlayerEvents.EscapingPocketDimension -= Handlers.OnEscapingPocketDimension;
-
 			Scp914Events.Activating -= Handlers.On914Activating;
 			Scp914Events.UpgradingItems -= Handlers.On914Upgrade;
 
@@ -178,7 +178,10 @@ namespace DiscordLog
 			//LogStaff
 			PlayerEvents.Banning -= Handlers.OnBanning;
 			PlayerEvents.Kicking -= Handlers.OnKicking;
-			ServerEvents.SendingRemoteAdminCommand -= Handlers.OnSendingRemoteAdminCommand;
+            ServerEvents.SendingRemoteAdminCommand -= Handlers.OnSendingRemoteAdminCommand;
+
+			//PingStaff
+			ServerEvents.LocalReporting -= Handlers.OnLocalReporting;
 			Handlers = null;
 		}
 

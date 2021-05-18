@@ -123,3 +123,7 @@ D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Numerics.Vectors.xml
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\SerpentsHand.pdb
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\SerpentsHand.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.CustomItems.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.Loader.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\0Harmony.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.CoreModule.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.dll

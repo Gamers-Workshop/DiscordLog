@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Interfaces;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace DiscordLog
@@ -36,5 +37,9 @@ namespace DiscordLog
         public string WebhookSiStaff { get; set; } = "none";
         [Description("Webhook Id Message")]
         public string IdMessageStaff { get; set; } = "none";
+        [Description("RoleID to ping")]
+        public string WebhookReport { get; set; } = "none";
+
+        public string Ping { get; set; } = "<@&(Roleid)> <@(Memberid)>";
     }
 }

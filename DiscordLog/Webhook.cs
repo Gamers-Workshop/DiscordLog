@@ -515,5 +515,52 @@ namespace DiscordLog
             var response = (HttpWebResponse)await wr.GetResponseAsync();
             wr.Abort();
         }
+        public static async Task ReportAsync(Player Reporter, Player Reported, string WebhookUrl,string pings, string reason)
+        {
+
+            WebRequest wr = (HttpWebRequest)WebRequest.Create(WebhookUrl);
+            wr.ContentType = "application/json";
+            wr.Method = "POST";
+            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
+            {
+                string json = JsonConvert.SerializeObject(new
+                {
+                    username = "SCP:SL",
+                    embeds = new[]
+                    {
+                        new
+                            {
+                                title = DiscordLog.Instance.Config.SIName,
+                                description = "",
+                                color = 16773376,
+                                fields = new[]
+                                {
+                                    new
+                                    {
+                                        name = $"Report",
+                                        value = $"[{Reported.Id}]``{Reported.Nickname}`` ({EventHandlers.ConvertID(Reported.UserId)})",
+                                        inline = false,
+                                    },
+                                    new
+                                    {
+                                        name = $"Reason",
+                                        value = $"``{reason}``",
+                                        inline = false,
+                                    },
+                                },
+                                footer = new
+                                {
+                                    icon_url = "",
+                                    text = $"Report par [{Reporter.Id}] {Reporter.Nickname} ({Reporter.UserId})",
+                                },
+                                timestamp = DateTime.Now,
+                            },
+                    }
+                });
+                await sw.WriteAsync(json);
+            }
+            var response = (HttpWebResponse)await wr.GetResponseAsync();
+            wr.Abort();
+        }
     }
 }

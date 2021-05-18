@@ -15,9 +15,10 @@ namespace DiscordLog
         internal readonly DiscordLog plugin;
         public static List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
 
-        public bool RoundIsStart = false;
-        public float IntercomDelay;
-        public Player IntercomPlayerSpeek;
+        private bool RoundIsStart = false;
+        private float IntercomDelay;
+        private Player IntercomPlayerSpeek;
+        private Player Use914;
         public EventHandlers(DiscordLog plugin) => this.plugin = plugin;
         public void OnWaintingForPlayers()
         {
@@ -25,9 +26,9 @@ namespace DiscordLog
                 Timing.KillCoroutines(handle);
             plugin.NormalisedName.Clear();
             if (DiscordLog.Instance.Config.WebhookUrlLogJoueur != string.Empty)
-                Coroutines.Add(Timing.RunCoroutine(plugin.RunSendWebhook()));
+                Coroutines.Add(Timing.RunCoroutine(plugin.RunSendWebhook(), Segment.RealtimeUpdate));
             if (DiscordLog.Instance.Config.WebhookSi != "null" || DiscordLog.Instance.Config.IdMessage != "null" )
-                Coroutines.Add(Timing.RunCoroutine(plugin.RunUpdateWebhook()));
+                Coroutines.Add(Timing.RunCoroutine(plugin.RunUpdateWebhook(), Segment.RealtimeUpdate));
             plugin.LOG += ":zzz: En attente de joueurs...\n";
             RoundIsStart = false;
         }
@@ -194,6 +195,13 @@ namespace DiscordLog
             else if (ev.IsAllowed && ev.Player != null && UnityEngine.Object.FindObjectOfType<AlphaWarheadOutsitePanel>().keycardEntered)
                 plugin.LOG += $":radioactive: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a fermer la protection pour activé l'Alpha Warhead.\n";
         }
+        public void OnLocalReporting(LocalReportingEventArgs ev)
+        {
+            if (DiscordLog.Instance.Config.WebhookReport != "none")
+                Webhook.ReportAsync(ev.Issuer, ev.Target, DiscordLog.Instance.Config.WebhookReport, DiscordLog.Instance.Config.Ping, ev.Reason);
+            ev.IsAllowed = true;
+        }
+
         public void OnIntercomSpeaking(IntercomSpeakingEventArgs ev)
         {
             if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && Intercom.host.remainingCooldown <= 0f && !ev.Player.IsIntercomMuted && !ev.Player.IsMuted && Player.Dictionary.TryGetValue(Intercom.host.speaker,out Player speaker) && speaker == ev.Player)
@@ -229,11 +237,15 @@ namespace DiscordLog
         public void On914Activating(ActivatingEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":gear: SCP-914 a été enclenché par ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}).\n";
+                Use914 = ev.Player;
         }
         public void On914Upgrade(UpgradingItemsEventArgs ev)
         {
-            string str = $":gear: SCP-914 a été enclenché en {ev.KnobSetting} :\n";
+            string str;
+            if (Use914 != null)
+                str = $":gear: SCP-914 a été enclenché en {ev.KnobSetting} par ``{Use914.Nickname}`` ({ConvertID(Use914.UserId)}) :\n";
+            else
+                str = $":gear: SCP-914 a été enclenché en {ev.KnobSetting} par Unknow :\n";
             bool Item = ev.Items.Count != 0;
             bool PlayerItem = ev.Players.Where(x => x.CurrentItemIndex != -1).Count() != 0;
             if (Item || PlayerItem)
@@ -309,7 +321,7 @@ namespace DiscordLog
                     {
                         {
                             Player player = Player.Get(ev.Arguments[0]);
-                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a jail ``{player.Nickname}`` ({player.UserId}).\n");
+                            Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a jail ``{player.Nickname}`` ({player.UserId}).\n");
                             success = true;
                         }
                     }
@@ -333,7 +345,7 @@ namespace DiscordLog
                             {
                                 Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                             }
-                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a changé en {(RoleType)Role} : {Receiver}");
+                            Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a changé en {(RoleType)Role} : {Receiver}");
                             success = true;
                         }
                     }
@@ -357,7 +369,7 @@ namespace DiscordLog
                             {
                                 Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})\n";
                             }
-                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a donné : {(ItemType)Item} {Receiver}");
+                            Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a donné : {(ItemType)Item} {Receiver}");
                             success = true;
                         }
                     }
@@ -381,12 +393,12 @@ namespace DiscordLog
                         }
                         if (ev.Arguments[1] == "0")
                         {
-                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à enlever l'overwatch : {Receiver}");
+                            Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à enlever l'overwatch : {Receiver}");
                             success = true; 
                         }
                         else if (ev.Arguments[1] == "1")
                         {
-                            Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à mis l'overwatch : {Receiver}");
+                            Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à mis l'overwatch : {Receiver}");
                             success = true; 
                         }
                     }
@@ -408,21 +420,21 @@ namespace DiscordLog
                         {
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
-                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à tp les joueurs sur lui : {Receiver}");
+                        Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à tp les joueurs sur lui : {Receiver}");
                         success = true;
                     }
                     return;
                 case "goto":
                     {
                         Player player = Player.Get(ev.Arguments[0]);
-                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) se tp à ``{player.Nickname}`` ({player.UserId}).");
+                        Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) se tp à ``{player.Nickname}`` ({player.UserId}).");
                         success = true;
                     }
                     return;
                 case "request_data":
                     {
                         Player player = Player.Get(ev.Arguments[1]);
-                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a demandé les donnée de {player.Nickname}`` ({ConvertID(player.UserId)}) : {ev.Arguments[0]}");
+                        Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a demandé les donnée de {player.Nickname}`` ({ConvertID(player.UserId)}) : {ev.Arguments[0]}");
                         success = true;
                     }
                     return;
@@ -443,7 +455,7 @@ namespace DiscordLog
                         {
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
-                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé {ev.Name} {ev.Arguments[1]} : {Receiver}");
+                        Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé {ev.Name} {ev.Arguments[1]} : {Receiver}");
                         success = true;
                     }
                     return;
@@ -469,7 +481,7 @@ namespace DiscordLog
                         {
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
-                        Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à {ev.Name} : {Receiver}");
+                        Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à {ev.Name} : {Receiver}");
                         success = true;
                     }
                     return;
@@ -479,7 +491,7 @@ namespace DiscordLog
                 string str1 = null;
                 foreach (string str2 in ev.Arguments)
                     str1 += $" {str2}";
-                Webhook.SendWebhookStaff($"``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé ``{ev.Name}{str1}``.\n");
+                Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé ``{ev.Name}{str1}``.\n");
             }
         }
         public static string ConvertID(string UserID)
