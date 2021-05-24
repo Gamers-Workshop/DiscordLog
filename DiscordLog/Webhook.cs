@@ -145,7 +145,7 @@ namespace DiscordLog
                                     },
                                     new
                                     {
-                                        name = "Rôle",
+                                        name = "Rôle(Hp)",
                                         value = PlayerRoleList,
                                         inline = true,
                                     },

@@ -41,6 +41,9 @@ namespace DiscordLog.Command.Warn
                 response = $"Vous devez donner une raison a votre warn";
                 return false;
             }
+            if (DiscordLog.Instance.Config.WarnBox)
+                Sanctioned.OpenReportWindow($"Vous avez été warn par {sanctionneur.Nickname} car {Extensions.FormatArguments(arguments, 1)}");
+
             Webhook.WarnPlayerAsync(sanctionneur, Sanctioned, Extensions.FormatArguments(arguments, 1));
             response = $"Player {Sanctioned.Nickname} has been warned : {Extensions.FormatArguments(arguments, 1)}";
             return true;

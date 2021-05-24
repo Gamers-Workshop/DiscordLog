@@ -332,11 +332,14 @@ namespace DiscordLog
 					NormalisedName.TryGetValue(player, out string PlayerName);
 					PlayerNameList += $"{PlayerName}\n";
 					if (SerpentsHand.API.IsSerpent(player))
-						PlayerRoleList += "SerpentsHand\n";
-					else if (player.IsOverwatchEnabled)
-						PlayerRoleList += "Overwatch\n";
+						PlayerRoleList += $"SerpentsHand({(int)player.Health}Hp)\n";
+					else if (player.Role == RoleType.Spectator)
+						if (player.IsOverwatchEnabled)
+							PlayerRoleList += $"Overwatch\n";
+						else
+							PlayerRoleList += $"{player.Role}\n";
 					else
-						PlayerRoleList += $"{player.Role}\n";
+						PlayerRoleList += $"{player.Role}({(int)player.Health}Hp)\n";
 					UserIdList += $"{player.UserId}\n";
 				}
 			}

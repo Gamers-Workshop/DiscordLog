@@ -10,6 +10,8 @@ namespace DiscordLog
 
         [Description("Debug Plugin")]
         public bool Debugplugin { get; set; }
+        [Description("Box Warn")]
+        public bool WarnBox { get; set; } = false;
         [Description("Webhook url : Bug par les joueurs")]
         public string WebhookUrlLogBug { get; set; } = string.Empty;
         [Description("Webhook url : Suggestion par les joueurs")]

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace DiscordLog
 {
@@ -32,6 +33,10 @@ namespace DiscordLog
 			string msg = SB.ToString();
 			StringBuilderPool.Shared.Return(SB);
 			return msg;
+		}
+		public static void OpenReportWindow(this Player player, string text)
+		{
+			player.ReferenceHub.GetComponent<GameConsoleTransmission>().SendToClient(player.Connection, "[REPORTING] " + text, "white");
 		}
 	}
 }

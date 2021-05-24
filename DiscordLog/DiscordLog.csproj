@@ -64,7 +64,7 @@
     </Reference>
     <Reference Include="Mirror, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Users\louismonneyronpc\Desktop\SCPSL SERVEUR\depots\996561\5797666\SCPSL_Data\Managed\Mirror.dll</HintPath>
+      <HintPath>C:\Users\louismonneyronpc\Desktop\SCPSL SERVEUR\depots\996561\6390275\SCPSL_Data\Managed\Mirror.dll</HintPath>
     </Reference>
     <Reference Include="Mirror.Components">
       <HintPath>C:\Users\louismonneyronpc\Desktop\SCPSL SERVEUR\depots\996561\5797666\SCPSL_Data\Managed\Mirror.Components.dll</HintPath>
