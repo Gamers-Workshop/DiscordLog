@@ -99,7 +99,7 @@ namespace DiscordLog
         }
         public void OnGeneratorFinish(GeneratorActivatedEventArgs ev)
         {
-            plugin.LOG += $":computer: Le générateur dans la {ev.Generator.CurRoom} est activé.\n";
+            plugin.LOG += $":computer: Le générateur dans la {Map.FindParentRoom(ev.Generator.gameObject).Type} est activé.\n";
         }
         public void OnPlayerAuth(PreAuthenticatingEventArgs ev)
         {
