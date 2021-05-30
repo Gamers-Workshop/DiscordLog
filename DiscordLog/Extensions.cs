@@ -1,4 +1,5 @@
 ﻿using Exiled.API.Features;
+using NorthwoodLib;
 using NorthwoodLib.Pools;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,27 @@ namespace DiscordLog
 		public static void OpenReportWindow(this Player player, string text)
 		{
 			player.ReferenceHub.GetComponent<GameConsoleTransmission>().SendToClient(player.Connection, "[REPORTING] " + text, "white");
+		}
+		public static Transform NameOfGeneratorRoom(this Generator079 gen)
+        {
+			Transform transform = gen.transform;
+			Physics.Raycast(new Ray(transform.position - transform.forward, Vector3.up), out RaycastHit raycastHit, 5f, global::Interface079.singleton.roomDetectionMask);
+			Transform transform2 = raycastHit.transform;
+			if (!transform2)
+			{
+				RaycastHit raycastHit2;
+				Physics.Raycast(new Ray(transform.position - transform.forward, Vector3.down), out raycastHit2, 5f, global::Interface079.singleton.roomDetectionMask);
+				transform2 = raycastHit2.transform;
+			}
+			if (transform2)
+			{
+				while (transform2 != null && !transform2.transform.name.Contains("ROOT", StringComparison.OrdinalIgnoreCase) && !transform2.gameObject.CompareTag("Room"))
+				{
+					transform2 = transform2.transform.parent;
+				}
+			}
+			return transform2;
+
 		}
 	}
 }

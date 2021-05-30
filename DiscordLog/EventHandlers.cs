@@ -2,6 +2,7 @@
 using Exiled.Events.EventArgs;
 using MEC;
 using Newtonsoft.Json.Serialization;
+using NorthwoodLib;
 using Respawning;
 using System;
 using System.Collections.Generic;
@@ -90,7 +91,7 @@ namespace DiscordLog
         }
         public void OnDetonated()
         {
-            plugin.LOG += ":boom: Explosion du site.\n";
+            plugin.LOG += ":radioactive: Explosion du site.\n";
         }
         public void OnAnnounceDecont(AnnouncingDecontaminationEventArgs ev)
         {
@@ -99,7 +100,8 @@ namespace DiscordLog
         }
         public void OnGeneratorFinish(GeneratorActivatedEventArgs ev)
         {
-            plugin.LOG += $":computer: Le générateur dans la {Map.FindParentRoom(ev.Generator.gameObject).Type} est activé.\n";
+
+            plugin.LOG += $":computer: Le générateur dans la {Map.FindParentRoom(ev.Generator.NameOfGeneratorRoom().gameObject).Type} est activé.\n";
         }
         public void OnPlayerAuth(PreAuthenticatingEventArgs ev)
         {
@@ -116,18 +118,9 @@ namespace DiscordLog
         }
         public void OnPlayerDestroying(DestroyingEventArgs ev)
         {
-            if (ev.Player == null || ev.Player.Role == RoleType.None) return;
+            if (ev.Player == null) return;
             plugin.LOG += $":chart_with_downwards_trend: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a quitté le serveur.\n";
             plugin.NormalisedName.Remove(ev.Player);
-            if (Player.List.ToList().Count < 2)
-            {
-                if (plugin.LOG != null && DiscordLog.Instance.Config.WebhookUrlLogJoueur != string.Empty)
-                {
-                    Webhook.SendWebhook(plugin.LOG);
-                    plugin.LOG = null;
-                }
-                if (DiscordLog.Instance.Config.WebhookSi != "null" && DiscordLog.Instance.Config.IdMessage != "null")  plugin.UpdateWebhook();
-            }
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
@@ -135,7 +128,7 @@ namespace DiscordLog
             if (SerpentsHand.API.IsSerpent(ev.Player))
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : SerpentHand.\n";
             else if (ev.IsEscaped)
-                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                plugin.LOG += $":person_running: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
             else
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {ev.NewRole}.\n";
         }
@@ -176,18 +169,18 @@ namespace DiscordLog
         public void OnGeneratorUnlock(UnlockingGeneratorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a débloqué un générateur dans la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a débloqué un générateur dans la salle : {Map.FindParentRoom(ev.Generator.NameOfGeneratorRoom().gameObject).Type}.\n";
         }
         public void OnEjectingGeneratorTablet(EjectingGeneratorTabletEventArgs ev)
         {
             
             if (ev.IsAllowed && ev.Player != null && ev.Generator.isTabletConnected)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a ejecté la tablette du générateur de la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a ejecté la tablette du générateur de la salle : {Map.FindParentRoom(ev.Generator.NameOfGeneratorRoom().gameObject).Type}.\n";
         }
         public void OnGeneratorInsert(InsertingGeneratorTabletEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a inséré une tablette dans un générateur de la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a inséré une tablette dans un générateur de la salle : {Map.FindParentRoom(ev.Generator.NameOfGeneratorRoom().gameObject).Type}.\n";
         }
         public void OnActivatingWarheadPanel(ActivatingWarheadPanelEventArgs ev)
         {
@@ -271,6 +264,7 @@ namespace DiscordLog
                     str += $"- ``{player.Nickname}`` ({ConvertID(player.UserId)})\n";
                 }
             }
+            Use914 = null;
             plugin.LOG += str;
         }
         public void OnFinishingRecall(FinishingRecallEventArgs ev)

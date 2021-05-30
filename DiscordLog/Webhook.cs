@@ -526,6 +526,7 @@ namespace DiscordLog
                 string json = JsonConvert.SerializeObject(new
                 {
                     username = "SCP:SL",
+                    content = pings,
                     embeds = new[]
                     {
                         new
