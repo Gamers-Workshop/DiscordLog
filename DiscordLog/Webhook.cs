@@ -515,7 +515,7 @@ namespace DiscordLog
             var response = (HttpWebResponse)await wr.GetResponseAsync();
             wr.Abort();
         }
-        public static async Task ReportAsync(Player Reporter, Player Reported, string WebhookUrl,string pings, string reason)
+        public static async Task ReportAsync(Player Reporter, Player Reported, string WebhookUrl,string pings, string reason = "Aucune raison donnée")
         {
 
             WebRequest wr = (HttpWebRequest)WebRequest.Create(WebhookUrl);
