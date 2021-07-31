@@ -41,7 +41,6 @@ C:\Users\Corentin\source\repos\PluginBETA\PluginBETA\obj\Debug\DiscordLog.csproj
 C:\Users\Corentin\source\repos\PluginBETA\PluginBETA\obj\Debug\PluginBETA.dll
 C:\Users\Corentin\source\repos\PluginBETA\PluginBETA\obj\Debug\PluginBETA.pdb
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Newtonsoft.Json.dll
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.PhysicsModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.AudioModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.AnimationModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.IMGUIModule.dll
@@ -82,4 +81,3 @@ D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.Loader.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\0Harmony.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.CoreModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.dll
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Mirror.dll

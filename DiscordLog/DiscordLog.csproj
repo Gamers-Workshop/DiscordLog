@@ -159,13 +159,13 @@
     <Compile Include="Command\Bug.cs" />
     <Compile Include="Command\Suggestion.cs" />
     <Compile Include="Command\Warn.cs" />
-    <Compile Include="Data.cs" />
     <Compile Include="DiscordWebhook.cs" />
     <Compile Include="EventHandlers.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Configs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaReplyPatches.cs" />
     <Compile Include="ReportPatch.cs" />
     <Compile Include="Webhook.cs" />
   </ItemGroup>

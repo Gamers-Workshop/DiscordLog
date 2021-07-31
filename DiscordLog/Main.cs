@@ -36,6 +36,8 @@ namespace DiscordLog
 		public DiscordLog() => Instance = this;
 		public Harmony Harmony { get; private set; }
 		public string LOG = null;
+		public string LOGStaff = null;
+
 
 		public Dictionary<Player, string> NormalisedName = new Dictionary<Player, string>();
 
@@ -244,10 +246,49 @@ namespace DiscordLog
 						}
 					}
 				}
+				if (LOGStaff != null)
+				{
+					yield return Timing.WaitForSeconds(0.25f);
+					if (LOGStaff.Length < 2001)
+					{
+						Webhook.SendWebhookStaff(LOGStaff);
+						LOGStaff = null;
+					}
+					else
+					{
+						int Limiteur = 0;
+						string LogLimite = string.Empty;
+						string logs = LOGStaff;
+						LOGStaff = null;
+						List<string> LogToSend = new List<string>();
+						foreach (string ligne in logs.Split('\n'))
+						{
+							if (ligne.Count() + Limiteur < 1999)
+							{
+								Limiteur += ligne.Count() + 1;
+								LogLimite += ligne + "\n";
+							}
+							else
+							{
+								LogToSend.Add(LogLimite);
+								Limiteur = ligne.Count() + 1;
+								LogLimite = ligne + "\n";
+							}
+						}
+						LogToSend.Add(LogLimite);
+						foreach (string SendLog in LogToSend)
+						{
+							Webhook.SendWebhookStaff(SendLog);
+							yield return Timing.WaitForSeconds(0.25f);
+						}
+					}
+				}
 			}
 		}
 		public IEnumerator<float> RunUpdateWebhook()
 		{
+			yield return Timing.WaitForSeconds(4f);
+
 			for (; ; )
 			{
 				yield return Timing.WaitForSeconds(1f);
@@ -332,14 +373,14 @@ namespace DiscordLog
 					NormalisedName.TryGetValue(player, out string PlayerName);
 					PlayerNameList += $"{PlayerName}\n";
 					if (SerpentsHand.API.IsSerpent(player))
-						PlayerRoleList += $"SerpentsHand({(int)player.Health}Hp)\n";
+						PlayerRoleList += $"SerpentsHand({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
 					else if (player.Role == RoleType.Spectator)
 						if (player.IsOverwatchEnabled)
 							PlayerRoleList += $"Overwatch\n";
 						else
-							PlayerRoleList += $"{player.Role}\n";
+							PlayerRoleList += $"Spectator\n";
 					else
-						PlayerRoleList += $"{player.Role}({(int)player.Health}Hp)\n";
+						PlayerRoleList += $"{player.Role}({(player.IsGodModeEnabled ? $"GodMod" : $"{(int)player.Health}Hp")})\n";
 					UserIdList += $"{player.UserId}\n";
 				}
 			}

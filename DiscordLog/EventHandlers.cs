@@ -17,7 +17,6 @@ namespace DiscordLog
         public static List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
 
         private bool RoundIsStart = false;
-        private float IntercomDelay;
         private Player IntercomPlayerSpeek;
         private Player Use914;
         public EventHandlers(DiscordLog plugin) => this.plugin = plugin;
@@ -36,14 +35,14 @@ namespace DiscordLog
         public void OnRoundStart()
         {
             string RoundStart = $":triangular_flag_on_post: Démarrage de la partie avec {Player.List.Where((p) => p.Role != RoleType.None).Count()} joueurs.\n";
-            foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None))
-                RoundStart += $"- ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en {player.Role}.\n";
+            foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None).OrderBy(x=>x.Team))
+                RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en {player.Role}.\n";
             plugin.LOG += RoundStart;
             RoundIsStart = true;
         }
         public void OnRoundEnd(RoundEndedEventArgs ev)
         {
-            plugin.LOG += $":checkered_flag: Fin de la partie.\n```Win: {ev.LeadingTeam}\nClass-D échappé{(ev.ClassList.class_ds <= 1 ? "" : "s")}: {ev.ClassList.class_ds}\nScientifique{(ev.ClassList.scientists <= 1 ? "" : "s")} sauvé: {ev.ClassList.scientists}\nSCPs restant{(ev.ClassList.scps_except_zombies <= 1 ? "" : "s")}: {ev.ClassList.scps_except_zombies}\n{(Exiled.API.Features.Warhead.IsDetonated ? "Le site a explosé" : $"Le site n'a pas explosé\nMort par la warhead: {ev.ClassList.warhead_kills}")}```\n";
+            plugin.LOG += $":checkered_flag: Fin de la partie.\n```Win: {ev.LeadingTeam}\nClass-D échappé{(ev.ClassList.class_ds <= 1 ? "" : "s")}: {ev.ClassList.class_ds}\nScientifique{(ev.ClassList.scientists <= 1 ? "" : "s")} sauvé: {ev.ClassList.scientists}\nSCPs restant{(ev.ClassList.scps_except_zombies <= 1 ? "" : "s")}: {ev.ClassList.scps_except_zombies}\n{(Exiled.API.Features.Warhead.IsDetonated ? $"Le site a explosé\nMort par la warhead: {ev.ClassList.warhead_kills}" : "Le site n'a pas explosé")}```\n";
         }
         public void OnRoundRestart()
         {
@@ -58,7 +57,7 @@ namespace DiscordLog
                 objcontent = ":helicopter: L’équipe Epsilon est arrivée sur le site.\n";
                 foreach (Player playerrespawn in ev.Players)
                 {
-                    objcontent += $"- ``{playerrespawn.Nickname}`` ({ConvertID(playerrespawn.UserId)})\n";
+                    objcontent += $"    - ``{playerrespawn.Nickname}`` ({ConvertID(playerrespawn.UserId)})\n";
                 }
             }
             else if (ev.NextKnownTeam == SpawnableTeamType.ChaosInsurgency)
@@ -66,7 +65,7 @@ namespace DiscordLog
                 objcontent = ":articulated_lorry: L’Insurrection du Chaos est arrivée sur le site.\n";
                 foreach (Player playerrespawn in ev.Players)
                 {
-                    objcontent += $"- ``{playerrespawn.Nickname}`` ({ConvertID(playerrespawn.UserId)})\n";
+                    objcontent += $"    - ``{playerrespawn.Nickname}`` ({ConvertID(playerrespawn.UserId)})\n";
                 }
             }
             else
@@ -74,7 +73,7 @@ namespace DiscordLog
                 objcontent = ":snake: La Main du Serpent est arrivée sur le site.\n";
                 foreach (Player playerrespawn in ev.Players)
                 {
-                    objcontent += $"- ``{playerrespawn.Nickname}`` ({ConvertID(playerrespawn.UserId)})\n";
+                    objcontent += $"    - ``{playerrespawn.Nickname}`` ({ConvertID(playerrespawn.UserId)})\n";
                 }
             }
             plugin.LOG += objcontent;
@@ -105,7 +104,7 @@ namespace DiscordLog
         }
         public void OnPlayerAuth(PreAuthenticatingEventArgs ev)
         {
-            Webhook.SendWebhookStaff($":flag_{ev.Country.ToLower()}: {ConvertID(ev.UserId)} ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n");
+            plugin.LOGStaff += ($":flag_{ev.Country.ToLower()}: {ConvertID(ev.UserId)} ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n");
         }
         public void OnPlayerVerified(VerifiedEventArgs ev)
         {
@@ -128,7 +127,10 @@ namespace DiscordLog
             if (SerpentsHand.API.IsSerpent(ev.Player))
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : SerpentHand.\n";
             else if (ev.IsEscaped)
-                plugin.LOG += $":person_running: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                if (ev.Player.IsCuffed)
+                    plugin.LOG += $":chains: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a été escorté en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                else 
+                    plugin.LOG += $":person_running: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
             else
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {ev.NewRole}.\n";
         }
@@ -154,13 +156,30 @@ namespace DiscordLog
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.id}.\n";
+                if (Exiled.API.Extensions.Item.IsWeapon(ev.Item.id))
+                    if (ev.Item.id == ItemType.MicroHID)
+                        plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.id}({(int)(ev.Item.durability*100)}%).\n";
+                    else 
+                        plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.id}({(int)ev.Item.durability}).\n";
+                else if (ev.Item.id == ItemType.Radio)
+                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.id}({(int)ev.Item.durability}%).\n";
+                else
+                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.id}.\n";
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.ItemId}.\n";
+                if (Exiled.API.Extensions.Item.IsWeapon(ev.Pickup.ItemId))
+                    if (ev.Pickup.ItemId == ItemType.MicroHID)
+                        plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.ItemId}({(int)(ev.Pickup.durability * 100)}%).\n";
+                    else
+                        plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.ItemId}({(int)ev.Pickup.durability}).\n";
+                else if (ev.Pickup.ItemId == ItemType.Radio)
+                    plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.ItemId}({(int)ev.Pickup.durability}%).\n";
+                else
+                    plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.ItemId}.\n";
         }
+        
         public void OnPlayerUsedMedicalItem(UsedMedicalItemEventArgs ev)
         {
             if (ev.Player != null)
@@ -246,14 +265,14 @@ namespace DiscordLog
             {
                 str += $"**Item{(ev.Items.Count + ev.Players.Where(x => x.CurrentItemIndex != -1).Count() <= 1 ? "" : "s")}**\n";
                 if (Item)
-                    foreach (Pickup item in ev.Items)
+                    foreach (Pickup item in ev.Items.Where(x => !x.ItemId.ToString().Contains("Ammo")))//item.itemId
                     {
-                        str += $"- {item.itemId}\n";
+                        str += $"   - {item.itemId}\n";
                     }
                 if (PlayerItem)
                     foreach (Player player in ev.Players.Where(x => x.CurrentItemIndex != -1))
                     {
-                        str += $"- {player.CurrentItem.id}\n";
+                        str += $"   - {player.CurrentItem.id}\n";
                     }
             }
             if (ev.Players.Count != 0)
@@ -261,7 +280,7 @@ namespace DiscordLog
                 str += $"**Joueur{(ev.Players.Count() <= 1 ? "" : "s")}**\n";
                 foreach (Player player in ev.Players)
                 {
-                    str += $"- ``{player.Nickname}`` ({ConvertID(player.UserId)})\n";
+                    str += $"   - ``{player.Nickname}`` ({ConvertID(player.UserId)})\n";
                 }
             }
             Use914 = null;
@@ -277,14 +296,14 @@ namespace DiscordLog
             if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
             {
                 Webhook.BanPlayerAsync(ev.Issuer, ev.Target,ev.Reason, ev.Duration);
-                Webhook.SendWebhookStaff($":hammer: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n");
+                plugin.LOGStaff += ($":hammer: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n");
             } 
         }
         public void OnKicking(KickingEventArgs ev)
         {
             if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
-            { 
-                Webhook.SendWebhookStaff($":mans_shoe: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été kick pour : ``{ev.Reason}`` ; par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n");
+            {
+                plugin.LOGStaff += ($":mans_shoe: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été kick pour : ``{ev.Reason}`` ; par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n");
                 Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
             }
         }
@@ -316,7 +335,7 @@ namespace DiscordLog
                     {
                         {
                             Player player = Player.Get(ev.Arguments[0]);
-                            Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a jail ``{player.Nickname}`` ({player.UserId}).\n");
+                            plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a jail ``{player.Nickname}`` ({player.UserId}).\n");
                             success = true;
                         }
                     }
@@ -340,7 +359,7 @@ namespace DiscordLog
                             {
                                 Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                             }
-                            Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a changé en {(RoleType)Role} : {Receiver}");
+                            plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a changé en {(RoleType)Role} : {Receiver}");
                             success = true;
                         }
                     }
@@ -364,7 +383,7 @@ namespace DiscordLog
                             {
                                 Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})\n";
                             }
-                            Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a donné : {(ItemType)Item} {Receiver}");
+                            plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a donné : {(ItemType)Item} {Receiver}");
                             success = true;
                         }
                     }
@@ -388,12 +407,12 @@ namespace DiscordLog
                         }
                         if (ev.Arguments[1] == "0")
                         {
-                            Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à enlever l'overwatch : {Receiver}");
+                            plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à enlever l'overwatch : {Receiver}");
                             success = true; 
                         }
                         else if (ev.Arguments[1] == "1")
                         {
-                            Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à mis l'overwatch : {Receiver}");
+                            plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à mis l'overwatch : {Receiver}");
                             success = true; 
                         }
                     }
@@ -415,21 +434,21 @@ namespace DiscordLog
                         {
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
-                        Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à tp les joueurs sur lui : {Receiver}");
+                        plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à tp les joueurs sur lui : {Receiver}");
                         success = true;
                     }
                     return;
                 case "goto":
                     {
                         Player player = Player.Get(ev.Arguments[0]);
-                        Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) se tp à ``{player.Nickname}`` ({player.UserId}).");
+                        plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) se tp à ``{player.Nickname}`` ({player.UserId}).");
                         success = true;
                     }
                     return;
                 case "request_data":
                     {
                         Player player = Player.Get(ev.Arguments[1]);
-                        Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a demandé les donnée de {player.Nickname}`` ({ConvertID(player.UserId)}) : {ev.Arguments[0]}");
+                        plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a demandé les donnée de {player.Nickname}`` ({ConvertID(player.UserId)}) : {ev.Arguments[0]}");
                         success = true;
                     }
                     return;
@@ -450,7 +469,7 @@ namespace DiscordLog
                         {
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
-                        Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé {ev.Name} {ev.Arguments[1]} : {Receiver}");
+                        plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé {ev.Name} {ev.Arguments[1]} : {Receiver}");
                         success = true;
                     }
                     return;
@@ -476,7 +495,7 @@ namespace DiscordLog
                         {
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
-                        Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à {ev.Name} : {Receiver}");
+                        plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à {ev.Name} : {Receiver}");
                         success = true;
                     }
                     return;
@@ -486,7 +505,7 @@ namespace DiscordLog
                 string str1 = null;
                 foreach (string str2 in ev.Arguments)
                     str1 += $" {str2}";
-                Webhook.SendWebhookStaff($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé ``{ev.Name}{str1}``.\n");
+                plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé ``{ev.Name}{str1}``.\n");
             }
         }
         public static string ConvertID(string UserID)
