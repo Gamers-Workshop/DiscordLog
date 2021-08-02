@@ -34,11 +34,20 @@ namespace DiscordLog
         }
         public void OnRoundStart()
         {
-            string RoundStart = $":triangular_flag_on_post: Démarrage de la partie avec {Player.List.Where((p) => p.Role != RoleType.None).Count()} joueurs.\n";
-            foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None).OrderBy(x=>x.Team))
-                RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en {player.Role}.\n";
-            plugin.LOG += RoundStart;
             RoundIsStart = true;
+
+            Timing.CallDelayed(0.5f, () =>
+            {
+                string RoundStart = $":triangular_flag_on_post: Démarrage de la partie avec {Player.List.Where((p) => p.Role != RoleType.None).Count()} joueurs.\n";
+                foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None).OrderBy(x => x.Team))
+                    if (player.SessionVariables.ContainsKey("MajorScientist"))
+                        RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en MajorScientist.\n";
+                    else if (player.SessionVariables.ContainsKey("MajorGuard"))
+                        RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en MajorGuard.\n";
+                    else
+                        RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en {player.Role}.\n";
+                plugin.LOG += RoundStart;
+            });
         }
         public void OnRoundEnd(RoundEndedEventArgs ev)
         {
@@ -104,7 +113,7 @@ namespace DiscordLog
         }
         public void OnPlayerAuth(PreAuthenticatingEventArgs ev)
         {
-            plugin.LOGStaff += ($":flag_{ev.Country.ToLower()}: {ConvertID(ev.UserId)} ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n");
+            plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: {ConvertID(ev.UserId)} ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
         }
         public void OnPlayerVerified(VerifiedEventArgs ev)
         {
@@ -124,7 +133,7 @@ namespace DiscordLog
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
             if (!RoundIsStart || ev.Player == null) return;
-            if (SerpentsHand.API.IsSerpent(ev.Player))
+            if (ev.Player.SessionVariables.ContainsKey("IsSH"))
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : SerpentHand.\n";
             else if (ev.IsEscaped)
                 if (ev.Player.IsCuffed)
@@ -296,14 +305,14 @@ namespace DiscordLog
             if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
             {
                 Webhook.BanPlayerAsync(ev.Issuer, ev.Target,ev.Reason, ev.Duration);
-                plugin.LOGStaff += ($":hammer: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n");
+                plugin.LOGStaff += $":hammer: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n";
             } 
         }
         public void OnKicking(KickingEventArgs ev)
         {
             if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
             {
-                plugin.LOGStaff += ($":mans_shoe: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été kick pour : ``{ev.Reason}`` ; par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n");
+                plugin.LOGStaff += $":mans_shoe: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été kick pour : ``{ev.Reason}`` ; par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n";
                 Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
             }
         }
@@ -335,7 +344,7 @@ namespace DiscordLog
                     {
                         {
                             Player player = Player.Get(ev.Arguments[0]);
-                            plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a jail ``{player.Nickname}`` ({player.UserId}).\n");
+                            plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a jail ``{player.Nickname}`` ({player.UserId}).\n";
                             success = true;
                         }
                     }
@@ -359,7 +368,7 @@ namespace DiscordLog
                             {
                                 Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                             }
-                            plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a changé en {(RoleType)Role} : {Receiver}");
+                            plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a changé en {(RoleType)Role} : {Receiver}\n";
                             success = true;
                         }
                     }
@@ -383,7 +392,7 @@ namespace DiscordLog
                             {
                                 Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})\n";
                             }
-                            plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a donné : {(ItemType)Item} {Receiver}");
+                            plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a donné : {(ItemType)Item} {Receiver}\n";
                             success = true;
                         }
                     }
@@ -407,12 +416,12 @@ namespace DiscordLog
                         }
                         if (ev.Arguments[1] == "0")
                         {
-                            plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à enlever l'overwatch : {Receiver}");
+                            plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à enlever l'overwatch : {Receiver}\n";
                             success = true; 
                         }
                         else if (ev.Arguments[1] == "1")
                         {
-                            plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à mis l'overwatch : {Receiver}");
+                            plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à mis l'overwatch : {Receiver}\n";
                             success = true; 
                         }
                     }
@@ -434,21 +443,21 @@ namespace DiscordLog
                         {
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
-                        plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à tp les joueurs sur lui : {Receiver}");
+                        plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à tp les joueurs sur lui : {Receiver}\n";
                         success = true;
                     }
                     return;
                 case "goto":
                     {
                         Player player = Player.Get(ev.Arguments[0]);
-                        plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) se tp à ``{player.Nickname}`` ({player.UserId}).");
+                        plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) se tp à ``{player.Nickname}`` ({player.UserId}).\n";
                         success = true;
                     }
                     return;
                 case "request_data":
                     {
                         Player player = Player.Get(ev.Arguments[1]);
-                        plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a demandé les donnée de {player.Nickname}`` ({ConvertID(player.UserId)}) : {ev.Arguments[0]}");
+                        plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a demandé les donnée de ``{player.Nickname}`` ({ConvertID(player.UserId)}) : {ev.Arguments[0]}\n";
                         success = true;
                     }
                     return;
@@ -469,7 +478,7 @@ namespace DiscordLog
                         {
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
-                        plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé {ev.Name} {ev.Arguments[1]} : {Receiver}");
+                        plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé {ev.Name} {ev.Arguments[1]} : {Receiver}\n";
                         success = true;
                     }
                     return;
@@ -495,7 +504,7 @@ namespace DiscordLog
                         {
                             Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
                         }
-                        plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à {ev.Name} : {Receiver}");
+                        plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à {ev.Name} : {Receiver}\n";
                         success = true;
                     }
                     return;
@@ -505,7 +514,7 @@ namespace DiscordLog
                 string str1 = null;
                 foreach (string str2 in ev.Arguments)
                     str1 += $" {str2}";
-                plugin.LOGStaff +=($":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé ``{ev.Name}{str1}``.\n");
+                plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé ``{ev.Name}{str1}``.\n";
             }
         }
         public static string ConvertID(string UserID)

@@ -257,9 +257,9 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Détail sanction",
-                                        value = $"Le    : {DateTime.Now.ToString("G",CultureInfo.CreateSpecificCulture("fr-FR"))}\n" +
+                                        value = $"Le    : <t:{DateTime.Now.Ticks}>\n" +
                                                 $"Durée : {(Duration < 31536000 ? TimeSpan.FromSeconds(Duration).ToString("%d'd. '%h'h. '%m'min.'") : $"{Duration/31536000} ans")}\n" +
-                                                $"Unban : {DateTime.Now.AddSeconds(Duration).ToString("G",CultureInfo.CreateSpecificCulture("fr-FR"))}",
+                                                $"Unban : <t:{DateTime.Now.AddSeconds(Duration).Ticks}> -> <t:{DateTime.Now.AddSeconds(Duration).Ticks}:R>",
                                         inline = false,
                                     },
                                 },
@@ -311,9 +311,9 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Détail sanction",
-                                        value = $"Le    : {DateTime.Now.ToString("G",CultureInfo.CreateSpecificCulture("fr-FR"))}\n" +
-                                                $"Durée : {(Duration < 525600 ? TimeSpan.FromMinutes(Duration).ToString("%d'd. '%h'h. '%m'min.'") : $"{Duration/525600} ans")}\n" +
-                                                $"Unban : {DateTime.Now.AddMinutes(Duration).ToString("G",CultureInfo.CreateSpecificCulture("fr-FR"))}",
+                                        value = $"Le    : <t:{DateTime.Now.Ticks}>\n" +
+                                                $"Durée : {(Duration < 31536000 ? TimeSpan.FromSeconds(Duration).ToString("%d'd. '%h'h. '%m'min.'") : $"{Duration/31536000} ans")}\n" +
+                                                $"Unban : <t:{DateTime.Now.AddSeconds(Duration).Ticks}> -> <t:{DateTime.Now.AddSeconds(Duration).Ticks}:R>",
                                         inline = false,
                                     },
                                 },
@@ -517,7 +517,6 @@ namespace DiscordLog
         }
         public static async Task ReportAsync(Player Reporter, Player Reported, string WebhookUrl,string pings, string reason = "Aucune raison donnée")
         {
-
             WebRequest wr = (HttpWebRequest)WebRequest.Create(WebhookUrl);
             wr.ContentType = "application/json";
             wr.Method = "POST";

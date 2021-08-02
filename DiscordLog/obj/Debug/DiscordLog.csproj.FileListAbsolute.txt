@@ -55,7 +55,6 @@ D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Numerics.Vectors.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.JSONSerializeModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Newtonsoft.Json.xml
-D:\1-Plugin\DiscordLog\DiscordLog\obj\Debug\DiscordLog.csprojAssemblyReference.cache
 D:\1-Plugin\DiscordLog\DiscordLog\obj\Debug\DiscordLog.csproj.CoreCompileInputs.cache
 D:\1-Plugin\DiscordLog\DiscordLog\obj\Debug\DiscordLog.csproj.CopyComplete
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\DiscordLog.dll
@@ -74,10 +73,8 @@ D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Threading.Tasks.Extensions.xm
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Buffers.xml
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Memory.xml
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\System.Numerics.Vectors.xml
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\SerpentsHand.pdb
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\SerpentsHand.dll
-D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.CustomItems.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.Loader.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\0Harmony.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.CoreModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.dll
+D:\1-Plugin\DiscordLog\DiscordLog\obj\Debug\DiscordLog.csproj.AssemblyReference.cache
