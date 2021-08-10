@@ -2,7 +2,6 @@
 using Exiled.API.Enums;
 using Exiled.API.Features;
 using HarmonyLib;
-
 using ServerEvents = Exiled.Events.Handlers.Server;
 using MapEvents = Exiled.Events.Handlers.Map;
 using WarheadEvents = Exiled.Events.Handlers.Warhead;
@@ -12,8 +11,6 @@ using Scp914Events = Exiled.Events.Handlers.Scp914;
 using Scp106Events = Exiled.Events.Handlers.Scp106;
 using Scp096Events = Exiled.Events.Handlers.Scp096;
 using Scp049Events = Exiled.Events.Handlers.Scp049;
-
-
 using System.Collections.Generic;
 using System.IO;
 using MEC;
@@ -207,7 +204,7 @@ namespace DiscordLog
 
 		public IEnumerator<float> RunSendWebhook()
 		{
-			for (; ; )
+			while(true)
 			{
 				yield return Timing.WaitForSeconds(1f);
 				if (LOG != null)
@@ -234,6 +231,8 @@ namespace DiscordLog
 							else
                             {
 								LogToSend.Add(LogLimite);
+								LogLimite = string.Empty;
+								Limiteur = 0;
 								Limiteur = ligne.Count() + 1;
 								LogLimite = ligne + "\n";
 							}
@@ -289,7 +288,7 @@ namespace DiscordLog
 		{
 			yield return Timing.WaitForSeconds(4f);
 
-			for (; ; )
+			while(true)
 			{
 				yield return Timing.WaitForSeconds(1f);
 				UpdateWebhook();
@@ -379,11 +378,13 @@ namespace DiscordLog
 							PlayerRoleList += $"Spectator\n";
 					else if (player.SessionVariables.TryGetValue("NewRole", out object NewRole))
 						PlayerRoleList += $"{NewRole}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
+					else if (player.Role == RoleType.Scp079)
+						PlayerRoleList += $"{NewRole}({(player.IsGodModeEnabled ? $"GodMod" : $"{Generator079.Generators.Where(x=>x.isActiveAndEnabled).Count()}/5 Gen")})\n";
 					else
 						PlayerRoleList += $"{player.Role}({(player.IsGodModeEnabled ? $"GodMod" : $"{(int)player.Health}Hp")})\n";
-					UserIdList += $"{player.UserId}\n";
-				}
-			}
+                    UserIdList += $"{player.UserId}\n";
+                }
+            }
 			Webhook.UpdateServerInfoStaffAsync(RoundInfo, RoundTime, PlayerNameList, PlayerRoleList, UserIdList);
 		}
 	}

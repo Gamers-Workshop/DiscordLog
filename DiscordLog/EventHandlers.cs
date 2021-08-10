@@ -133,8 +133,8 @@ namespace DiscordLog
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
             if (!RoundIsStart || ev.Player == null) return;
-            if (ev.Player.SessionVariables.ContainsKey("IsSH"))
-                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : SerpentHand.\n";
+            if (ev.Player.SessionVariables.TryGetValue("NewRole", out object NewRole))
+                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {NewRole}.\n";
             else if (ev.IsEscaped)
                 if (ev.Player.IsCuffed)
                     plugin.LOG += $":chains: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a été escorté en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";

@@ -13,7 +13,6 @@ using UnityEngine;
 
 namespace DiscordLog
 {
-
     class Webhook
     {
         public static void SendWebhook(string objcontent)
