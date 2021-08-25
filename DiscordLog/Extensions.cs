@@ -39,7 +39,7 @@ namespace DiscordLog
 		{
 			player.ReferenceHub.GetComponent<GameConsoleTransmission>().SendToClient(player.Connection, "[REPORTING] " + text, "white");
 		}
-		public static Transform NameOfGeneratorRoom(this Generator079 gen)
+		/*public static Transform NameOfGeneratorRoom(this Generator079 gen)
         {
 			Transform transform = gen.transform;
 			Physics.Raycast(new Ray(transform.position - transform.forward, Vector3.up), out RaycastHit raycastHit, 5f, global::Interface079.singleton.roomDetectionMask);
@@ -59,6 +59,6 @@ namespace DiscordLog
 			}
 			return transform2;
 
-		}
+		}*/
 	}
 }

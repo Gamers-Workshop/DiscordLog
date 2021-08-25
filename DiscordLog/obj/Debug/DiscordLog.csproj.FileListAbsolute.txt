@@ -78,3 +78,16 @@ D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\0Harmony.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.CoreModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.dll
 D:\1-Plugin\DiscordLog\DiscordLog\obj\Debug\DiscordLog.csproj.AssemblyReference.cache
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Assembly-CSharp-firstpass.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Assembly-CSharp_publicized.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\CommandSystem.Core.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.API.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.CreditTags.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.CustomItems.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.Permissions.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Exiled.Updater.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Mirror.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\NorthwoodLib.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.ParticleSystemModule.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.InputLegacyModule.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.Physics2DModule.dll

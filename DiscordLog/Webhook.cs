@@ -222,7 +222,7 @@ namespace DiscordLog
                 wr.Abort();
             }
         }
-        public static async Task BanPlayerAsync(Player player, Player sanctioned, string reason, int Duration)
+        public static async Task BanPlayerAsync(Player player, Player sanctioned, string reason, long Duration)
         {
             WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
             wr.ContentType = "application/json";

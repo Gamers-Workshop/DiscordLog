@@ -35,7 +35,6 @@ namespace DiscordLog
 		public string LOG = null;
 		public string LOGStaff = null;
 
-
 		public Dictionary<Player, string> NormalisedName = new Dictionary<Player, string>();
 
 
@@ -109,11 +108,11 @@ namespace DiscordLog
 			PlayerEvents.Died += Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem += Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem += Handlers.OnPickingUpItem;
-			PlayerEvents.MedicalItemUsed += Handlers.OnPlayerUsedMedicalItem;
+			PlayerEvents.ItemUsed += Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator += Handlers.OnGeneratorUnlock;
-			PlayerEvents.EjectingGeneratorTablet += Handlers.OnEjectingGeneratorTablet;
-			PlayerEvents.InsertingGeneratorTablet += Handlers.OnGeneratorInsert;
+			PlayerEvents.StoppingGenerator += Handlers.OnStoppingGenerator;
+			PlayerEvents.ActivatingGenerator += Handlers.OnActivatingGenerator;
 			PlayerEvents.ActivatingWarheadPanel += Handlers.OnActivatingWarheadPanel;
 			PlayerEvents.IntercomSpeaking += Handlers.OnIntercomSpeaking;
 			PlayerEvents.Handcuffing += Handlers.OnHandcuffing;
@@ -122,14 +121,12 @@ namespace DiscordLog
 			PlayerEvents.EnteringPocketDimension += Handlers.OnEnteringPocketDimension;
 			PlayerEvents.EscapingPocketDimension += Handlers.OnEscapingPocketDimension;
 			Scp914Events.Activating += Handlers.On914Activating;
-			Scp914Events.UpgradingItems += Handlers.On914Upgrade;
-
 			Scp049Events.FinishingRecall += Handlers.OnFinishingRecall;
 
 			//LogStaff
 			PlayerEvents.Banning += Handlers.OnBanning;
 			PlayerEvents.Kicking += Handlers.OnKicking;
-			ServerEvents.SendingRemoteAdminCommand += Handlers.OnSendingRemoteAdminCommand;
+			//ServerEvents. += Handlers.OnSendingRemoteAdminCommand;
 			//PingStaff
 			ServerEvents.LocalReporting += Handlers.OnLocalReporting;
 		}
@@ -157,11 +154,11 @@ namespace DiscordLog
 			PlayerEvents.Died -= Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem -= Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem -= Handlers.OnPickingUpItem;
-			PlayerEvents.MedicalItemUsed -= Handlers.OnPlayerUsedMedicalItem;
+			PlayerEvents.ItemUsed -= Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator -= Handlers.OnGeneratorUnlock;
-			PlayerEvents.EjectingGeneratorTablet -= Handlers.OnEjectingGeneratorTablet;
-			PlayerEvents.InsertingGeneratorTablet -= Handlers.OnGeneratorInsert;
+			PlayerEvents.StoppingGenerator -= Handlers.OnStoppingGenerator;
+			PlayerEvents.ActivatingGenerator -= Handlers.OnActivatingGenerator;
 			PlayerEvents.ActivatingWarheadPanel -= Handlers.OnActivatingWarheadPanel;
 			PlayerEvents.IntercomSpeaking -= Handlers.OnIntercomSpeaking;
 			PlayerEvents.Handcuffing -= Handlers.OnHandcuffing;
@@ -170,14 +167,13 @@ namespace DiscordLog
 			PlayerEvents.EnteringPocketDimension -= Handlers.OnEnteringPocketDimension;
 			PlayerEvents.EscapingPocketDimension -= Handlers.OnEscapingPocketDimension;
 			Scp914Events.Activating -= Handlers.On914Activating;
-			Scp914Events.UpgradingItems -= Handlers.On914Upgrade;
 
 			Scp049Events.FinishingRecall -= Handlers.OnFinishingRecall;
 
 			//LogStaff
 			PlayerEvents.Banning -= Handlers.OnBanning;
 			PlayerEvents.Kicking -= Handlers.OnKicking;
-            ServerEvents.SendingRemoteAdminCommand -= Handlers.OnSendingRemoteAdminCommand;
+            //ServerEvents.SendingRemoteAdminCommand -= Handlers.OnSendingRemoteAdminCommand;
 
 			//PingStaff
 			ServerEvents.LocalReporting -= Handlers.OnLocalReporting;
@@ -379,7 +375,7 @@ namespace DiscordLog
 					else if (player.SessionVariables.TryGetValue("NewRole", out object NewRole))
 						PlayerRoleList += $"{NewRole}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
 					else if (player.Role == RoleType.Scp079)
-						PlayerRoleList += $"{NewRole}({(player.IsGodModeEnabled ? $"GodMod" : $"{Generator079.Generators.Where(x=>x.isActiveAndEnabled).Count()}/5 Gen")})\n";
+						PlayerRoleList += $"Scp079({(player.IsGodModeEnabled ? $"GodMod" : $"{Map.ActivatedGenerators}/3 Gen")})\n";
 					else
 						PlayerRoleList += $"{player.Role}({(player.IsGodModeEnabled ? $"GodMod" : $"{(int)player.Health}Hp")})\n";
                     UserIdList += $"{player.UserId}\n";

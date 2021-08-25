@@ -1,5 +1,9 @@
-﻿using Exiled.API.Features;
+﻿using Exiled.API.Enums;
+using Exiled.API.Features;
 using Exiled.Events.EventArgs;
+using InventorySystem.Items.Firearms;
+using InventorySystem.Items.MicroHID;
+using InventorySystem.Items.Radio;
 using MEC;
 using Newtonsoft.Json.Serialization;
 using NorthwoodLib;
@@ -18,7 +22,7 @@ namespace DiscordLog
 
         private bool RoundIsStart = false;
         private Player IntercomPlayerSpeek;
-        private Player Use914;
+        public static Player Use914;
         public EventHandlers(DiscordLog plugin) => this.plugin = plugin;
         public void OnWaintingForPlayers()
         {
@@ -108,8 +112,7 @@ namespace DiscordLog
         }
         public void OnGeneratorFinish(GeneratorActivatedEventArgs ev)
         {
-
-            plugin.LOG += $":computer: Le générateur dans la {Map.FindParentRoom(ev.Generator.NameOfGeneratorRoom().gameObject).Type} est activé.\n";
+            plugin.LOG += $":computer: Le générateur dans la {Map.FindParentRoom(ev.Generator.gameObject).Type} est activé.\n";
         }
         public void OnPlayerAuth(PreAuthenticatingEventArgs ev)
         {
@@ -135,7 +138,7 @@ namespace DiscordLog
             if (!RoundIsStart || ev.Player == null) return;
             if (ev.Player.SessionVariables.TryGetValue("NewRole", out object NewRole))
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {NewRole}.\n";
-            else if (ev.IsEscaped)
+            else if (ev.Reason == SpawnReason.Escaped)
                 if (ev.Player.IsCuffed)
                     plugin.LOG += $":chains: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a été escorté en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
                 else 
@@ -155,60 +158,62 @@ namespace DiscordLog
             if (ev.Target.Role == RoleType.None || ev.HitInformations.Attacker == "DISCONNECT") return;
             if (ev.Killer != null && ev.Killer != ev.Target)
             {
-                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par ``{ev.Killer.Nickname}`` ({ConvertID(ev.Killer.UserId)}) avec {ev.HitInformations.GetDamageName()}.\n";
+                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par ``{ev.Killer.Nickname}`` ({ConvertID(ev.Killer.UserId)}) avec {ev.HitInformations.CustomAttackerName}.\n";
             }
             else
             {
-                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par {ev.HitInformations.GetDamageName()}.\n";
+                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par {ev.HitInformations.CustomAttackerName}.\n";
             }
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                if (Exiled.API.Extensions.Item.IsWeapon(ev.Item.id))
-                    if (ev.Item.id == ItemType.MicroHID)
-                        plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.id}({(int)(ev.Item.durability*100)}%).\n";
-                    else 
-                        plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.id}({(int)ev.Item.durability}).\n";
-                else if (ev.Item.id == ItemType.Radio)
-                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.id}({(int)ev.Item.durability}%).\n";
+                if (Exiled.API.Extensions.ItemExtensions.IsWeapon(ev.Item.Type))
+                    if (ev.Item.Type == ItemType.MicroHID && ev.Item.Base.gameObject.TryGetComponent(out MicroHIDItem microHIDItem))
+                        plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}({(int)(microHIDItem.RemainingEnergy * 100)}%).\n";
+                    else if (ev.Item.Base.gameObject.TryGetComponent(out Firearm firearm))
+                        plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}({(int)firearm.Status.Ammo}).\n";
+                else if (ev.Item.Type == ItemType.Radio && ev.Item.Base.gameObject.TryGetComponent(out RadioItem radioitem))
+                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}({(int)radioitem._battery * 100}%).\n";
                 else
-                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.id}.\n";
+                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                if (Exiled.API.Extensions.Item.IsWeapon(ev.Pickup.ItemId))
-                    if (ev.Pickup.ItemId == ItemType.MicroHID)
-                        plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.ItemId}({(int)(ev.Pickup.durability * 100)}%).\n";
-                    else
-                        plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.ItemId}({(int)ev.Pickup.durability}).\n";
-                else if (ev.Pickup.ItemId == ItemType.Radio)
-                    plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.ItemId}({(int)ev.Pickup.durability}%).\n";
+                if (Exiled.API.Extensions.ItemExtensions.IsWeapon(ev.Pickup.Type))
+                    if (ev.Pickup.Type == ItemType.MicroHID && ev.Pickup.Base.gameObject.TryGetComponent(out MicroHIDItem microHIDItem))
+                        plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}({(int)(microHIDItem.RemainingEnergy * 100)}%).\n";
+                    else if (ev.Pickup.Base.gameObject.TryGetComponent(out Firearm firearm))
+                        plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}({(int)firearm.Status.Ammo}).\n";
+                else if (ev.Pickup.Type == ItemType.Radio && ev.Pickup.Base.gameObject.TryGetComponent(out RadioItem radioitem))
+                    plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}({(int)radioitem._battery * 100}%).\n";
                 else
-                    plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.ItemId}.\n";
+                    plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}.\n";
         }
         
-        public void OnPlayerUsedMedicalItem(UsedMedicalItemEventArgs ev)
+        public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
-            if (ev.Player != null)
+            if (ev.Player != null && Exiled.API.Extensions.ItemExtensions.IsMedical(ev.Item.Type))
                 plugin.LOG += $":adhesive_bandage: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est soigné avec {ev.Item}.\n";
+            else
+                plugin.LOG += $":??: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item}.\n";
         }
         public void OnGeneratorUnlock(UnlockingGeneratorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a débloqué un générateur dans la salle : {Map.FindParentRoom(ev.Generator.NameOfGeneratorRoom().gameObject).Type}.\n";
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a débloqué un générateur dans la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
         }
-        public void OnEjectingGeneratorTablet(EjectingGeneratorTabletEventArgs ev)
+        public void OnStoppingGenerator(StoppingGeneratorEventArgs ev)
         {
             
-            if (ev.IsAllowed && ev.Player != null && ev.Generator.isTabletConnected)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a ejecté la tablette du générateur de la salle : {Map.FindParentRoom(ev.Generator.NameOfGeneratorRoom().gameObject).Type}.\n";
+            if (ev.IsAllowed && ev.Player != null && ev.Generator.Activating)
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a ejecté la tablette du générateur de la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
         }
-        public void OnGeneratorInsert(InsertingGeneratorTabletEventArgs ev)
+        public void OnActivatingGenerator(ActivatingGeneratorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a inséré une tablette dans un générateur de la salle : {Map.FindParentRoom(ev.Generator.NameOfGeneratorRoom().gameObject).Type}.\n";
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a inséré une tablette dans un générateur de la salle : {Map.FindParentRoom(ev.Generator.gameObject)}.\n";
         }
         public void OnActivatingWarheadPanel(ActivatingWarheadPanelEventArgs ev)
         {
@@ -226,7 +231,7 @@ namespace DiscordLog
 
         public void OnIntercomSpeaking(IntercomSpeakingEventArgs ev)
         {
-            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && Intercom.host.remainingCooldown <= 0f && !ev.Player.IsIntercomMuted && !ev.Player.IsMuted && Player.Dictionary.TryGetValue(Intercom.host.speaker,out Player speaker) && speaker == ev.Player)
+            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player)
             {
                 IntercomPlayerSpeek = ev.Player;
                 plugin.LOG += $":loudspeaker: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) utilise l'intercom.\n";
@@ -261,40 +266,7 @@ namespace DiscordLog
             if (ev.IsAllowed && ev.Player != null)
                 Use914 = ev.Player;
         }
-        public void On914Upgrade(UpgradingItemsEventArgs ev)
-        {
-            string str;
-            if (Use914 != null)
-                str = $":gear: SCP-914 a été enclenché en {ev.KnobSetting} par ``{Use914.Nickname}`` ({ConvertID(Use914.UserId)}) :\n";
-            else
-                str = $":gear: SCP-914 a été enclenché en {ev.KnobSetting} par Unknow :\n";
-            bool Item = ev.Items.Count != 0;
-            bool PlayerItem = ev.Players.Where(x => x.CurrentItemIndex != -1).Count() != 0;
-            if (Item || PlayerItem)
-            {
-                str += $"**Item{(ev.Items.Count + ev.Players.Where(x => x.CurrentItemIndex != -1).Count() <= 1 ? "" : "s")}**\n";
-                if (Item)
-                    foreach (Pickup item in ev.Items.Where(x => !x.ItemId.ToString().Contains("Ammo")))//item.itemId
-                    {
-                        str += $"   - {item.itemId}\n";
-                    }
-                if (PlayerItem)
-                    foreach (Player player in ev.Players.Where(x => x.CurrentItemIndex != -1))
-                    {
-                        str += $"   - {player.CurrentItem.id}\n";
-                    }
-            }
-            if (ev.Players.Count != 0)
-            {
-                str += $"**Joueur{(ev.Players.Count() <= 1 ? "" : "s")}**\n";
-                foreach (Player player in ev.Players)
-                {
-                    str += $"   - ``{player.Nickname}`` ({ConvertID(player.UserId)})\n";
-                }
-            }
-            Use914 = null;
-            plugin.LOG += str;
-        }
+        
         public void OnFinishingRecall(FinishingRecallEventArgs ev)
         {
             if (ev.IsAllowed && ev.Target != null && ev.Scp049 != null)
@@ -314,207 +286,6 @@ namespace DiscordLog
             {
                 plugin.LOGStaff += $":mans_shoe: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été kick pour : ``{ev.Reason}`` ; par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n";
                 Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
-            }
-        }
-        public void OnSendingRemoteAdminCommand(SendingRemoteAdminCommandEventArgs ev)
-        {
-            bool success = false;
-            if (!ev.Success || ev.Name.ToLower() == "ban" || ev.Name.ToLower() == "kick" || ev.Name == null) return;
-            switch (ev.Name.ToLower())
-            {
-                case "oban":
-                    {
-                        if (!string.IsNullOrEmpty(ev.Arguments[0]) && uint.TryParse(ev.Arguments[1], out uint Duration))
-                        {
-                            int l = 2;
-                            string str1 = null;
-                            foreach (string str2 in ev.Arguments)
-                            {
-                                if (l == 0)
-                                    str1 += $" {str2}";
-                                else
-                                    l--;
-                            }
-                            Webhook.OBanPlayerAsync(ev.Sender, ev.Arguments[0], str1, Duration);
-                            success = true;
-                        }
-                    }
-                    return;
-                case "jail":
-                    {
-                        {
-                            Player player = Player.Get(ev.Arguments[0]);
-                            plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a jail ``{player.Nickname}`` ({player.UserId}).\n";
-                            success = true;
-                        }
-                    }
-                    return;
-                case "forceclass":
-                    {
-                        if (int.TryParse(ev.Arguments[1], out int Role))
-                        {
-                            string Receiver = string.Empty;
-
-                            string[] Users = ev.Arguments[0].Split('.');
-                            List<Player> PlyList = new List<Player>();
-                            foreach (string s in Users)
-                            {
-                                if (int.TryParse(s, out int id) && Player.Get(id) != null)
-                                    PlyList.Add(Player.Get(id));
-                                else if (Player.Get(s) != null)
-                                    PlyList.Add(Player.Get(s));
-                            }
-                            foreach (Player ply in PlyList)
-                            {
-                                Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
-                            }
-                            plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a changé en {(RoleType)Role} : {Receiver}\n";
-                            success = true;
-                        }
-                    }
-                    return;
-                case "give":
-                    {
-                        if (int.TryParse(ev.Arguments[1], out int Item))
-                        {
-                            string Receiver = string.Empty;
-
-                            string[] Users = ev.Arguments[0].Split('.');
-                            List<Player> PlyList = new List<Player>();
-                            foreach (string s in Users)
-                            {
-                                if (int.TryParse(s, out int id) && Player.Get(id) != null)
-                                    PlyList.Add(Player.Get(id));
-                                else if (Player.Get(s) != null)
-                                    PlyList.Add(Player.Get(s));
-                            }
-                            foreach (Player ply in PlyList)
-                            {
-                                Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})\n";
-                            }
-                            plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a donné : {(ItemType)Item} {Receiver}\n";
-                            success = true;
-                        }
-                    }
-                    return;
-                case "overwatch":
-                    {
-                        string Receiver = string.Empty;
-
-                        string[] Users = ev.Arguments[0].Split('.');
-                        List<Player> PlyList = new List<Player>();
-                        foreach (string s in Users)
-                        {
-                            if (int.TryParse(s, out int id) && Player.Get(id) != null)
-                                PlyList.Add(Player.Get(id));
-                            else if (Player.Get(s) != null)
-                                PlyList.Add(Player.Get(s));
-                        }
-                        foreach (Player ply in PlyList)
-                        {
-                            Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
-                        }
-                        if (ev.Arguments[1] == "0")
-                        {
-                            plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à enlever l'overwatch : {Receiver}\n";
-                            success = true; 
-                        }
-                        else if (ev.Arguments[1] == "1")
-                        {
-                            plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à mis l'overwatch : {Receiver}\n";
-                            success = true; 
-                        }
-                    }
-                    return;
-                case "bring":
-                    {
-                        string Receiver = string.Empty;
-
-                        string[] Users = ev.Arguments[0].Split('.');
-                        List<Player> PlyList = new List<Player>();
-                        foreach (string s in Users)
-                        {
-                            if (int.TryParse(s, out int id) && Player.Get(id) != null)
-                                PlyList.Add(Player.Get(id));
-                            else if (Player.Get(s) != null)
-                                PlyList.Add(Player.Get(s));
-                        }
-                        foreach (Player ply in PlyList)
-                        {
-                            Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
-                        }
-                        plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à tp les joueurs sur lui : {Receiver}\n";
-                        success = true;
-                    }
-                    return;
-                case "goto":
-                    {
-                        Player player = Player.Get(ev.Arguments[0]);
-                        plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) se tp à ``{player.Nickname}`` ({player.UserId}).\n";
-                        success = true;
-                    }
-                    return;
-                case "request_data":
-                    {
-                        Player player = Player.Get(ev.Arguments[1]);
-                        plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a demandé les donnée de ``{player.Nickname}`` ({ConvertID(player.UserId)}) : {ev.Arguments[0]}\n";
-                        success = true;
-                    }
-                    return;
-                case "effect":
-                    {
-                        string Receiver = string.Empty;
-
-                        string[] Users = ev.Arguments[0].Split('.');
-                        List<Player> PlyList = new List<Player>();
-                        foreach (string s in Users)
-                        {
-                            if (int.TryParse(s, out int id) && Player.Get(id) != null)
-                                PlyList.Add(Player.Get(id));
-                            else if (Player.Get(s) != null)
-                                PlyList.Add(Player.Get(s));
-                        }
-                        foreach (Player ply in PlyList)
-                        {
-                            Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
-                        }
-                        plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé {ev.Name} {ev.Arguments[1]} : {Receiver}\n";
-                        success = true;
-                    }
-                    return;
-                case "mute":
-                case "unmute":
-                case "imute":
-                case "iunmute":
-                case "disarm":
-                case "release":
-                    {
-                        string Receiver = string.Empty;
-
-                        string[] Users = ev.Arguments[0].Split('.');
-                        List<Player> PlyList = new List<Player>();
-                        foreach (string s in Users)
-                        {
-                            if (int.TryParse(s, out int id) && Player.Get(id) != null)
-                                PlyList.Add(Player.Get(id));
-                            else if (Player.Get(s) != null)
-                                PlyList.Add(Player.Get(s));
-                        }
-                        foreach (Player ply in PlyList)
-                        {
-                            Receiver += $"\n - ``{ply.Nickname}`` ({ConvertID(ply.UserId)})";
-                        }
-                        plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) à {ev.Name} : {Receiver}\n";
-                        success = true;
-                    }
-                    return;
-            }
-            if (!success)
-            {
-                string str1 = null;
-                foreach (string str2 in ev.Arguments)
-                    str1 += $" {str2}";
-                plugin.LOGStaff += $":keyboard: ``{ev.Sender.Nickname}`` ({ConvertID(ev.Sender.UserId)}) a envoyé ``{ev.Name}{str1}``.\n";
             }
         }
         public static string ConvertID(string UserID)
