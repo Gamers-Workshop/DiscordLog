@@ -135,7 +135,7 @@ namespace DiscordLog
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
-            if (!RoundIsStart || ev.Player == null) return;
+            if (!RoundIsStart || ev.Player == null || ev.Reason == SpawnReason.Died || ev.Reason == SpawnReason.Revived || ev.Reason == SpawnReason.RoundStart) return;
             if (ev.Player.SessionVariables.TryGetValue("NewRole", out object NewRole))
                 plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {NewRole}.\n";
             else if (ev.Reason == SpawnReason.Escaped)
@@ -158,47 +158,48 @@ namespace DiscordLog
             if (ev.Target.Role == RoleType.None || ev.HitInformations.Attacker == "DISCONNECT") return;
             if (ev.Killer != null && ev.Killer != ev.Target)
             {
-                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par ``{ev.Killer.Nickname}`` ({ConvertID(ev.Killer.UserId)}) avec {ev.HitInformations.CustomAttackerName}.\n";
+                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par ``{ev.Killer.Nickname}`` ({ConvertID(ev.Killer.UserId)}) avec {(ev.HitInformations.CustomAttackerName ? $"{ev.HitInformations.ClientAttackerName}" : $"{ev.HitInformations.Tool.Name}")}.\n";
             }
             else
             {
-                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par {ev.HitInformations.CustomAttackerName}.\n";
+                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par {((ev.HitInformations.CustomAttackerName && ev.HitInformations.ClientAttackerName != "WORLD") ? $"{ev.HitInformations.ClientAttackerName}": $"{ev.HitInformations.Tool.Name}")}.\n";
             }
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                if (Exiled.API.Extensions.ItemExtensions.IsWeapon(ev.Item.Type))
-                    if (ev.Item.Type == ItemType.MicroHID && ev.Item.Base.gameObject.TryGetComponent(out MicroHIDItem microHIDItem))
-                        plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}({(int)(microHIDItem.RemainingEnergy * 100)}%).\n";
-                    else if (ev.Item.Base.gameObject.TryGetComponent(out Firearm firearm))
-                        plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}({(int)firearm.Status.Ammo}).\n";
-                else if (ev.Item.Type == ItemType.Radio && ev.Item.Base.gameObject.TryGetComponent(out RadioItem radioitem))
-                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}({(int)radioitem._battery * 100}%).\n";
-                else
-                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
+                plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                if (Exiled.API.Extensions.ItemExtensions.IsWeapon(ev.Pickup.Type))
-                    if (ev.Pickup.Type == ItemType.MicroHID && ev.Pickup.Base.gameObject.TryGetComponent(out MicroHIDItem microHIDItem))
-                        plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}({(int)(microHIDItem.RemainingEnergy * 100)}%).\n";
-                    else if (ev.Pickup.Base.gameObject.TryGetComponent(out Firearm firearm))
-                        plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}({(int)firearm.Status.Ammo}).\n";
-                else if (ev.Pickup.Type == ItemType.Radio && ev.Pickup.Base.gameObject.TryGetComponent(out RadioItem radioitem))
-                    plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}({(int)radioitem._battery * 100}%).\n";
-                else
-                    plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}.\n";
+               plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}.\n";
+        }
+        public void OnPickingUpArmor(PickingUpArmorEventArgs ev)
+        {
+            if (ev.IsAllowed && ev.Player != null)
+                plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}.\n";
         }
         
+
         public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
             if (ev.Player != null && Exiled.API.Extensions.ItemExtensions.IsMedical(ev.Item.Type))
-                plugin.LOG += $":adhesive_bandage: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est soigné avec {ev.Item}.\n";
+                plugin.LOG += $":adhesive_bandage: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est soigné avec {ev.Item.Type}.\n";
             else
-                plugin.LOG += $":??: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item}.\n";
-        }
+                switch (ev.Item.Type)
+                {
+                    case ItemType.SCP207:
+                        plugin.LOG += $":champagne: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item.Type}.\n";
+                        break;
+                    case ItemType.SCP268:
+                        plugin.LOG += $":billed_cap: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item.Type}.\n";
+                        break;
+                    default:
+                        plugin.LOG += $":??: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item.Type}.\n";
+                        break;
+                }
+       }
         public void OnGeneratorUnlock(UnlockingGeneratorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
@@ -213,7 +214,7 @@ namespace DiscordLog
         public void OnActivatingGenerator(ActivatingGeneratorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a inséré une tablette dans un générateur de la salle : {Map.FindParentRoom(ev.Generator.gameObject)}.\n";
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a activé un générateur de la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
         }
         public void OnActivatingWarheadPanel(ActivatingWarheadPanelEventArgs ev)
         {

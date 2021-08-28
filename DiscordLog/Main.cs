@@ -24,9 +24,6 @@ namespace DiscordLog
 		public override string Prefix => "DiscordLog";
 		public override string Author => "Husky/Corentin & Louis1706";
 		public override PluginPriority Priority => PluginPriority.Lowest;
-		public override Version Version => new Version(2, 9, 1);
-		public override Version RequiredExiledVersion => new Version(2, 1, 9);
-
 		public static DiscordLog Instance { get; private set; }
 		public EventHandlers Handlers { get; private set; }
 
@@ -108,6 +105,7 @@ namespace DiscordLog
 			PlayerEvents.Died += Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem += Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem += Handlers.OnPickingUpItem;
+			PlayerEvents.PickingUpArmor += Handlers.OnPickingUpArmor;
 			PlayerEvents.ItemUsed += Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator += Handlers.OnGeneratorUnlock;
@@ -126,7 +124,7 @@ namespace DiscordLog
 			//LogStaff
 			PlayerEvents.Banning += Handlers.OnBanning;
 			PlayerEvents.Kicking += Handlers.OnKicking;
-			//ServerEvents. += Handlers.OnSendingRemoteAdminCommand;
+
 			//PingStaff
 			ServerEvents.LocalReporting += Handlers.OnLocalReporting;
 		}
@@ -154,6 +152,7 @@ namespace DiscordLog
 			PlayerEvents.Died -= Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem -= Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem -= Handlers.OnPickingUpItem;
+			PlayerEvents.PickingUpArmor -= Handlers.OnPickingUpArmor;
 			PlayerEvents.ItemUsed -= Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator -= Handlers.OnGeneratorUnlock;
@@ -173,7 +172,6 @@ namespace DiscordLog
 			//LogStaff
 			PlayerEvents.Banning -= Handlers.OnBanning;
 			PlayerEvents.Kicking -= Handlers.OnKicking;
-            //ServerEvents.SendingRemoteAdminCommand -= Handlers.OnSendingRemoteAdminCommand;
 
 			//PingStaff
 			ServerEvents.LocalReporting -= Handlers.OnLocalReporting;
@@ -294,7 +292,7 @@ namespace DiscordLog
 		{
 			string RoundInfo;
 			string RoundTime;
-			int PlayerCount = Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().Count;
+			int PlayerCount = Player.List.Where((p) => !p.IsOverwatchEnabled).Count();
 			if (Round.IsStarted)
 			{
 				if (Round.IsLocked)
@@ -361,17 +359,17 @@ namespace DiscordLog
 			string PlayerNameList = "";
 			string PlayerRoleList = "";
 			string UserIdList = "";
-			if (Player.List.Where((p) => p.Role != RoleType.None).ToList().Count != 0)
+			if (Player.List.Count() != 0)
 			{
-				foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None)) 
+				foreach (Player player in Player.List) 
 				{
 					NormalisedName.TryGetValue(player, out string PlayerName);
 					PlayerNameList += $"{PlayerName}\n";
-					if (player.Role == RoleType.Spectator)
+					if (player.Team == Team.RIP)
 						if (player.IsOverwatchEnabled)
 							PlayerRoleList += $"Overwatch\n";
 						else
-							PlayerRoleList += $"Spectator\n";
+							PlayerRoleList += $"{player.Role}\n";
 					else if (player.SessionVariables.TryGetValue("NewRole", out object NewRole))
 						PlayerRoleList += $"{NewRole}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
 					else if (player.Role == RoleType.Scp079)

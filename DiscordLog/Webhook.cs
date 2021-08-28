@@ -256,9 +256,9 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Détail sanction",
-                                        value = $"Le    : <t:{DateTime.Now.Ticks}>\n" +
+                                        value = $"Le    : <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}>\n" +
                                                 $"Durée : {(Duration < 31536000 ? TimeSpan.FromSeconds(Duration).ToString("%d'd. '%h'h. '%m'min.'") : $"{Duration/31536000} ans")}\n" +
-                                                $"Unban : <t:{DateTime.Now.AddSeconds(Duration).Ticks}> -> <t:{DateTime.Now.AddSeconds(Duration).Ticks}:R>",
+                                                $"Unban : <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}> -> <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}:R>",
                                         inline = false,
                                     },
                                 },
@@ -310,11 +310,11 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Détail sanction",
-                                        value = $"Le    : <t:{DateTime.Now.Ticks}>\n" +
+                                        value = $"Le    : <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}>\n" +
                                                 $"Durée : {(Duration < 31536000 ? TimeSpan.FromSeconds(Duration).ToString("%d'd. '%h'h. '%m'min.'") : $"{Duration/31536000} ans")}\n" +
-                                                $"Unban : <t:{DateTime.Now.AddSeconds(Duration).Ticks}> -> <t:{DateTime.Now.AddSeconds(Duration).Ticks}:R>",
+                                                $"Unban : <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}> -> <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}:R>",
                                         inline = false,
-                                    },
+                                    }
                                 },
                                 footer = new
                                 {

@@ -37,42 +37,42 @@ namespace DiscordLog.Patches
         private static void Scp914Events(Collider[] intake, Scp914Mode mode, Scp914KnobSetting knob)
         {
             List<Player> Players = new List<Player>();
-            List<ItemType> Items = new List<ItemType>();
+            List<PickupSyncInfo> Items = new List<PickupSyncInfo>();
 
             foreach (Collider collider in intake)
             {
                 GameObject gameObject = collider.transform.root.gameObject;
                 Player player = Player.Get(gameObject);
-                if (player != null)
+                if (player != null && !Players.Contains(player))
                 {
                     Players.Add(player);
                 }
-                else if (gameObject.TryGetComponent(out ItemPickupBase pickup))
+                else if (gameObject.TryGetComponent(out ItemPickupBase pickup) && !Items.Contains(pickup.Info))
                 {
-                    Items.Add(pickup.Info.ItemId);
+                    Items.Add(pickup.Info);
                 }
             }
-
             string str;
             if (EventHandlers.Use914 != null)
-                str = $":gear: SCP-914 a été enclenché en {knob} par ``{EventHandlers.Use914?.Nickname}`` ({EventHandlers.ConvertID(EventHandlers.Use914.UserId)}) :\n";
+                str = $":gear: SCP-914 a été enclenché en {knob} par ``{EventHandlers.Use914?.Nickname}`` ({EventHandlers.ConvertID(EventHandlers.Use914?.UserId)}) :\n";
             else
                 str = $":gear: SCP-914 a été enclenché en {knob} par Unknow :\n";
             bool Item = Items.Count != 0;
-            bool PlayerItem = Players.Where(x => x.CurrentItem.Type != ItemType.None).Count() != 0;
+            bool PlayerItem = Players?.Where(x => x?.CurrentItem?.Type != ItemType.None).Count() != null;
             if (Item || PlayerItem)
             {
-                str += $"**Item{(Items.Count + Players.Where(x => x.CurrentItem.Type != ItemType.None).Count() <= 1 ? "" : "s")}**\n";
+                str += $"**Item{(Items.Count + Players?.Where(x => x?.CurrentItem?.Type != ItemType.None).Count() <= 1 ? "" : "s")}**\n";
                 if (Item)
-                    foreach (ItemType item in Items)//item.itemId
+                    foreach (var item in Items)
                     {
-                        if (!Exiled.API.Extensions.ItemExtensions.IsAmmo(item))
-                            str += $"   - {item}\n";
+                        if (!Exiled.API.Extensions.ItemExtensions.IsAmmo(item.ItemId))
+                            str += $"   - {item.ItemId}\n";
                     }
                 if (PlayerItem)
-                    foreach (Player player in Players.Where(x => x.CurrentItem.Type != ItemType.None))
+                    foreach (Player player in Players)
                     {
-                        str += $"   - {player.CurrentItem.Type}\n";
+                        if (!string.IsNullOrWhiteSpace(player?.CurrentItem?.Type.ToString()))
+                            str += $"   - {player?.CurrentItem?.Type}\n";
                     }
             }
             if (Players.Count != 0)
