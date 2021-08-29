@@ -10,6 +10,7 @@ using NorthwoodLib;
 using Respawning;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using UnityEngine;
 
@@ -288,6 +289,29 @@ namespace DiscordLog
                 plugin.LOGStaff += $":mans_shoe: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été kick pour : ``{ev.Reason}`` ; par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n";
                 Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
             }
+        }
+        public void OnBanned(BannedEventArgs ev)
+        {
+            if (ev.Details.OriginalName != "Unknown - offline ban") return;
+
+            var ticks = TimeSpan.FromTicks(ev.Details.Expires - ev.Details.IssuanceTime).TotalSeconds.ToString(CultureInfo.InvariantCulture);
+            var time = long.TryParse(ticks, out var timelong) ? timelong : -1;
+            string TargetNick = "Unknow";
+            if (ev.Details.Id.EndsWith("@steam"))
+            {
+                TargetNick = "Unknown (API Key Not valid)";
+                try
+                {
+                    TargetNick = Extensions.GetUserName(ev.Details.Id);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn($"API key is not valide {ex}");
+                }
+            }
+            plugin.LOGStaff += $":hammer: ``{TargetNick}`` ({ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n";
+
+            Webhook.OBanPlayerAsync(ev.Issuer, TargetNick, ev.Details.Id, ev.Details.Reason, time);
         }
         public static string ConvertID(string UserID)
         {

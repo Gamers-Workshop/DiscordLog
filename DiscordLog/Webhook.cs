@@ -276,7 +276,7 @@ namespace DiscordLog
             var response = (HttpWebResponse)await wr.GetResponseAsync();
             wr.Abort();
         }
-        public static async Task OBanPlayerAsync(Player player, string sanctioned, string reason, uint Duration)
+        public static async Task OBanPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, string reason, long Duration)
         {
             WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
             wr.ContentType = "application/json";
@@ -298,7 +298,7 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Oban",
-                                        value = $"({EventHandlers.ConvertID(sanctioned)})",
+                                        value = $"``{sanctionedNickname}``({EventHandlers.ConvertID(sanctionedUserId)})",
                                         inline = false,
                                     },
                                     new

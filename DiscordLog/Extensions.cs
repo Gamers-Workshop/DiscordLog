@@ -3,8 +3,11 @@ using NorthwoodLib;
 using NorthwoodLib.Pools;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -38,6 +41,29 @@ namespace DiscordLog
 		public static void OpenReportWindow(this Player player, string text)
 		{
 			player.ReferenceHub.GetComponent<GameConsoleTransmission>().SendToClient(player.Connection, "[REPORTING] " + text, "white");
+		}
+		public static string GetUserName(string userid)
+		{
+			try
+			{
+				//013D09D43A87F1D90ED3BEAA19BFCF98 -> Steam Api key to get the nickname of obanned users (Get your api key in https://steamcommunity.com/dev/apikey)
+				var httpWebRequest = (HttpWebRequest)WebRequest.Create($"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=013D09D43A87F1D90ED3BEAA19BFCF98&steamids={userid}");
+				httpWebRequest.Method = "GET";
+
+				var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+
+				using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+				{
+					var result = streamReader.ReadToEnd();
+					return Regex.Match(result, @"\x22personaname\x22:\x22(.+?)\x22").Groups[1].Value;
+				}
+			}
+			catch (Exception)
+			{
+				Log.Error("An error has occured while contacting steam servers (Are they down? Invalid API key?)");
+			}
+
+			return "Unknown";
 		}
 		/*public static Transform NameOfGeneratorRoom(this Generator079 gen)
         {

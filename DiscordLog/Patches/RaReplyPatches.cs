@@ -61,19 +61,7 @@ namespace DiscordLog
                 {
                     case "oban":
                         {
-                            if (!string.IsNullOrEmpty(args[1]) && uint.TryParse(args[2], out uint Duration))
-                            {
-                                int l = 2;
-                                string str1 = null;
-                                foreach (string str2 in args)
-                                {
-                                    if (l == 0)
-                                        str1 += $" {str2}";
-                                    else
-                                        l--;
-                                }
-                                Webhook.OBanPlayerAsync(player, args[1], str1, Duration);
-                            }
+
                         }
                         return;
                     case "jail":

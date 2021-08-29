@@ -124,7 +124,7 @@ namespace DiscordLog
 			//LogStaff
 			PlayerEvents.Banning += Handlers.OnBanning;
 			PlayerEvents.Kicking += Handlers.OnKicking;
-
+			PlayerEvents.Banned += Handlers.OnBanned;
 			//PingStaff
 			ServerEvents.LocalReporting += Handlers.OnLocalReporting;
 		}
@@ -172,6 +172,7 @@ namespace DiscordLog
 			//LogStaff
 			PlayerEvents.Banning -= Handlers.OnBanning;
 			PlayerEvents.Kicking -= Handlers.OnKicking;
+			PlayerEvents.Banned -= Handlers.OnBanned;
 
 			//PingStaff
 			ServerEvents.LocalReporting -= Handlers.OnLocalReporting;
