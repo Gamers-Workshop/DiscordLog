@@ -191,7 +191,7 @@ namespace DiscordLog
                 switch (ev.Item.Type)
                 {
                     case ItemType.SCP207:
-                        plugin.LOG += $":champagne: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item.Type}.\n";
+                        plugin.LOG += $"<:ContaCola:881985143718445086> ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item.Type}.\n";
                         break;
                     case ItemType.SCP268:
                         plugin.LOG += $":billed_cap: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item.Type}.\n";
@@ -210,7 +210,7 @@ namespace DiscordLog
         {
             
             if (ev.IsAllowed && ev.Player != null && ev.Generator.Activating)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a ejecté la tablette du générateur de la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a désactivé un générateur de la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
         }
         public void OnActivatingGenerator(ActivatingGeneratorEventArgs ev)
         {
@@ -233,7 +233,7 @@ namespace DiscordLog
 
         public void OnIntercomSpeaking(IntercomSpeakingEventArgs ev)
         {
-            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player)
+            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && Map.IntercomSpeaker == ev.Player)
             {
                 IntercomPlayerSpeek = ev.Player;
                 plugin.LOG += $":loudspeaker: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) utilise l'intercom.\n";
