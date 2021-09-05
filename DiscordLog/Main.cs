@@ -31,6 +31,8 @@ namespace DiscordLog
 		public Harmony Harmony { get; private set; }
 		public string LOG = null;
 		public string LOGStaff = null;
+		public string LOGError = null;
+
 
 		public Dictionary<Player, string> NormalisedName = new Dictionary<Player, string>();
 
@@ -67,7 +69,10 @@ namespace DiscordLog
                 Timing.KillCoroutines(handle);
 			base.OnReloaded();
 			NormalisedName.Clear();
-            if (Instance.Config.WebhookUrlLogJoueur != string.Empty)
+			
+			EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendLogError()));
+
+			if (Instance.Config.WebhookUrlLogJoueur != string.Empty)
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendWebhook()));
             if (Instance.Config.WebhookSi != "null" || Instance.Config.IdMessage != "null" )
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunUpdateWebhook()));
@@ -196,7 +201,51 @@ namespace DiscordLog
 		{
 			Harmony.UnpatchAll();
 		}
-
+		public IEnumerator<float> RunSendLogError()
+        {
+			while (true)
+			{
+				yield return Timing.WaitForSeconds(2f);
+				if (LOGError != null)
+				{
+					if (LOGError.Length < 2001)
+					{
+						Webhook.SendWebhookError(LOGError);
+						LOGError = null;
+					}
+					else
+					{
+						int Limiteur = 0;
+						string LogLimite = string.Empty;
+						string logs = LOGError;
+						LOGError = null;
+						List<string> LogToSend = new List<string>();
+						foreach (string ligne in logs.Split('\n'))
+						{
+							if (ligne.Count() + Limiteur < 1999)
+							{
+								Limiteur += ligne.Count() + 1;
+								LogLimite += ligne + "\n";
+							}
+							else
+							{
+								LogToSend.Add(LogLimite);
+								LogLimite = string.Empty;
+								Limiteur = 0;
+								Limiteur = ligne.Count() + 1;
+								LogLimite = ligne + "\n";
+							}
+						}
+						LogToSend.Add(LogLimite);
+						foreach (string SendLog in LogToSend)
+						{
+							Webhook.SendWebhookError(SendLog);
+							yield return Timing.WaitForSeconds(1f);
+						}
+					}
+				}
+			}
+		}
 		public IEnumerator<float> RunSendWebhook()
 		{
 			while(true)

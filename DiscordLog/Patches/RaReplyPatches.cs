@@ -23,7 +23,7 @@ namespace DiscordLog
     }
 
 
-    //[HarmonyPatch(typeof(CommandProcessor), nameof(CommandProcessor.ProcessQuery))]
+    [HarmonyPatch(typeof(CommandProcessor), nameof(CommandProcessor.ProcessQuery))]
     internal class CommandLogging
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
@@ -224,7 +224,10 @@ namespace DiscordLog
                         return;
                     default:
                         {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) a envoyé ``{string.Concat(args)}``.\n";
+                            string str1 = null;
+                            foreach (string str2 in args)
+                                str1 += $"{str2} ";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) a envoyé ``{str1.TrimEnd(' ')}``.\n";
                             return;
                         }
                 }

@@ -10,6 +10,9 @@ namespace DiscordLog
 
         [Description("Debug Plugin")]
         public bool Debugplugin { get; set; }
+        [Description("Webhook url : Erreur Console")]
+        public string WebhookUrlLogError { get; set; } = "https://discord.com/api/webhooks/777294073522159636/JjHtkklY7fTVNaTKmr39Ip0rxsU7b-ts-dtjis7hM6HIoJ3zdtsiU0x4GTT3s8iTNq6m";
+
         [Description("Box Warn")]
         public bool WarnBox { get; set; } = false;
         [Description("Webhook url : Bug par les joueurs")]
