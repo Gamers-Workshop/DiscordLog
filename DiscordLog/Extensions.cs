@@ -47,7 +47,7 @@ namespace DiscordLog
 			try
 			{
 				//013D09D43A87F1D90ED3BEAA19BFCF98 -> Steam Api key to get the nickname of obanned users (Get your api key in https://steamcommunity.com/dev/apikey)
-				var httpWebRequest = (HttpWebRequest)WebRequest.Create($"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=013D09D43A87F1D90ED3BEAA19BFCF98&steamids={userid}");
+				var httpWebRequest = (HttpWebRequest)WebRequest.Create($"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={DiscordLog.Instance.Config.SteamAPIKey}&steamids={userid}");
 				httpWebRequest.Method = "GET";
 
 				var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();

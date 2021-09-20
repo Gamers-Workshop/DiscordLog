@@ -15,6 +15,9 @@ namespace DiscordLog
 
         [Description("Box Warn")]
         public bool WarnBox { get; set; } = false;
+        [Description("clé d'API Web Steam (https://steamcommunity.com/dev/registerkey)")]
+        public string SteamAPIKey { get; set; } = string.Empty;
+
         [Description("Webhook url : Bug par les joueurs")]
         public string WebhookUrlLogBug { get; set; } = string.Empty;
         [Description("Webhook url : Suggestion par les joueurs")]

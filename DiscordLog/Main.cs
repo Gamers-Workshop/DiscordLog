@@ -360,8 +360,16 @@ namespace DiscordLog
 			{
 				if (Round.IsLobbyLocked)
 				{
-					RoundInfo = "La partie est en pause";
-					RoundTime = "** **";
+					if (PlayerCount < 2)
+					{
+						RoundInfo = "En attente des joueurs";
+						RoundTime = $"{2 - PlayerCount} {(2 - PlayerCount <= 1 ? "joueur manquant" : "joueurs manquants")}";
+					}
+					else
+					{
+						RoundInfo = "En attente des joueurs";
+						RoundTime = $"Le lobby est lock";
+					}
 				}
 				else if (GameCore.RoundStart.singleton.NetworkTimer == -1)
 				{

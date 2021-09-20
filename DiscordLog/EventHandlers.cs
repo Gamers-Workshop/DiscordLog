@@ -20,7 +20,7 @@ namespace DiscordLog
     {
         internal readonly DiscordLog plugin;
         public static List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
-
+        private static Dictionary<string, string> SteamNickName = new Dictionary<string, string>();
         private bool RoundIsStart = false;
         private Player IntercomPlayerSpeek;
         public static Player Use914;
@@ -117,7 +117,19 @@ namespace DiscordLog
         }
         public void OnPlayerAuth(PreAuthenticatingEventArgs ev)
         {
-            plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: {ConvertID(ev.UserId)} ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
+            if (ev.UserId.EndsWith("@steam"))
+            {
+                if (SteamNickName.TryGetValue(ev.UserId, out string NickName))
+                    plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: ``{NickName}`` ({ConvertID(ev.UserId)}) ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
+                else
+                {
+                    NickName = Extensions.GetUserName(ev.UserId.Replace("@steam", string.Empty));
+                    SteamNickName.Add(ev.UserId, NickName);
+                    plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: ``{NickName}`` ({ConvertID(ev.UserId)}) ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
+                }
+            }
+            else
+                plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: {ConvertID(ev.UserId)} ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
         }
         public void OnPlayerVerified(VerifiedEventArgs ev)
         {
