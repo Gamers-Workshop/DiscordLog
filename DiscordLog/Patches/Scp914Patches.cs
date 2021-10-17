@@ -52,20 +52,21 @@ namespace DiscordLog.Patches
                     Items.Add(pickup.Info);
                 }
             }
+            Items.OrderBy(x => x.ItemId);
             string str;
             if (EventHandlers.Use914 != null)
                 str = $":gear: SCP-914 a été enclenché en {knob} par ``{EventHandlers.Use914?.Nickname}`` ({EventHandlers.ConvertID(EventHandlers.Use914?.UserId)}) :\n";
             else
                 str = $":gear: SCP-914 a été enclenché en {knob} par Unknow :\n";
-            bool Item = Items.Count != 0;
+            int ItemCount = (Items.Count() + (int)Players?.Where(x => x?.CurrentItem?.Type != ItemType.None).Count());
             bool PlayerItem = Players?.Where(x => x?.CurrentItem?.Type != ItemType.None).Count() != null;
-            if (Item || PlayerItem)
+            if (ItemCount > 0 || PlayerItem)
             {
-                str += $"**Item{(Items.Count + Players?.Where(x => x?.CurrentItem?.Type != ItemType.None).Count() <= 1 ? "" : "s")}**\n";
-                if (Item)
+                str += $"**Item{(ItemCount <= 1 ? "" : "s")}**\n";
+                if (ItemCount > 0)
                     foreach (var item in Items)
                     {
-                        if (!Exiled.API.Extensions.ItemExtensions.IsAmmo(item.ItemId))
+                        if (!Exiled.API.Extensions.ItemExtensions.IsAmmo(item.ItemId) && item.ItemId != ItemType.None)
                             str += $"   - {item.ItemId}\n";
                     }
                 if (PlayerItem)
