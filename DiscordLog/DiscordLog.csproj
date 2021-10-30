@@ -157,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\Bug.cs" />
+    <Compile Include="Command\Owarn.cs" />
     <Compile Include="Command\Suggestion.cs" />
     <Compile Include="Command\Warn.cs" />
     <Compile Include="DiscordWebhook.cs" />

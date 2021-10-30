@@ -420,6 +420,52 @@ namespace DiscordLog
             var response = (HttpWebResponse)await wr.GetResponseAsync();
             wr.Abort();
         }
+        public static async Task OwarnPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, string reason)
+        {
+            WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
+            wr.ContentType = "application/json";
+            wr.Method = "POST";
+            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
+            {
+                string json = JsonConvert.SerializeObject(new
+                {
+                    username = "SCP:SL",
+                    embeds = new[]
+                    {
+                        new
+                            {
+                                title = DiscordLog.Instance.Config.SIName,
+                                description = "",
+                                color = 16773376,
+                                fields = new[]
+                                {
+                                    new
+                                    {
+                                        name = $"Warn",
+                                        value = $"``{sanctionedNickname}`` ({EventHandlers.ConvertID(sanctionedUserId)})",
+                                        inline = false,
+                                    },
+                                    new
+                                    {
+                                        name = $"Raison",
+                                        value = $"``{reason}``",
+                                        inline = false,
+                                    },
+                                },
+                                footer = new
+                                {
+                                    icon_url = "",
+                                    text = $"Warn par {player.Nickname} ({player.UserId})",
+                                },
+                                timestamp = DateTime.Now,
+                            },
+                    }
+                });
+                await sw.WriteAsync(json);
+            }
+            var response = (HttpWebResponse)await wr.GetResponseAsync();
+            wr.Abort();
+        }
         public static async Task BugInfoAsync(Player player, string Info)
         {
             WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogBug);
