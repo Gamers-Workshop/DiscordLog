@@ -42,7 +42,7 @@ namespace DiscordLog.Command.Warn
                 return false;
             }
             if (DiscordLog.Instance.Config.WarnBox)
-                Sanctioned.OpenReportWindow($"Vous avez été warn par {sanctionneur.Nickname} car {Extensions.FormatArguments(arguments, 1)}");
+                Sanctioned.OpenReportWindow($"Vous avez été warn par {sanctionneur.Nickname} car {Extensions.FormatArguments(arguments, 1)}\n<b>Appuyez sur Esc pour fermer</b>");
 
             Webhook.WarnPlayerAsync(sanctionneur, Sanctioned, Extensions.FormatArguments(arguments, 1));
             response = $"Player {Sanctioned.Nickname} has been warned : {Extensions.FormatArguments(arguments, 1)}";
