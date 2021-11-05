@@ -111,6 +111,7 @@ namespace DiscordLog
 			PlayerEvents.DroppingItem += Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem += Handlers.OnPickingUpItem;
 			PlayerEvents.PickingUpArmor += Handlers.OnPickingUpArmor;
+			//PlayerEvents.PickingUpScp330 += Handlers.OnPickingUpScp330;
 			PlayerEvents.ItemUsed += Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator += Handlers.OnGeneratorUnlock;
@@ -158,6 +159,7 @@ namespace DiscordLog
 			PlayerEvents.DroppingItem -= Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem -= Handlers.OnPickingUpItem;
 			PlayerEvents.PickingUpArmor -= Handlers.OnPickingUpArmor;
+			//PlayerEvents.PickingUpScp330 -= Handlers.OnPickingUpScp330;
 			PlayerEvents.ItemUsed -= Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator -= Handlers.OnGeneratorUnlock;
@@ -428,8 +430,8 @@ namespace DiscordLog
 							PlayerRoleList += $"Overwatch\n";
 						else
 							PlayerRoleList += $"{player.Role}\n";
-					else if (player.SessionVariables.TryGetValue("NewRole", out object NewRole))
-						PlayerRoleList += $"{NewRole}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
+					else if (player.TryGetSessionVariable("NewRole", out Tuple<string,string> NewRole))
+						PlayerRoleList += $"{NewRole.Item1}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
 					else if (player.Role == RoleType.Scp079)
 						PlayerRoleList += $"Scp079({(player.IsGodModeEnabled ? $"GodMod" : $"{Map.ActivatedGenerators}/3 Gen")})\n";
 					else

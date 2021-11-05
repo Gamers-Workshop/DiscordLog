@@ -40,15 +40,12 @@ namespace DiscordLog
         public void OnRoundStart()
         {
             RoundIsStart = true;
-
             Timing.CallDelayed(0.5f, () =>
             {
                 string RoundStart = $":triangular_flag_on_post: Démarrage de la partie avec {Player.List.Where((p) => p.Role != RoleType.None).Count()} joueurs.\n";
                 foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None).OrderBy(x => x.Team))
-                    if (player.SessionVariables.ContainsKey("MajorScientist"))
-                        RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en MajorScientist.\n";
-                    else if (player.SessionVariables.ContainsKey("MajorGuard"))
-                        RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en MajorGuard.\n";
+                    if (player.TryGetSessionVariable("NewRole", out Tuple<string, string> newrole))
+                        RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en {newrole.Item1}.\n";
                     else
                         RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en {player.Role}.\n";
                 plugin.LOG += RoundStart;
@@ -149,15 +146,18 @@ namespace DiscordLog
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
             if (!RoundIsStart || ev.Player == null || ev.Reason == SpawnReason.Died || ev.Reason == SpawnReason.Revived || ev.Reason == SpawnReason.RoundStart) return;
-            if (ev.Player.SessionVariables.TryGetValue("NewRole", out object NewRole))
-                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {NewRole}.\n";
-            else if (ev.Reason == SpawnReason.Escaped)
-                if (ev.Player.IsCuffed)
-                    plugin.LOG += $":chains: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a été escorté en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
-                else 
-                    plugin.LOG += $":person_running: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
-            else
-                plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {ev.NewRole}.\n";
+            Timing.CallDelayed(0.25f, () =>
+            {
+                if (ev.Player.TryGetSessionVariable("NewRole", out Tuple<string, string> newrole))
+                    plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {newrole.Item1}.\n";
+                else if (ev.Reason == SpawnReason.Escaped)
+                    if (ev.Player.IsCuffed)
+                        plugin.LOG += $":chains: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a été escorté en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                    else
+                        plugin.LOG += $":person_running: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                else
+                    plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {ev.NewRole}.\n";
+            });
         }
 
         public void OnPlayerHurt(HurtingEventArgs ev)
@@ -193,11 +193,16 @@ namespace DiscordLog
             if (ev.IsAllowed && ev.Player != null)
                 plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}.\n";
         }
-        
+
+        public void OnPickingUpScp330(PickingUpScp330EventArgs ev)
+        {
+            if (ev.IsAllowed && ev.Player != null)
+                plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.ItemId} .\n";
+        }
 
         public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
-            if (ev.Player != null && Exiled.API.Extensions.ItemExtensions.IsMedical(ev.Item.Type))
+            if (Exiled.API.Extensions.ItemExtensions.IsMedical(ev.Item.Type))
                 plugin.LOG += $":adhesive_bandage: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est soigné avec {ev.Item.Type}.\n";
             else
                 switch (ev.Item.Type)
@@ -212,7 +217,7 @@ namespace DiscordLog
                         plugin.LOG += $":??: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item.Type}.\n";
                         break;
                 }
-       }
+        }
         public void OnGeneratorUnlock(UnlockingGeneratorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
