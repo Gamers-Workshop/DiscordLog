@@ -146,15 +146,16 @@ namespace DiscordLog
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
             if (!RoundIsStart || ev.Player == null || ev.Reason == SpawnReason.Died || ev.Reason == SpawnReason.Revived || ev.Reason == SpawnReason.RoundStart) return;
+            float TimeAlive = ev.Player.ReferenceHub.characterClassManager.AliveTime;
             Timing.CallDelayed(0.25f, () =>
             {
                 if (ev.Player.TryGetSessionVariable("NewRole", out Tuple<string, string> newrole))
                     plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {newrole.Item1}.\n";
                 else if (ev.Reason == SpawnReason.Escaped)
                     if (ev.Player.IsCuffed)
-                        plugin.LOG += $":chains: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a été escorté en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                        plugin.LOG += $":chains: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a été escorté en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
                     else
-                        plugin.LOG += $":person_running: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {ev.Player.ReferenceHub.characterClassManager.AliveTime / 60:00}:{ev.Player.ReferenceHub.characterClassManager.AliveTime % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                        plugin.LOG += $":person_running: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
                 else
                     plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {ev.NewRole}.\n";
             });
@@ -181,7 +182,17 @@ namespace DiscordLog
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
+                if (ev.Item.Type == ItemType.SCP330)
+                {
+                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}: ";
+                    ev.Item.Base.TryGetComponent<InventorySystem.Items.Usables.Scp330.Scp330Bag>(out var comp);
+                    foreach (var candy in comp.Candies)
+                    {
+                        plugin.LOG += $"\n  - {candy}";
+                    }
+                }
+                else 
+                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
@@ -193,11 +204,17 @@ namespace DiscordLog
             if (ev.IsAllowed && ev.Player != null)
                 plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}.\n";
         }
-
-        public void OnPickingUpScp330(PickingUpScp330EventArgs ev)
+        public void OnPickingScp330(PickingUpScp330EventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.ItemId} .\n";
+                plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.ItemId}.\n";
+        }
+
+        public void OnEatenScp330(EatenScp330EventArgs ev)
+        {
+            Log.Debug($"[OnEatenScp330] {ev.Player.Nickname} -> {ev.Candy.Kind}");
+            if (ev.Player != null)
+                plugin.LOG += $":candy: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a manger un bonbon : {ev.Candy.Kind.ToString().ToLower()}.\n";
         }
 
         public void OnPlayerUsedItem(UsedItemEventArgs ev)

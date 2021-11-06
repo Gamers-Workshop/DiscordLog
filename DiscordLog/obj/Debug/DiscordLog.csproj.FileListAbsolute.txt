@@ -124,3 +124,11 @@ D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.ARModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.XRModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.InputModule.dll
 D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\YamlDotNet.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Assembly-CSharp-firstpass.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Assembly-CSharp_publicized.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\CommandSystem.Core.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\Mirror.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\NorthwoodLib.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.CoreModule.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.dll
+D:\1-Plugin\DiscordLog\DiscordLog\bin\Debug\UnityEngine.PhysicsModule.dll
