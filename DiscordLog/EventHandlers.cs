@@ -182,7 +182,7 @@ namespace DiscordLog
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                if (ev.Item.Type == ItemType.SCP330)
+                /*if (ev.Item.Type == ItemType.SCP330)
                 {
                     plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}: ";
                     ev.Item.Base.TryGetComponent<InventorySystem.Items.Usables.Scp330.Scp330Bag>(out var comp);
@@ -191,8 +191,8 @@ namespace DiscordLog
                         plugin.LOG += $"\n  - {candy}";
                     }
                 }
-                else 
-                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
+                else */ // SCP330 log
+                plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {

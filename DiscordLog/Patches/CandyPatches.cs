@@ -10,7 +10,8 @@ using System.Threading.Tasks;
 
 namespace DiscordLog.Patches
 {
-	[HarmonyPatch(typeof(Scp330Bag), nameof(Scp330Bag.TryAddSpecific))]
+	//SCP330 Log
+    /*[HarmonyPatch(typeof(Scp330Bag), nameof(Scp330Bag.TryAddSpecific))]
 	public class CandyPickup
     {
 		public static bool Prefix(Scp330Bag __instance,ref bool __result,CandyKindID kind)
@@ -63,5 +64,5 @@ namespace DiscordLog.Patches
 				return true;
 			}
 		}
-	}
+	}*/
 }
