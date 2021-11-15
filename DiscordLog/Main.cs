@@ -11,7 +11,7 @@ using Scp914Events = Exiled.Events.Handlers.Scp914;
 using Scp106Events = Exiled.Events.Handlers.Scp106;
 using Scp096Events = Exiled.Events.Handlers.Scp096;
 using Scp049Events = Exiled.Events.Handlers.Scp049;
-using Scp330Events = Exiled.Events.Handlers.Scp330;
+//using Scp330Events = Exiled.Events.Handlers.Scp330;
 using System.Collections.Generic;
 using System.IO;
 using MEC;
@@ -113,7 +113,7 @@ namespace DiscordLog
 			PlayerEvents.PickingUpItem += Handlers.OnPickingUpItem;
 			PlayerEvents.PickingUpArmor += Handlers.OnPickingUpArmor;
 			//PlayerEvents.PickingUpScp330 += Handlers.OnPickingUpScp330;
-			Scp330Events.EatenScp330 += Handlers.OnEatenScp330;
+			//Scp330Events.EatenScp330 += Handlers.OnEatenScp330;
 			PlayerEvents.ItemUsed += Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator += Handlers.OnGeneratorUnlock;
@@ -162,7 +162,7 @@ namespace DiscordLog
 			PlayerEvents.PickingUpItem -= Handlers.OnPickingUpItem;
 			PlayerEvents.PickingUpArmor -= Handlers.OnPickingUpArmor;
 			//PlayerEvents.PickingUpScp330 -= Handlers.OnPickingUpScp330;
-			Scp330Events.EatenScp330 -= Handlers.OnEatenScp330;
+			//Scp330Events.EatenScp330 -= Handlers.OnEatenScp330;
 			PlayerEvents.ItemUsed -= Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator -= Handlers.OnGeneratorUnlock;

@@ -8,13 +8,12 @@ using System.Threading.Tasks;
 
 namespace DiscordLog.Patches
 {
+    [HarmonyPatch(typeof(Log), nameof(Log.Error))]
     public class ErrorPatches
     {
-        [HarmonyPatch(typeof(Log), nameof(Log.Error))]
         public static void Prefix(object message)
         {
             DiscordLog.Instance.LOGError += message.ToString();
         }
     }
-
 }

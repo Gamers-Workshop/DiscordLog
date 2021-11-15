@@ -1,6 +1,7 @@
 ﻿using Exiled.API.Features;
 using HarmonyLib;
 using NorthwoodLib.Pools;
+using GameCore;
 using RemoteAdmin;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,15 @@ namespace DiscordLog
         }
     }
 
+    [HarmonyPatch(typeof(ConsoleCommandSender), nameof(ConsoleCommandSender.RaReply))]
+    public class GamCoreReplyPAtches
+    {
+        public static void Prefix(string text, bool success, bool logToConsole, string overrideDisplay)
+        {
+            if (!text.Contains("REQUEST_DATA:PLAYER_LIST"))
+                DiscordLog.Instance.LOGStaff += $"{text}\n";
+        }
+    }
 
     [HarmonyPatch(typeof(CommandProcessor), nameof(CommandProcessor.ProcessQuery))]
     internal class CommandLogging
@@ -234,7 +244,7 @@ namespace DiscordLog
             }
             catch (System.Exception ex)
             {
-                Log.Error($"Error In LogCommand : {ex}");
+                Exiled.API.Features.Log.Error($"Error In LogCommand : {ex}");
             }
             Harmony.DEBUG = false;
         }

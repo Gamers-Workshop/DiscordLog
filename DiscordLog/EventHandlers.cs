@@ -204,6 +204,7 @@ namespace DiscordLog
             if (ev.IsAllowed && ev.Player != null)
                 plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}.\n";
         }
+        /*
         public void OnPickingScp330(PickingUpScp330EventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
@@ -215,7 +216,7 @@ namespace DiscordLog
             Log.Debug($"[OnEatenScp330] {ev.Player.Nickname} -> {ev.Candy.Kind}");
             if (ev.Player != null)
                 plugin.LOG += $":candy: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a manger un bonbon : {ev.Candy.Kind.ToString().ToLower()}.\n";
-        }
+        }*/
 
         public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
