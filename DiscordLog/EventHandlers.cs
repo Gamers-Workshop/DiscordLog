@@ -7,6 +7,7 @@ using InventorySystem.Items.Radio;
 using MEC;
 using Newtonsoft.Json.Serialization;
 using NorthwoodLib;
+using PlayerStatsSystem;
 using Respawning;
 using System;
 using System.Collections.Generic;
@@ -103,10 +104,9 @@ namespace DiscordLog
         {
             plugin.LOG += ":radioactive: Explosion du site.\n";
         }
-        public void OnAnnounceDecont(AnnouncingDecontaminationEventArgs ev)
+        public void OnDecontaminating(DecontaminatingEventArgs ev)
         {
-            if (ev.Id == 6)
-                plugin.LOG += ":biohazard: Décontamination de la LCZ.\n";
+            plugin.LOG += ":biohazard: Décontamination de la LCZ.\n";
         }
         public void OnGeneratorFinish(GeneratorActivatedEventArgs ev)
         {
@@ -169,20 +169,21 @@ namespace DiscordLog
         }
         public void OnPlayerDeath(DiedEventArgs ev)
         {
-            if (ev.Target.Role == RoleType.None || ev.HitInformations.Attacker == "DISCONNECT") return;
+            if (ev.Target.Role == RoleType.None || !(ev.DamageHandler is StandardDamageHandler damage)) return;
             if (ev.Killer != null && ev.Killer != ev.Target)
             {
-                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par ``{ev.Killer.Nickname}`` ({ConvertID(ev.Killer.UserId)}) avec {(ev.HitInformations.CustomAttackerName ? $"{ev.HitInformations.ClientAttackerName}" : $"{ev.HitInformations.Tool.Name}")}.\n";
+                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par ``{ev.Killer.Nickname}`` ({ConvertID(ev.Killer.UserId)}) avec {damage.ServerLogsText}.\n";
             }
             else
             {
-                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par {((ev.HitInformations.CustomAttackerName && ev.HitInformations.ClientAttackerName != "WORLD") ? $"{ev.HitInformations.ClientAttackerName}": $"{ev.HitInformations.Tool.Name}")}.\n";
+                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par {damage.ServerLogsText}.\n";
             }
+            Log.Info($"[DAMAGE] ServerLogsText: {damage.ServerLogsText}");
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                /*if (ev.Item.Type == ItemType.SCP330)
+                if (ev.Item.Type == ItemType.SCP330)
                 {
                     plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}: ";
                     ev.Item.Base.TryGetComponent<InventorySystem.Items.Usables.Scp330.Scp330Bag>(out var comp);
@@ -191,7 +192,7 @@ namespace DiscordLog
                         plugin.LOG += $"\n  - {candy}";
                     }
                 }
-                else */ // SCP330 log
+                else
                 plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)

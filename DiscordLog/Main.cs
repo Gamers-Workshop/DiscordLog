@@ -99,7 +99,7 @@ namespace DiscordLog
 			WarheadEvents.Stopping += Handlers.OnWarheadCancel;
 			WarheadEvents.Detonated += Handlers.OnDetonated;
 
-			MapEvents.AnnouncingDecontamination += Handlers.OnAnnounceDecont;
+			MapEvents.Decontaminating += Handlers.OnDecontaminating;
 			MapEvents.GeneratorActivated += Handlers.OnGeneratorFinish;
 
 			PlayerEvents.PreAuthenticating += Handlers.OnPlayerAuth;
@@ -149,7 +149,7 @@ namespace DiscordLog
 			WarheadEvents.Stopping -= Handlers.OnWarheadCancel;
 			WarheadEvents.Detonated -= Handlers.OnDetonated;
 
-			MapEvents.AnnouncingDecontamination -= Handlers.OnAnnounceDecont;
+			MapEvents.Decontaminating -= Handlers.OnDecontaminating;
 			MapEvents.GeneratorActivated -= Handlers.OnGeneratorFinish;
 
 			PlayerEvents.PreAuthenticating -= Handlers.OnPlayerAuth;

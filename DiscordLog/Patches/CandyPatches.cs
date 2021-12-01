@@ -1,7 +1,7 @@
 ﻿using Exiled.API.Features;
 using HarmonyLib;
 using InventorySystem;
-//using InventorySystem.Items.Usables.Scp330;
+using InventorySystem.Items.Usables.Scp330;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace DiscordLog.Patches
 {
 	//SCP330 Log
-    /*[HarmonyPatch(typeof(Scp330Bag), nameof(Scp330Bag.TryAddSpecific))]
+    [HarmonyPatch(typeof(Scp330Bag), nameof(Scp330Bag.TryAddSpecific))]
 	public class CandyPickup
     {
 		public static bool Prefix(Scp330Bag __instance,ref bool __result,CandyKindID kind)
@@ -64,5 +64,5 @@ namespace DiscordLog.Patches
 				return true;
 			}
 		}
-	}*/
+	}
 }
