@@ -70,8 +70,9 @@ namespace DiscordLog
                 Timing.KillCoroutines(handle);
 			base.OnReloaded();
 			NormalisedName.Clear();
-			
-			EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendLogError()));
+
+			if (Instance.Config.WebhookUrlLogError != string.Empty)
+				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendLogError()));
 
 			if (Instance.Config.WebhookUrlLogJoueur != string.Empty)
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendWebhook()));
@@ -210,7 +211,7 @@ namespace DiscordLog
         {
 			while (true)
 			{
-				yield return Timing.WaitForSeconds(2f);
+				yield return Timing.WaitForSeconds(10f);
 				if (LOGError != null)
 				{
 					if (LOGError.Length < 2001)
@@ -245,7 +246,7 @@ namespace DiscordLog
 						foreach (string SendLog in LogToSend)
 						{
 							Webhook.SendWebhookError(SendLog);
-							yield return Timing.WaitForSeconds(1f);
+							yield return Timing.WaitForSeconds(5f);
 						}
 					}
 				}

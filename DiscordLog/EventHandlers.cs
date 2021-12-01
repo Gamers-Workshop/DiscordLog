@@ -31,6 +31,8 @@ namespace DiscordLog
             foreach (CoroutineHandle handle in Coroutines)
                 Timing.KillCoroutines(handle);
             plugin.NormalisedName.Clear();
+            if (DiscordLog.Instance.Config.WebhookUrlLogError != string.Empty)
+                Coroutines.Add(Timing.RunCoroutine(plugin.RunSendLogError()));
             if (DiscordLog.Instance.Config.WebhookUrlLogJoueur != string.Empty)
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunSendWebhook(), Segment.RealtimeUpdate));
             if (DiscordLog.Instance.Config.WebhookSi != "null" || DiscordLog.Instance.Config.IdMessage != "null" )

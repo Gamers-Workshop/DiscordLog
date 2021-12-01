@@ -11,9 +11,9 @@ namespace DiscordLog.Patches
     [HarmonyPatch(typeof(Log), nameof(Log.Error))]
     public class ErrorPatches
     {
-        public static void Prefix(object message)
+        public static void Postfix(object message)
         {
-            DiscordLog.Instance.LOGError += message.ToString();
+            DiscordLog.Instance.LOGError += message.ToString() + "\n";
         }
     }
 }
