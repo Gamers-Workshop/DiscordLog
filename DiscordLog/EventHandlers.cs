@@ -171,16 +171,34 @@ namespace DiscordLog
         }
         public void OnPlayerDeath(DiedEventArgs ev)
         {
-            if (ev.Target.Role == RoleType.None || !(ev.DamageHandler is StandardDamageHandler damage)) return;
-            if (ev.Killer != null && ev.Killer != ev.Target)
+            if (ev.Target.Role == RoleType.None) return;
+            string DamageString;
+            if (ev.Handler.Type == DamageType.Firearm)
             {
-                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par ``{ev.Killer.Nickname}`` ({ConvertID(ev.Killer.UserId)}) avec {damage.ServerLogsText}.\n";
+                DamageString = ev.Handler.Item.Type.ToString();
+            }
+            else if (ev.Handler.Type == DamageType.Scp)
+            {
+                DamageString = ev.Handler.Attacker.Role.ToString();
+            }
+            else if (ev.Handler.Type == DamageType.Unknown && ev.Handler.Base is CustomReasonDamageHandler customReason)
+            {
+                DamageString = customReason.ServerLogsText.Remove(0,30);
+                if (DamageString == "Disconect") 
+                    return;
             }
             else
             {
-                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par {damage.ServerLogsText}.\n";
+                DamageString = ev.Handler.Type.ToString();
             }
-            Log.Info($"[DAMAGE] ServerLogsText: {damage.ServerLogsText}");
+            if (ev.Killer != null && ev.Killer != ev.Target)
+            {
+                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par ``{ev.Killer.Nickname}`` ({ConvertID(ev.Killer.UserId)}) avec {DamageString}.\n";
+            }
+            else
+            {
+                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par {DamageString}.\n";
+            }
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
