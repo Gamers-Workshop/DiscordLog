@@ -13,7 +13,8 @@ namespace DiscordLog.Patches
     {
         public static void Postfix(object message)
         {
-            DiscordLog.Instance.LOGError += message.ToString() + "\n";
+            if (DiscordLog.Instance.LOGError == null || !DiscordLog.Instance.LOGError.Contains(message.ToString()));
+                DiscordLog.Instance.LOGError += message.ToString() + "\n";
         }
     }
 }
