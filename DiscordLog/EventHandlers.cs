@@ -64,6 +64,7 @@ namespace DiscordLog
         }
         public void OnTeamRespawn(RespawningTeamEventArgs ev)
         {
+            if (!ev.IsAllowed) return;
             if (ev.Players.Count == 0) return;
             string objcontent;
             if (ev.NextKnownTeam == SpawnableTeamType.NineTailedFox)
@@ -108,11 +109,13 @@ namespace DiscordLog
         }
         public void OnDecontaminating(DecontaminatingEventArgs ev)
         {
-            plugin.LOG += ":biohazard: Décontamination de la LCZ.\n";
+            if (ev.IsAllowed)
+                plugin.LOG += ":biohazard: Décontamination de la LCZ.\n";
         }
         public void OnGeneratorFinish(GeneratorActivatedEventArgs ev)
         {
-            plugin.LOG += $":computer: Le générateur dans la {Map.FindParentRoom(ev.Generator.gameObject).Type} est activé.\n";
+            if (ev.IsAllowed)
+                plugin.LOG += $":computer: Le générateur dans la {Map.FindParentRoom(ev.Generator.gameObject).Type} est activé.\n";
         }
         public void OnPlayerAuth(PreAuthenticatingEventArgs ev)
         {
@@ -147,7 +150,7 @@ namespace DiscordLog
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
-            if (!RoundIsStart || ev.Player == null || ev.Reason == SpawnReason.Died || ev.Reason == SpawnReason.Revived || ev.Reason == SpawnReason.RoundStart) return;
+            if (!RoundIsStart || ev.Player == null || ev.Reason == SpawnReason.Died || ev.Reason == SpawnReason.Revived || ev.Reason == SpawnReason.RoundStart || !ev.IsAllowed) return;
             float TimeAlive = ev.Player.ReferenceHub.characterClassManager.AliveTime;
             Timing.CallDelayed(0.25f, () =>
             {
@@ -173,15 +176,7 @@ namespace DiscordLog
         {
             if (ev.Target.Role == RoleType.None) return;
             string DamageString;
-            if (ev.Handler.Type == DamageType.Firearm)
-            {
-                DamageString = ev.Handler.Item.Type.ToString();
-            }
-            else if (ev.Handler.Type == DamageType.Scp)
-            {
-                DamageString = ev.Handler.Attacker.Role.ToString();
-            }
-            else if (ev.Handler.Type == DamageType.Unknown && ev.Handler.Base is CustomReasonDamageHandler customReason)
+            if (ev.Handler.Type == DamageType.Custom && ev.Handler.Base is CustomReasonDamageHandler customReason)
             {
                 DamageString = customReason.ServerLogsText.Remove(0,30);
                 if (DamageString == "Disconect") 
@@ -225,19 +220,12 @@ namespace DiscordLog
             if (ev.IsAllowed && ev.Player != null)
                 plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}.\n";
         }
-        /*
-        public void OnPickingScp330(PickingUpScp330EventArgs ev)
-        {
-            if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.ItemId}.\n";
-        }
 
         public void OnEatenScp330(EatenScp330EventArgs ev)
         {
-            Log.Debug($"[OnEatenScp330] {ev.Player.Nickname} -> {ev.Candy.Kind}");
             if (ev.Player != null)
                 plugin.LOG += $":candy: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a manger un bonbon : {ev.Candy.Kind.ToString().ToLower()}.\n";
-        }*/
+        }
 
         public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
@@ -299,24 +287,25 @@ namespace DiscordLog
         }
         public void OnHandcuffing(HandcuffingEventArgs ev)
         {
-            if (ev.Cuffer != null)
+            if (ev.IsAllowed && ev.Cuffer != null)
                 plugin.LOG += $":chains: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été menoté par ``{ev.Cuffer.Nickname}`` ({ConvertID(ev.Cuffer.UserId)}).\n";
         }
         public void OnRemovingHandcuffs(RemovingHandcuffsEventArgs ev)
         {
-            if (ev.Cuffer != null)
-                plugin.LOG += $":chains: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été démenoté par ``{ev.Cuffer.Nickname}`` ({ConvertID(ev.Cuffer.UserId)}).\n";
-            else
-                plugin.LOG += $":chains: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été démenoté.\n";
+            if (ev.IsAllowed)
+                if (ev.Cuffer != null)
+                    plugin.LOG += $":chains: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été démenoté par ``{ev.Cuffer.Nickname}`` ({ConvertID(ev.Cuffer.UserId)}).\n";
+                else
+                    plugin.LOG += $":chains: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été démenoté.\n";
         }
         public void OnEnteringPocketDimension(EnteringPocketDimensionEventArgs ev)
         {
-            if (ev.Player != null)
+            if (ev.IsAllowed && ev.Player != null)
                 plugin.LOG += $":hole: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) est entré dans la dimension de poche.\n";
         }
         public void OnEscapingPocketDimension(EscapingPocketDimensionEventArgs ev)
         {
-            if (ev.Player != null)
+            if (ev.IsAllowed && ev.Player != null)
                 plugin.LOG += $":hole: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a échappé a la dimension de poche.\n";
         }
         public void On914Activating(ActivatingEventArgs ev)
