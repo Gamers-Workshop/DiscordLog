@@ -209,6 +209,7 @@ namespace DiscordLog
                 }
                 else
                 plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
+                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
