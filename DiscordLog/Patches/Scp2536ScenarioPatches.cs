@@ -55,7 +55,7 @@ namespace DiscordLog.Patches
 					{
 						PickupSyncInfo psi = new PickupSyncInfo
 						{
-							ItemId = __instance.ItemToAdd,
+							ItemId = ItemGift,
 							Serial = ItemSerialGenerator.GenerateNext(),
 							Weight = itemBase.Weight
 						};
@@ -64,7 +64,7 @@ namespace DiscordLog.Patches
 						itemPickupBase.RefreshPositionAndRotation();
 						return false;
 					}
-					ItemBase itemBase2 = giftee.inventory.ServerAddItem(__instance.ItemToAdd, 0, null);
+					ItemBase itemBase2 = giftee.inventory.ServerAddItem(ItemGift, 0, null);
 					if (itemBase2 != null)
 					{
 						__instance.ServerAfterActivate(giftee, itemBase2);

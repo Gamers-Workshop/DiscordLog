@@ -206,6 +206,7 @@ namespace DiscordLog
                     {
                         plugin.LOG += $"\n  - {candy}";
                     }
+                    plugin.LOG += "\n";
                 }
                 else
                     plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
