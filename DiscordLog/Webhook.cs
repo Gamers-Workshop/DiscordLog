@@ -26,7 +26,6 @@ namespace DiscordLog
                 Username = DiscordLog.Instance.Config.WebhookName
             };
             string webhookstr = webhook.ToJson();
-            Console.WriteLine(webhookstr);
             var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
             http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogJoueur, content);
         }
@@ -41,7 +40,6 @@ namespace DiscordLog
                 Username = DiscordLog.Instance.Config.WebhookName
             };
             string webhookstr = webhook.ToJson();
-            Console.WriteLine(webhookstr);
             var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
             http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogStaff, content);
         }
@@ -56,7 +54,6 @@ namespace DiscordLog
                 Username = DiscordLog.Instance.Config.WebhookName
             };
             string webhookstr = webhook.ToJson();
-            Console.WriteLine(webhookstr);
             var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
             http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogError, content);
         }
@@ -88,8 +85,8 @@ namespace DiscordLog
                                 },
                                 new
                                 {
-                                    name = $"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
-                                    value = $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}",
+                                    name = $"{(Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
+                                    value = $"{Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().ToList().Count}/{CustomNetworkManager.slots}",
                                     inline = false,
                                 },
                                 },
@@ -154,8 +151,8 @@ namespace DiscordLog
                                     },
                                     new
                                     {
-                                        name = $"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
-                                        value = $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}",
+                                        name = $"{(Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
+                                        value = $"{Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().ToList().Count}/{CustomNetworkManager.slots}",
                                         inline = false,
                                     },
                                 },
@@ -200,8 +197,8 @@ namespace DiscordLog
                                 },
                                 new
                                 {
-                                    name = $"{(Player.List.Where((p) => p.Role != RoleType.None).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
-                                    value = $"{Player.List.ToList().Count}/{CustomNetworkManager.slots}",
+                                    name = $"{(Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
+                                    value = $"{Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().ToList().Count}/{CustomNetworkManager.slots}",
                                     inline = false,
                                 },
                                 },

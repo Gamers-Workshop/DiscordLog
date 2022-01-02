@@ -342,7 +342,7 @@ namespace DiscordLog
 
             var ticks = TimeSpan.FromTicks(ev.Details.Expires - ev.Details.IssuanceTime).TotalSeconds.ToString(CultureInfo.InvariantCulture);
             var time = long.TryParse(ticks, out var timelong) ? timelong : -1;
-            string TargetNick = "Unknow";
+            string TargetNick = "Unknown";
             if (ev.Details.Id.EndsWith("@steam"))
             {
                 TargetNick = "Unknown (API Key Not valid)";

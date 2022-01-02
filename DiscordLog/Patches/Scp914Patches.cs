@@ -57,7 +57,7 @@ namespace DiscordLog.Patches
             if (EventHandlers.Use914 != null)
                 str = $":gear: SCP-914 a été enclenché en {knob} par ``{EventHandlers.Use914?.Nickname}`` ({EventHandlers.ConvertID(EventHandlers.Use914?.UserId)}) :\n";
             else
-                str = $":gear: SCP-914 a été enclenché en {knob} par Unknow :\n";
+                str = $":gear: SCP-914 a été enclenché en {knob} par Unknown :\n";
             int ItemCount = (Items.Count() + (int)Players?.Where(x => x?.CurrentItem?.Type != ItemType.None).Count());
             bool PlayerItem = Players?.Where(x => x?.CurrentItem?.Type != ItemType.None).Count() != null;
             if (ItemCount > 0 || PlayerItem)

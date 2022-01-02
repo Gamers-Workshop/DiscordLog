@@ -69,11 +69,6 @@ namespace DiscordLog
 
                 switch (args[0])
                 {
-                    case "oban":
-                        {
-
-                        }
-                        return;
                     case "jail":
                         {
                             {

@@ -30,7 +30,7 @@ namespace DiscordLog.Command.Warn
                 response = "Permission denied.";
                 return false;
             }
-            string SanctionedNickname = "Unknow";
+            string SanctionedNickname = "Unknown";
             if (arguments.At(0).EndsWith("@steam"))
             {
                 SanctionedNickname = "Unknown (API Key Not valid)";

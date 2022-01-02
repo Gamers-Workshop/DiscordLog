@@ -362,7 +362,7 @@ namespace DiscordLog
 					RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
 				}
 			}
-			else if (!Round.IsStarted)
+			else
 			{
 				if (Round.IsLobbyLocked)
 				{
@@ -403,21 +403,11 @@ namespace DiscordLog
 						RoundTime = $"Départ de la game dans 30 secondes";
 					}
 				}
-				else if (GameCore.RoundStart.singleton.NetworkTimer >= 0 || GameCore.RoundStart.singleton.NetworkTimer == -2)
+				else
 				{
 					RoundInfo = "En attente des joueurs";
 					RoundTime = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
 				}
-				else
-				{
-					RoundInfo = "Error";
-					RoundTime = "Error";
-				}
-			}
-			else
-			{
-				RoundInfo = "Error";
-				RoundTime = "Error";
 			}
 			Webhook.UpdateServerInfo(RoundInfo, RoundTime);
 			string PlayerNameList = "";
