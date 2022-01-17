@@ -131,6 +131,7 @@
     <Compile Include="Configs.cs" />
     <Compile Include="Patches\CandyPatches.cs" />
     <Compile Include="Patches\ErrorPatches.cs" />
+    <Compile Include="Patches\SCP244Patches.cs" />
     <Compile Include="Patches\Scp914Patches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Patches\RaReplyPatches.cs" />
