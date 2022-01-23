@@ -427,7 +427,7 @@ namespace DiscordLog
 					else if (player.TryGetSessionVariable("NewRole", out Tuple<string,string> NewRole))
 						PlayerRoleList += $"{NewRole.Item1}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
 					else if (player.Role == RoleType.Scp079)
-						PlayerRoleList += $"Scp079({(player.IsGodModeEnabled ? $"GodMod" : $"{Map.ActivatedGenerators}/3 Gen")})\n";
+						PlayerRoleList += $"Scp079({(player.IsGodModeEnabled ? $"GodMod" : $"{Generator.Get(GeneratorState.Engaged).Count()}/3 Gen")})\n";
 					else
 						PlayerRoleList += $"{player.Role}({(player.IsGodModeEnabled ? $"GodMod" : $"{(int)player.Health}Hp")})\n";
                     UserIdList += $"{player.UserId}\n";

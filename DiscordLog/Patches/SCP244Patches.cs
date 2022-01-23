@@ -80,35 +80,33 @@ namespace DiscordLog.Patches
 		{
 			try
 			{
+				if (__instance.ModelDestroyed && __instance._visibleModel.activeSelf)
 				{
-					if (__instance.ModelDestroyed && __instance._visibleModel.activeSelf)
-					{
-						__instance.Rb.constraints = RigidbodyConstraints.FreezeAll;
-						__instance._visibleModel.SetActive(false);
-					}
-					if (!NetworkServer.active)
-					{
-						__instance._currentSizePercent = (float)__instance._syncSizePercent;
-						__instance._currentSizePercent /= 255f;
-						return false;
-					}
-					if (__instance.State == Scp244State.Idle && Vector3.Dot(__instance.transform.up, Vector3.up) < __instance._activationDot)
-					{
-						DiscordLog.Instance.LOG += $":teapot: {__instance?.Info.ItemId} c'est ouvert.\n";
-						__instance.State = Scp244State.Active;
-					}
-					float num = (__instance.State == Scp244State.Active) ? __instance._timeToGrow : (-__instance._timeToDecay);
-					__instance._currentSizePercent = Mathf.Clamp01(__instance._currentSizePercent + Time.deltaTime / num);
-					__instance.Network_syncSizePercent = (byte)Mathf.RoundToInt(__instance._currentSizePercent * 255f);
-					if (!__instance.ModelDestroyed || __instance._currentSizePercent > 0f)
-					{
-						return false;
-					}
-					__instance._timeToDecay -= Time.deltaTime;
-					if (__instance._timeToDecay <= 0f)
-					{
-						NetworkServer.Destroy(__instance.gameObject);
-					}
+					__instance.Rb.constraints = RigidbodyConstraints.FreezeAll;
+					__instance._visibleModel.SetActive(false);
+				}
+				if (!NetworkServer.active)
+				{
+					__instance._currentSizePercent = __instance._syncSizePercent;
+					__instance._currentSizePercent /= 255f;
+					return false;
+				}
+				if (__instance.State == Scp244State.Idle && Vector3.Dot(__instance.transform.up, Vector3.up) < __instance._activationDot)
+				{
+					DiscordLog.Instance.LOG += $":teapot: {__instance?.Info.ItemId} c'est ouvert.\n";
+					__instance.State = Scp244State.Active;
+				}
+				float num = (__instance.State == Scp244State.Active) ? __instance._timeToGrow : (-__instance._timeToDecay);
+				__instance._currentSizePercent = Mathf.Clamp01(__instance._currentSizePercent + Time.deltaTime / num);
+				__instance.Network_syncSizePercent = (byte)Mathf.RoundToInt(__instance._currentSizePercent * 255f);
+				if (!__instance.ModelDestroyed || __instance._currentSizePercent > 0f)
+				{
+					return false;
+				}
+				__instance._timeToDecay -= Time.deltaTime;
+				if (__instance._timeToDecay <= 0f)
+				{
+					NetworkServer.Destroy(__instance.gameObject);
 				}
 				return false;
 			}

@@ -249,18 +249,18 @@ namespace DiscordLog
         public void OnGeneratorUnlock(UnlockingGeneratorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a débloqué un générateur dans la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a débloqué un générateur dans la salle : {ev.Generator.Room.Type}.\n";
         }
         public void OnStoppingGenerator(StoppingGeneratorEventArgs ev)
         {
             
-            if (ev.IsAllowed && ev.Player != null && ev.Generator.Activating)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a désactivé un générateur de la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
+            if (ev.IsAllowed && ev.Player != null && ev.Generator.IsActivating)
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a désactivé un générateur de la salle : {ev.Generator.Room.Type}.\n";
         }
         public void OnActivatingGenerator(ActivatingGeneratorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a activé un générateur de la salle : {Map.FindParentRoom(ev.Generator.gameObject).Type}.\n";
+                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a activé un générateur de la salle : {ev.Generator.Room.Type}.\n";
         }
         public void OnActivatingWarheadPanel(ActivatingWarheadPanelEventArgs ev)
         {
