@@ -1,5 +1,7 @@
-﻿using Exiled.API.Features;
+﻿using Exiled.API.Extensions;
+using Exiled.API.Features;
 using HarmonyLib;
+using InventorySystem.Items;
 using InventorySystem.Items.Pickups;
 using NorthwoodLib.Pools;
 using Scp914;
@@ -14,7 +16,7 @@ using UnityEngine;
 namespace DiscordLog.Patches
 {
     [HarmonyPatch(typeof(Scp914Upgrader), nameof(Scp914Upgrader.Upgrade))]
-    internal class Scp914Patche
+    internal class Scp914Patches
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
@@ -26,7 +28,7 @@ namespace DiscordLog.Patches
                 new CodeInstruction(OpCodes.Ldarg_0),
                 new CodeInstruction(OpCodes.Ldarg_2),
                 new CodeInstruction(OpCodes.Ldarg_3),
-                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Scp914Patche), nameof(Scp914Events))),
+                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Scp914Patches), nameof(Scp914Events))),
             });
 
             for (int z = 0; z < newInstructions.Count; z++)
@@ -37,52 +39,53 @@ namespace DiscordLog.Patches
         private static void Scp914Events(Collider[] intake, Scp914Mode mode, Scp914KnobSetting knob)
         {
             List<Player> Players = new List<Player>();
-            List<PickupSyncInfo> Items = new List<PickupSyncInfo>();
+            List<ItemType> ItemTypes = new List<ItemType>();
+            bool upgradeDropped = (mode & Scp914Mode.Dropped) == Scp914Mode.Dropped;
+            bool upgradeInventory = (mode & Scp914Mode.Inventory) == Scp914Mode.Inventory;
+            bool heldOnly = upgradeInventory && (mode & Scp914Mode.Held) == Scp914Mode.Held;
 
-            foreach (Collider collider in intake)
+
+            if (upgradeDropped)
             {
-                GameObject gameObject = collider.transform.root.gameObject;
-                Player player = Player.Get(gameObject);
-                if (player != null && !Players.Contains(player))
+                List<PickupSyncInfo> Items = new List<PickupSyncInfo>();
+                foreach (Collider collider in intake)
                 {
-                    Players.Add(player);
-                }
-                else if (gameObject.TryGetComponent(out ItemPickupBase pickup) && !Items.Contains(pickup.Info))
-                {
-                    Items.Add(pickup.Info);
+                    GameObject gameObject = collider.transform.root.gameObject;
+                    Player player = Player.Get(gameObject);
+
+                    if (player != null && !Players.Contains(player))
+                        Players.Add(player);
+                    else if (gameObject.TryGetComponent(out ItemPickupBase pickup) && !Items.Contains(pickup.Info))
+                        ItemTypes.Add(pickup.Info.ItemId);
                 }
             }
-            Items.OrderBy(x => x.ItemId);
+
+            if (upgradeInventory)
+                foreach (var player in Players)
+                    foreach (var item in player.Inventory.UserInventory.Items)
+                        if (!heldOnly || item.Key == player.Inventory.CurItem.SerialNumber)
+                            ItemTypes.Add(item.Value.ItemTypeId);
+
+            ItemTypes.OrderBy(x => x);
+
             string str;
             if (EventHandlers.Use914 != null)
-                str = $":gear: SCP-914 a été enclenché en {knob} par ``{EventHandlers.Use914?.Nickname}`` ({EventHandlers.ConvertID(EventHandlers.Use914?.UserId)}) :\n";
+                str = $":gear: SCP-914 a été enclenché en {knob} par ``{EventHandlers.Use914.Nickname}`` ({EventHandlers.ConvertID(EventHandlers.Use914.UserId)}) :\n";
             else
                 str = $":gear: SCP-914 a été enclenché en {knob} par Unknown :\n";
-            int ItemCount = (Items.Count() + (int)Players?.Where(x => x?.CurrentItem?.Type != ItemType.None).Count());
-            bool PlayerItem = Players?.Where(x => x?.CurrentItem?.Type != ItemType.None).Count() != null;
-            if (ItemCount > 0 || PlayerItem)
+
+            if (ItemTypes.Any())
             {
-                str += $"**Item{(ItemCount <= 1 ? "" : "s")}**\n";
-                if (ItemCount > 0)
-                    foreach (var item in Items)
-                    {
-                        if (!Exiled.API.Extensions.ItemExtensions.IsAmmo(item.ItemId) && item.ItemId != ItemType.None)
-                            str += $"   - {item.ItemId}\n";
-                    }
-                if (PlayerItem)
-                    foreach (Player player in Players)
-                    {
-                        if (!string.IsNullOrWhiteSpace(player?.CurrentItem?.Type.ToString()))
-                            str += $"   - {player?.CurrentItem?.Type}\n";
-                    }
+                str += $"**Item{(ItemTypes.Count() <= 1 ? "" : "s")}**\n";
+                foreach (ItemType item in ItemTypes)
+                    if (!ItemExtensions.IsAmmo(item))
+                        str += $"   - {item}\n";
             }
-            if (Players.Count != 0)
+            if (Players.Any())
             {
                 str += $"**Joueur{(Players.Count() <= 1 ? "" : "s")}**\n";
                 foreach (Player player in Players)
-                {
                     str += $"   - ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)})\n";
-                }
             }
             EventHandlers.Use914 = null;
             DiscordLog.Instance.LOG += str;
