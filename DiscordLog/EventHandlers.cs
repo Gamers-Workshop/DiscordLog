@@ -65,7 +65,7 @@ namespace DiscordLog
         public void OnTeamRespawn(RespawningTeamEventArgs ev)
         {
             if (!ev.IsAllowed) return;
-            if (ev.Players.Count == 0) return;
+            if (ev.Players.Count() == 0) return;
             string objcontent;
             if (ev.NextKnownTeam == SpawnableTeamType.NineTailedFox)
             {
@@ -324,7 +324,7 @@ namespace DiscordLog
         {
             if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
             {
-                Webhook.BanPlayerAsync(ev.Issuer, ev.Target,ev.Reason, ev.Duration);
+                Webhook.BanPlayerAsync(ev.Issuer, ev.Target, ev.Reason, ev.Duration);
                 plugin.LOGStaff += $":hammer: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n";
             } 
         }
@@ -364,11 +364,11 @@ namespace DiscordLog
             if (string.IsNullOrEmpty(UserID)) return string.Empty;
             if (UserID.EndsWith("@discord"))
             {
-                return $"<@{UserID.Replace("@discord", "")}>";
+                return $"<@{UserID.Replace("@discord", string.Empty)}>";
             }
             else if (UserID.EndsWith("@steam"))
             {
-                return $"{UserID}[:link:](<https://steamidfinder.com/lookup/{UserID.Replace("@steam","")}\"SteamFinder\">)";
+                return $"{UserID}[:link:](<https://steamidfinder.com/lookup/{UserID.Replace("@steam",string.Empty)}\"SteamFinder\">)";
             }
             return UserID;
         }
