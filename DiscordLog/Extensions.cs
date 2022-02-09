@@ -17,13 +17,13 @@ namespace DiscordLog
 	{
 		public static bool IsEnemy(this Player player, Team target)
 		{
-			if (player.Role == RoleType.Spectator || player.Role == RoleType.None || player.Team == target)
+			if (player.Role == RoleType.Spectator || player.Role == RoleType.None || player.Role.Team == target)
 				return false;
 
 			return target == Team.SCP || target == Team.TUT ||
-				((player.Team != Team.MTF && player.Team != Team.RSC) || (target != Team.MTF && target != Team.RSC))
+				((player.Role.Team != Team.MTF && player.Role.Team != Team.RSC) || (target != Team.MTF && target != Team.RSC))
 				&&
-				((player.Team != Team.CDP && player.Team != Team.CHI) || (target != Team.CDP && target != Team.CHI))
+				((player.Role.Team != Team.CDP && player.Role.Team != Team.CHI) || (target != Team.CDP && target != Team.CHI))
 			;
 		}
 		public static string FormatArguments(ArraySegment<string> sentence, int index)

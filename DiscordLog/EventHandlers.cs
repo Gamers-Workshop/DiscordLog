@@ -46,7 +46,7 @@ namespace DiscordLog
             Timing.CallDelayed(0.5f, () =>
             {
                 string RoundStart = $":triangular_flag_on_post: Démarrage de la partie avec {Player.List.Where((p) => p.Role != RoleType.None).Count()} joueurs.\n";
-                foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None).OrderBy(x => x.Team))
+                foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None).OrderBy(x => x.Role.Team))
                     if (player.TryGetSessionVariable("NewRole", out Tuple<string, string> newrole))
                         RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en {newrole.Item1}.\n";
                     else

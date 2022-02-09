@@ -60,7 +60,7 @@ namespace DiscordLog.Patches
 			{
 				if (__instance.State == Scp244State.Destroyed)
 				{
-					DamageHandler damageHandler = new DamageHandler(null, handler);
+                    Exiled.API.Features.DamageHandlers.DamageHandler damageHandler = new Exiled.API.Features.DamageHandlers.CustomDamageHandler(null, handler);
 					DiscordLog.Instance.LOG += $":teapot: {__instance?.Info.ItemId} a été cassé par : {damageHandler.Type}.\n";
 				}
 			}

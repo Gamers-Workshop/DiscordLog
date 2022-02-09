@@ -115,7 +115,7 @@ namespace DiscordLog
 			PlayerEvents.PickingUpArmor += Handlers.OnPickingUpArmor;
 			//PlayerEvents.PickingUpScp330 += Handlers.OnPickingUpScp330;
 			Scp330Events.EatenScp330 += Handlers.OnEatenScp330;
-			PlayerEvents.ItemUsed += Handlers.OnPlayerUsedItem;
+			PlayerEvents.UsedItem += Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator += Handlers.OnGeneratorUnlock;
 			PlayerEvents.StoppingGenerator += Handlers.OnStoppingGenerator;
@@ -164,7 +164,7 @@ namespace DiscordLog
 			PlayerEvents.PickingUpArmor -= Handlers.OnPickingUpArmor;
 			//PlayerEvents.PickingUpScp330 -= Handlers.OnPickingUpScp330;
 			Scp330Events.EatenScp330 -= Handlers.OnEatenScp330;
-			PlayerEvents.ItemUsed -= Handlers.OnPlayerUsedItem;
+			PlayerEvents.UsedItem -= Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator -= Handlers.OnGeneratorUnlock;
 			PlayerEvents.StoppingGenerator -= Handlers.OnStoppingGenerator;
@@ -419,17 +419,17 @@ namespace DiscordLog
 				{
 					NormalisedName.TryGetValue(player, out string PlayerName);
 					PlayerNameList += $"{PlayerName}\n";
-					if (player.Team == Team.RIP)
+					if (player.Role.Team == Team.RIP)
 						if (player.IsOverwatchEnabled)
 							PlayerRoleList += $"Overwatch\n";
 						else
-							PlayerRoleList += $"{player.Role}\n";
+							PlayerRoleList += $"{player.Role.Type}\n";
 					else if (player.TryGetSessionVariable("NewRole", out Tuple<string,string> NewRole))
 						PlayerRoleList += $"{NewRole.Item1}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
 					else if (player.Role == RoleType.Scp079)
 						PlayerRoleList += $"Scp079({(player.IsGodModeEnabled ? $"GodMod" : $"{Generator.Get(GeneratorState.Engaged).Count()}/3 Gen")})\n";
 					else
-						PlayerRoleList += $"{player.Role}({(player.IsGodModeEnabled ? $"GodMod" : $"{(int)player.Health}Hp")})\n";
+						PlayerRoleList += $"{player.Role.Type}({(player.IsGodModeEnabled ? $"GodMod" : $"{(int)player.Health}Hp")})\n";
                     UserIdList += $"{player.UserId}\n";
                 }
             }
