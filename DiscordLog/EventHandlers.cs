@@ -23,7 +23,7 @@ namespace DiscordLog
     {
         internal readonly DiscordLog plugin;
         public static List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
-        private static Dictionary<string, string> SteamNickName = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> SteamNickName = new Dictionary<string, string>();
         private bool RoundIsStart = false;
         private Player IntercomPlayerSpeek;
         public static Player Use914;
