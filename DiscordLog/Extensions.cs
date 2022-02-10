@@ -22,7 +22,7 @@ namespace DiscordLog
             }
             else if (item is MicroHid microhid)
             {
-                return $"MicroHID [{(int)(microhid.Energy * 100)}]%";
+                return $"MicroHID [{(int)(microhid.Energy * 100)}%]";
             }
             else if (item is Exiled.API.Features.Items.Radio radio)
             {
@@ -39,7 +39,7 @@ namespace DiscordLog
             }
             else if (itemPickup.Base is MicroHIDPickup microhid)
             {
-                return $"MicroHID [{(int)(microhid.Energy * 100)}]%";
+                return $"MicroHID [{(int)(microhid.Energy * 100)}%]";
             }
             else if (itemPickup.Base is RadioPickup radio)
             {
