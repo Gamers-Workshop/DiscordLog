@@ -16,7 +16,7 @@ namespace DiscordLog
     [HarmonyPatch(typeof(PlayerCommandSender), nameof(PlayerCommandSender.RaReply))]
     public class RaReplyPatches
     {
-        public static void Prefix(string text, bool success, bool logToConsole, string overrideDisplay)
+        public static void Prefix(string text)
         {
             if (!text.Contains("REQUEST_DATA:PLAYER_LIST"))
                 DiscordLog.Instance.LOGStaff += $"{text}\n";
@@ -26,7 +26,7 @@ namespace DiscordLog
     [HarmonyPatch(typeof(ConsoleCommandSender), nameof(ConsoleCommandSender.RaReply))]
     public class GamCoreReplyPAtches
     {
-        public static void Prefix(string text, bool success, bool logToConsole, string overrideDisplay)
+        public static void Prefix(string text)
         {
             if (!text.Contains("REQUEST_DATA:PLAYER_LIST"))
                 DiscordLog.Instance.LOGStaff += $"{text}\n";
@@ -62,6 +62,7 @@ namespace DiscordLog
             try
             {
                 string[] args = query.Trim().Split(QueryProcessor.SpaceArray, 512, StringSplitOptions.RemoveEmptyEntries);
+                if (args.Count() == 0) return;
                 if (args[0].ToUpperInvariant() == "REQUEST_DATA")
                     return;
 
@@ -73,7 +74,7 @@ namespace DiscordLog
                         {
                             {
                                 Player Jailed = Player.Get(args[1]);
-                                DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) a jail ``{Jailed.Nickname}`` ({EventHandlers.ConvertID(Jailed.UserId)}).\n";
+                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a jail {Extensions.LogPlayer(Jailed)}.\n";
                             }
                         }
                         return;
@@ -94,9 +95,9 @@ namespace DiscordLog
                                 }
                                 foreach (Player ply in PlyList)
                                 {
-                                    Receiver += $"\n - ``{ply.Nickname}`` ({EventHandlers.ConvertID(ply.UserId)})";
+                                    Receiver += $"\n - {Extensions.LogPlayer(ply)}";
                                 }
-                                DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) a changé en {(RoleType)Role} : {Receiver}\n";
+                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a changé en {(RoleType)Role} : {Receiver}\n";
                             }
                         }
                         return;
@@ -117,9 +118,9 @@ namespace DiscordLog
                                 }
                                 foreach (Player ply in PlyList)
                                 {
-                                    Receiver += $"\n - ``{ply.Nickname}`` ({EventHandlers.ConvertID(ply.UserId)})\n";
+                                    Receiver += $"\n - {Extensions.LogPlayer(ply)}\n";
                                 }
-                                DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) a donné : {(ItemType)Item} {Receiver}\n";
+                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a donné : {(ItemType)Item} {Receiver}\n";
                             }
                         }
                         return;
@@ -138,15 +139,15 @@ namespace DiscordLog
                             }
                             foreach (Player ply in PlyList)
                             {
-                                Receiver += $"\n - ``{ply.Nickname}`` ({EventHandlers.ConvertID(ply.UserId)})";
+                                Receiver += $"\n - {Extensions.LogPlayer(ply)}";
                             }
                             if (args[1] == "0")
                             {
-                                DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) à enlever l'overwatch : {Receiver}\n";
+                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à enlever l'overwatch : {Receiver}\n";
                             }
                             else if (args[1] == "1")
                             {
-                                DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) à mis l'overwatch : {Receiver}\n";
+                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à mis l'overwatch : {Receiver}\n";
                             }
                         }
                         return;
@@ -165,21 +166,21 @@ namespace DiscordLog
                             }
                             foreach (Player ply in PlyList)
                             {
-                                Receiver += $"\n - ``{ply.Nickname}`` ({EventHandlers.ConvertID(ply.UserId)})";
+                                Receiver += $"\n - {Extensions.LogPlayer(ply)}";
                             }
-                            DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) à tp les joueurs sur lui : {Receiver}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à tp les joueurs sur lui : {Receiver}\n";
                         }
                         return;
                     case "goto":
                         {
                             Player player2 = Player.Get(args[1]);
-                            DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) se tp à ``{player2.Nickname}`` ({player2.UserId}).\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} se tp à ``{player2.Nickname}`` ({player2.UserId}).\n";
                         }
                         return;
                     case "request_data":
                         {
                             Player player2 = Player.Get(args[2]);
-                            DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) a demandé les donnée de ``{player2.Nickname}`` ({EventHandlers.ConvertID(player2.UserId)}) : {args[1]}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a demandé les donnée de {Extensions.LogPlayer(player2)} : {args[1]}\n";
                         }
                         return;
                     case "effect":
@@ -197,9 +198,9 @@ namespace DiscordLog
                             }
                             foreach (Player ply in PlyList)
                             {
-                                Receiver += $"\n - ``{ply.Nickname}`` ({EventHandlers.ConvertID(ply.UserId)})";
+                                Receiver += $"\n - {Extensions.LogPlayer(ply)}";
                             }
-                            DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) a envoyé {args[2]} : {Receiver}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé {args[2]} : {Receiver}\n";
                         }
                         return;
                     case "mute":
@@ -222,9 +223,9 @@ namespace DiscordLog
                             }
                             foreach (Player ply in PlyList)
                             {
-                                Receiver += $"\n - ``{ply.Nickname}`` ({EventHandlers.ConvertID(ply.UserId)})";
+                                Receiver += $"\n - {Extensions.LogPlayer(ply)}";
                             }
-                            DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) à {args[0]} : {Receiver}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à {args[0]} : {Receiver}\n";
                         }
                         return;
                     default:
@@ -232,7 +233,7 @@ namespace DiscordLog
                             string str1 = null;
                             foreach (string str2 in args)
                                 str1 += $"{str2} ";
-                            DiscordLog.Instance.LOGStaff += $":keyboard: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) a envoyé ``{str1.TrimEnd(' ')}``.\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{str1.TrimEnd(' ')}``.\n";
                             return;
                         }
                 }

@@ -239,7 +239,7 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Ban",
-                                        value = $"``{sanctioned.Nickname}`` ({EventHandlers.ConvertID(sanctioned.UserId)})",
+                                        value = $"{Extensions.LogPlayer(sanctioned)}",
                                         inline = false,
                                     },
                                     new
@@ -293,7 +293,7 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Oban",
-                                        value = $"``{sanctionedNickname}``({EventHandlers.ConvertID(sanctionedUserId)})",
+                                        value = $"``{sanctionedNickname}``({Extensions.ConvertID(sanctionedUserId)})",
                                         inline = false,
                                     },
                                     new
@@ -347,7 +347,7 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Kick",
-                                        value = $"``{sanctioned.Nickname}`` ({EventHandlers.ConvertID(sanctioned.UserId)})",
+                                        value = $"{Extensions.LogPlayer(sanctioned)}",
                                         inline = false,
                                     },
                                     new
@@ -393,7 +393,7 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Warn",
-                                        value = $"``{sanctioned.Nickname}`` ({EventHandlers.ConvertID(sanctioned.UserId)})",
+                                        value = $"{Extensions.LogPlayer(sanctioned)}",
                                         inline = false,
                                     },
                                     new
@@ -439,7 +439,7 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Warn",
-                                        value = $"``{sanctionedNickname}`` ({EventHandlers.ConvertID(sanctionedUserId)})",
+                                        value = $"``{sanctionedNickname}`` ({Extensions.ConvertID(sanctionedUserId)})",
                                         inline = false,
                                     },
                                     new
@@ -485,7 +485,7 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Bug",
-                                        value = $"``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)})",
+                                        value = $"{Extensions.LogPlayer(player)}",
                                         inline = false,
                                     },
                                     new
@@ -531,7 +531,7 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Sugestion",
-                                        value = $"``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)})",
+                                        value = $"{Extensions.LogPlayer(player)}",
                                         inline = false,
                                     },
                                     new
@@ -578,7 +578,7 @@ namespace DiscordLog
                                     new
                                     {
                                         name = $"Report",
-                                        value = $"[{Reported.Id}]``{Reported.Nickname}`` ({EventHandlers.ConvertID(Reported.UserId)})",
+                                        value = $"[{Reported.Id}] {Extensions.LogPlayer(Reported)}",
                                         inline = false,
                                     },
                                     new

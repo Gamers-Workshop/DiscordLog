@@ -1,4 +1,9 @@
 ﻿using Exiled.API.Features;
+using Exiled.API.Features.Items;
+using InventorySystem.Items.Firearms.Ammo;
+using InventorySystem.Items.MicroHID;
+using InventorySystem.Items.Pickups;
+using InventorySystem.Items.Radio;
 using NorthwoodLib;
 using NorthwoodLib.Pools;
 using System;
@@ -13,8 +18,59 @@ using UnityEngine;
 
 namespace DiscordLog
 {
-	internal static class Extensions
+	public static class Extensions
 	{
+		public static string LogItem(Item item)
+        {
+			if (item is Firearm firearm)
+			{
+				return $"{item.Type} [{firearm.Ammo}/{firearm.MaxAmmo}]";
+			}
+			else if (item is MicroHid microhid)
+			{
+				return $"MicroHID [{microhid.Energy * 100}]";
+			}
+			else if (item is Exiled.API.Features.Items.Radio radio)
+			{
+				return $"Radio [{radio.BatteryLevel}]";
+			}
+			else
+				return $"{item.Type}";
+        }
+		public static string LogPickup(Pickup itemPickup)
+        {
+			if (itemPickup.Base is AmmoPickup firearm)
+			{
+				return $"{itemPickup.Type} [{firearm.SavedAmmo}/{firearm.MaxAmmo}].\n";
+			}
+			else if (itemPickup.Base is MicroHIDPickup microhid)
+			{
+				return $"[{microhid.Energy * 100}].\n";
+			}
+			else if (itemPickup.Base is RadioPickup radio)
+			{
+				return $"[{radio.SavedBattery}].\n";
+			}
+			else
+				return $"{itemPickup.Type}.\n";
+		}
+		public static string LogPlayer(Player player)
+		{
+			return $"{LogPlayer(player)}";
+		}
+		public static string ConvertID(string UserID)
+		{
+			if (string.IsNullOrEmpty(UserID)) return string.Empty;
+			if (UserID.EndsWith("@discord"))
+			{
+				return $"<@{UserID.Replace("@discord", string.Empty)}>";
+			}
+			else if (UserID.EndsWith("@steam"))
+			{
+				return $"{UserID}[:link:](<https://steamidfinder.com/lookup/{UserID.Replace("@steam", string.Empty)}\"SteamFinder\">)";
+			}
+			return UserID;
+		}
 		public static bool IsEnemy(this Player player, Team target)
 		{
 			if (player.Role == RoleType.Spectator || player.Role == RoleType.None || player.Role.Team == target)

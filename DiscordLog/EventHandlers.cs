@@ -2,8 +2,10 @@
 using Exiled.API.Features;
 using Exiled.Events.EventArgs;
 using InventorySystem.Items.Firearms;
+using InventorySystem.Items.Firearms.Ammo;
 using InventorySystem.Items.MicroHID;
 using InventorySystem.Items.Radio;
+using InventorySystem.Items.Usables.Scp330;
 using MEC;
 using Newtonsoft.Json.Serialization;
 using NorthwoodLib;
@@ -48,9 +50,9 @@ namespace DiscordLog
                 string RoundStart = $":triangular_flag_on_post: Démarrage de la partie avec {Player.List.Where((p) => p.Role != RoleType.None).Count()} joueurs.\n";
                 foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None).OrderBy(x => x.Role.Team))
                     if (player.TryGetSessionVariable("NewRole", out Tuple<string, string> newrole))
-                        RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en {newrole.Item1}.\n";
+                        RoundStart += $"    - {Extensions.LogPlayer(player)} a spawn en {newrole.Item1}.\n";
                     else
-                        RoundStart += $"    - ``{player.Nickname}`` ({ConvertID(player.UserId)}) a spawn en {player.Role}.\n";
+                        RoundStart += $"    - {Extensions.LogPlayer(player)} a spawn en {player.Role}.\n";
                 plugin.LOG += RoundStart;
             });
         }
@@ -72,7 +74,7 @@ namespace DiscordLog
                 objcontent = ":helicopter: L’équipe Epsilon est arrivée sur le site.\n";
                 foreach (Player playerrespawn in ev.Players)
                 {
-                    objcontent += $"    - ``{playerrespawn.Nickname}`` ({ConvertID(playerrespawn.UserId)})\n";
+                    objcontent += $"    - {Extensions.LogPlayer(playerrespawn)}\n";
                 }
             }
             else if (ev.NextKnownTeam == SpawnableTeamType.ChaosInsurgency)
@@ -80,7 +82,7 @@ namespace DiscordLog
                 objcontent = ":articulated_lorry: L’Insurrection du Chaos est arrivée sur le site.\n";
                 foreach (Player playerrespawn in ev.Players)
                 {
-                    objcontent += $"    - ``{playerrespawn.Nickname}`` ({ConvertID(playerrespawn.UserId)})\n";
+                    objcontent += $"    - {Extensions.LogPlayer(playerrespawn)}\n";
                 }
             }
             else
@@ -88,7 +90,7 @@ namespace DiscordLog
                 objcontent = ":snake: La Main du Serpent est arrivée sur le site.\n";
                 foreach (Player playerrespawn in ev.Players)
                 {
-                    objcontent += $"    - ``{playerrespawn.Nickname}`` ({ConvertID(playerrespawn.UserId)})\n";
+                    objcontent += $"    - {Extensions.LogPlayer(playerrespawn)}\n";
                 }
             }
             plugin.LOG += objcontent;
@@ -96,12 +98,12 @@ namespace DiscordLog
         public void OnWarheadStart(StartingEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":radioactive: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a déclenché la détonation de l'Alpha Warhead.\n";
+                plugin.LOG += $":radioactive: {Extensions.LogPlayer(ev.Player)} a déclenché la détonation de l'Alpha Warhead.\n";
         }
         public void OnWarheadCancel(StoppingEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":radioactive: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a désactivé la détonation de l’Alpha Warhead.\n";
+                plugin.LOG += $":radioactive: {Extensions.LogPlayer(ev.Player)} a désactivé la détonation de l’Alpha Warhead.\n";
         }
         public void OnDetonated()
         {
@@ -122,20 +124,20 @@ namespace DiscordLog
             if (ev.UserId.EndsWith("@steam"))
             {
                 if (SteamNickName.TryGetValue(ev.UserId, out string NickName))
-                    plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: ``{NickName}`` ({ConvertID(ev.UserId)}) ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
+                    plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: ``{NickName}`` ({Extensions.ConvertID(ev.UserId)}) ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
                 else
                 {
                     NickName = Extensions.GetUserName(ev.UserId.Replace("@steam", string.Empty));
                     SteamNickName.Add(ev.UserId, NickName);
-                    plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: ``{NickName}`` ({ConvertID(ev.UserId)}) ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
+                    plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: ``{NickName}`` ({Extensions.ConvertID(ev.UserId)}) ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
                 }
             }
             else
-                plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: {ConvertID(ev.UserId)} ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
+                plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: {Extensions.ConvertID(ev.UserId)} ||{ev.Request.RemoteEndPoint}|| tente une connexion sur le serveur.\n";
         }
         public void OnPlayerVerified(VerifiedEventArgs ev)
         {
-            plugin.LOG += $":chart_with_upwards_trend: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) [{ev.Player.Id}] a rejoint le serveur.\n";
+            plugin.LOG += $":chart_with_upwards_trend: {Extensions.LogPlayer(ev.Player)} [{ev.Player.Id}] a rejoint le serveur.\n";
             string PlayerName = ev.Player.Nickname.Normalize(System.Text.NormalizationForm.FormKD);
             if (PlayerName.Length < 18)
               plugin.NormalisedName.Add(ev.Player, $"[{ev.Player.Id}] {PlayerName}");
@@ -145,7 +147,7 @@ namespace DiscordLog
         public void OnPlayerDestroying(DestroyingEventArgs ev)
         {
             if (ev.Player == null) return;
-            plugin.LOG += $":chart_with_downwards_trend: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a quitté le serveur.\n";
+            plugin.LOG += $":chart_with_downwards_trend: {Extensions.LogPlayer(ev.Player)} a quitté le serveur.\n";
             plugin.NormalisedName.Remove(ev.Player);
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
@@ -155,23 +157,17 @@ namespace DiscordLog
             Timing.CallDelayed(0.25f, () =>
             {
                 if (ev.Player.TryGetSessionVariable("NewRole", out Tuple<string, string> newrole))
-                    plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {newrole.Item1}.\n";
+                    plugin.LOG += $":new: {Extensions.LogPlayer(ev.Player)} a spawn en tant que : {newrole.Item1}.\n";
                 else if (ev.Reason == SpawnReason.Escaped)
                     if (ev.Player.IsCuffed)
-                        plugin.LOG += $":chains: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a été escorté en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                        plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Player)} a été escorté en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
                     else
-                        plugin.LOG += $":person_running: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est échapé en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                        plugin.LOG += $":person_running: {Extensions.LogPlayer(ev.Player)} s'est échapé en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
                 else
-                    plugin.LOG += $":new: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a spawn en tant que : {ev.NewRole}.\n";
+                    plugin.LOG += $":new: {Extensions.LogPlayer(ev.Player)} a spawn en tant que : {ev.NewRole}.\n";
             });
         }
 
-        public void OnPlayerHurt(HurtingEventArgs ev)
-        {
-            /*if (ev.IsAllowed && ev.Target != null && ev.Attacker != ev.Target && ev.Target.Role != RoleType.Spectator && ev.HitInformations.Amount < ev.Target.Health + ev.Target.AdrenalineHealth && !ev.Attacker.IsEnemy(ev.Target.Team))
-                if (bloodwebhook != $":drop_of_blood: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est blessé par ``{ev.Attacker.Nickname}`` ({ev.Attacker.UserId}) avec {ev.DamageType.name}")
-                    plugin.LOG += $":drop_of_blood: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est blessé par ``{ev.Attacker.Nickname}`` ({ev.Attacker.UserId}) avec {ev.DamageType.name}\n";*/
-        }
         public void OnPlayerDeath(DiedEventArgs ev)
         {
             if (ev.Target.Role == RoleType.None) return;
@@ -188,11 +184,11 @@ namespace DiscordLog
             }
             if (ev.Killer != null && ev.Killer != ev.Target)
             {
-                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par ``{ev.Killer.Nickname}`` ({ConvertID(ev.Killer.UserId)}) avec {DamageString}.\n";
+                plugin.LOG += $":skull: {Extensions.LogPlayer(ev.Target)} est mort par {Extensions.LogPlayer(ev.Killer)} avec {DamageString}.\n";
             }
             else
             {
-                plugin.LOG += $":skull: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) est mort par {DamageString}.\n";
+                plugin.LOG += $":skull: {Extensions.LogPlayer(ev.Target)} est mort par {DamageString}.\n";
             }
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
@@ -200,8 +196,8 @@ namespace DiscordLog
             if (ev.IsAllowed && ev.Player != null)
                 if (ev.Item.Type == ItemType.SCP330)
                 {
-                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}: ";
-                    ev.Item.Base.TryGetComponent<InventorySystem.Items.Usables.Scp330.Scp330Bag>(out var comp);
+                    plugin.LOG += $":outbox_tray: {Extensions.LogPlayer(ev.Player)} a jeté SCP330: ";
+                    ev.Item.Base.TryGetComponent<Scp330Bag>(out var comp);
                     foreach (var candy in comp.Candies)
                     {
                         plugin.LOG += $"\n  - {candy}";
@@ -209,70 +205,72 @@ namespace DiscordLog
                     plugin.LOG += "\n";
                 }
                 else
-                    plugin.LOG += $":outbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a jeté {ev.Item.Type}.\n";
+                    plugin.LOG += $":outbox_tray: {Extensions.LogPlayer(ev.Player)} a jeté {Extensions.LogItem(ev.Item)}.\n";
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-               plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}.\n";
+                    plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {Extensions.LogPickup(ev.Pickup)}.\n";
         }
         public void OnPickingUpArmor(PickingUpArmorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":inbox_tray: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a récupéré {ev.Pickup.Type}.\n";
+                plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Pickup.Type}.\n";
         }
 
         public void OnEatenScp330(EatenScp330EventArgs ev)
         {
             if (ev.Player != null)
-                plugin.LOG += $":candy: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a manger un bonbon : {ev.Candy.Kind.ToString().ToLower()}.\n";
+                plugin.LOG += $":candy: {Extensions.LogPlayer(ev.Player)} a manger un bonbon : {ev.Candy.Kind}.\n";
         }
 
         public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
             if (Exiled.API.Extensions.ItemExtensions.IsMedical(ev.Item.Type))
-                plugin.LOG += $":adhesive_bandage: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) s'est soigné avec {ev.Item.Type}.\n";
+                plugin.LOG += $":adhesive_bandage: {Extensions.LogPlayer(ev.Player)} s'est soigné avec {ev.Item.Type}.\n";
             else
                 switch (ev.Item.Type)
                 {
                     case ItemType.SCP207:
-                        plugin.LOG += $"<:ContaCola:881985143718445086> ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item.Type}.\n";
+                        plugin.LOG += $"<:ContaCola:881985143718445086> {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n";
                         break;
                     case ItemType.SCP268:
-                        plugin.LOG += $":billed_cap: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item.Type}.\n";
+                        plugin.LOG += $":billed_cap: {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n";
                         break;
                     default:
-                        plugin.LOG += $":??: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a utilisé {ev.Item.Type}.\n";
+                        plugin.LOG += $":??: {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n";
                         break;
                 }
         }
         public void OnGeneratorUnlock(UnlockingGeneratorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a débloqué un générateur dans la salle : {ev.Generator.Room.Type}.\n";
+                plugin.LOG += $":computer: {Extensions.LogPlayer(ev.Player)} a débloqué un générateur dans la salle : {ev.Generator.Room.Type}.\n";
         }
         public void OnStoppingGenerator(StoppingGeneratorEventArgs ev)
         {
             
             if (ev.IsAllowed && ev.Player != null && ev.Generator.IsActivating)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a désactivé un générateur de la salle : {ev.Generator.Room.Type}.\n";
+                plugin.LOG += $":computer: {Extensions.LogPlayer(ev.Player)} a désactivé un générateur de la salle : {ev.Generator.Room.Type}.\n";
         }
         public void OnActivatingGenerator(ActivatingGeneratorEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":computer: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a activé un générateur de la salle : {ev.Generator.Room.Type}.\n";
+                plugin.LOG += $":computer: {Extensions.LogPlayer(ev.Player)} a activé un générateur de la salle : {ev.Generator.Room.Type}.\n";
         }
         public void OnActivatingWarheadPanel(ActivatingWarheadPanelEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null && !UnityEngine.Object.FindObjectOfType<AlphaWarheadOutsitePanel>().keycardEntered)
-                plugin.LOG += $":radioactive: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a ouvert la protection pour activé l'Alpha Warhead.\n";
-            else if (ev.IsAllowed && ev.Player != null && UnityEngine.Object.FindObjectOfType<AlphaWarheadOutsitePanel>().keycardEntered)
-                plugin.LOG += $":radioactive: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a fermer la protection pour activé l'Alpha Warhead.\n";
+            if (!ev.IsAllowed && ev.Player == null) return;
+
+            if (!UnityEngine.Object.FindObjectOfType<AlphaWarheadOutsitePanel>().keycardEntered)
+                plugin.LOG += $":radioactive: {Extensions.LogPlayer(ev.Player)} a ouvert la protection pour activé l'Alpha Warhead.\n";
+            else if (UnityEngine.Object.FindObjectOfType<AlphaWarheadOutsitePanel>().keycardEntered)
+                plugin.LOG += $":radioactive: {Extensions.LogPlayer(ev.Player)} a fermer la protection pour activé l'Alpha Warhead.\n";
         }
         public void OnLocalReporting(LocalReportingEventArgs ev)
         {
             if (DiscordLog.Instance.Config.WebhookReport != "none")
-                Webhook.ReportAsync(ev.Issuer, ev.Target, DiscordLog.Instance.Config.WebhookReport, DiscordLog.Instance.Config.Ping, ev.Reason);
+                _ = Webhook.ReportAsync(ev.Issuer, ev.Target, DiscordLog.Instance.Config.WebhookReport, DiscordLog.Instance.Config.Ping, ev.Reason);
             ev.IsAllowed = true;
         }
 
@@ -281,7 +279,7 @@ namespace DiscordLog
             if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && Map.IntercomSpeaker == ev.Player)
             {
                 IntercomPlayerSpeek = ev.Player;
-                plugin.LOG += $":loudspeaker: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) utilise l'intercom.\n";
+                plugin.LOG += $":loudspeaker: {Extensions.LogPlayer(ev.Player)} utilise l'intercom.\n";
             }
             else if (ev.Player == null)
                 IntercomPlayerSpeek = null;
@@ -289,25 +287,25 @@ namespace DiscordLog
         public void OnHandcuffing(HandcuffingEventArgs ev)
         {
             if (ev.IsAllowed && ev.Cuffer != null)
-                plugin.LOG += $":chains: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été menoté par ``{ev.Cuffer.Nickname}`` ({ConvertID(ev.Cuffer.UserId)}).\n";
+                plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été menoté par {Extensions.LogPlayer(ev.Cuffer)}.\n";
         }
         public void OnRemovingHandcuffs(RemovingHandcuffsEventArgs ev)
         {
             if (ev.IsAllowed)
                 if (ev.Cuffer != null)
-                    plugin.LOG += $":chains: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été démenoté par ``{ev.Cuffer.Nickname}`` ({ConvertID(ev.Cuffer.UserId)}).\n";
+                    plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été démenoté par {Extensions.LogPlayer(ev.Cuffer)}.\n";
                 else
-                    plugin.LOG += $":chains: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été démenoté.\n";
+                    plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été démenoté.\n";
         }
         public void OnEnteringPocketDimension(EnteringPocketDimensionEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":hole: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) est entré dans la dimension de poche.\n";
+                plugin.LOG += $":hole: {Extensions.LogPlayer(ev.Player)} est entré dans la dimension de poche.\n";
         }
         public void OnEscapingPocketDimension(EscapingPocketDimensionEventArgs ev)
         {
             if (ev.IsAllowed && ev.Player != null)
-                plugin.LOG += $":hole: ``{ev.Player.Nickname}`` ({ConvertID(ev.Player.UserId)}) a échappé a la dimension de poche.\n";
+                plugin.LOG += $":hole: {Extensions.LogPlayer(ev.Player)} a échappé a la dimension de poche.\n";
         }
         public void On914Activating(ActivatingEventArgs ev)
         {
@@ -318,22 +316,22 @@ namespace DiscordLog
         public void OnFinishingRecall(FinishingRecallEventArgs ev)
         {
             if (ev.IsAllowed && ev.Target != null && ev.Scp049 != null)
-                plugin.LOG += $":zombie: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été ressuscité en Scp049-2 par ``{ev.Scp049.Nickname}`` ({ConvertID(ev.Scp049.UserId)}).\n";
+                plugin.LOG += $":zombie: {Extensions.LogPlayer(ev.Target)} a été ressuscité en Scp049-2 par {Extensions.LogPlayer(ev.Scp049)}.\n";
         }
         public void OnBanning(BanningEventArgs ev)
         {
             if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
             {
-                Webhook.BanPlayerAsync(ev.Issuer, ev.Target, ev.Reason, ev.Duration);
-                plugin.LOGStaff += $":hammer: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n";
+                _ = Webhook.BanPlayerAsync(ev.Issuer, ev.Target, ev.Reason, ev.Duration);
+                plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par {Extensions.LogPlayer(ev.Issuer)}.\n";
             } 
         }
         public void OnKicking(KickingEventArgs ev)
         {
             if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
             {
-                plugin.LOGStaff += $":mans_shoe: ``{ev.Target.Nickname}`` ({ConvertID(ev.Target.UserId)}) a été kick pour : ``{ev.Reason}`` ; par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n";
-                Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
+                plugin.LOGStaff += $":mans_shoe: {Extensions.LogPlayer(ev.Target)} a été kick pour : ``{ev.Reason}`` ; par {Extensions.LogPlayer(ev.Issuer)}.\n";
+                _ = Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
             }
         }
         public void OnBanned(BannedEventArgs ev)
@@ -355,22 +353,9 @@ namespace DiscordLog
                     Log.Warn($"API key is not valide {ex}");
                 }
             }
-            plugin.LOGStaff += $":hammer: ``{TargetNick}`` ({ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par ``{ev.Issuer.Nickname}`` ({ConvertID(ev.Issuer.UserId)}).\n";
+            plugin.LOGStaff += $":hammer: ``{TargetNick}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Issuer)}.\n";
 
-            Webhook.OBanPlayerAsync(ev.Issuer, TargetNick, ev.Details.Id, ev.Details.Reason, time);
-        }
-        public static string ConvertID(string UserID)
-        {
-            if (string.IsNullOrEmpty(UserID)) return string.Empty;
-            if (UserID.EndsWith("@discord"))
-            {
-                return $"<@{UserID.Replace("@discord", string.Empty)}>";
-            }
-            else if (UserID.EndsWith("@steam"))
-            {
-                return $"{UserID}[:link:](<https://steamidfinder.com/lookup/{UserID.Replace("@steam",string.Empty)}\"SteamFinder\">)";
-            }
-            return UserID;
+            _ = Webhook.OBanPlayerAsync(ev.Issuer, TargetNick, ev.Details.Id, ev.Details.Reason, time);
         }
     }
 }

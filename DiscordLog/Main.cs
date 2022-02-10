@@ -108,7 +108,6 @@ namespace DiscordLog
 			PlayerEvents.Destroying += Handlers.OnPlayerDestroying;
 			PlayerEvents.ChangingRole += Handlers.OnChangingRole;
 
-			PlayerEvents.Hurting += Handlers.OnPlayerHurt;
 			PlayerEvents.Died += Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem += Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem += Handlers.OnPickingUpItem;
@@ -157,7 +156,6 @@ namespace DiscordLog
 			PlayerEvents.Verified -= Handlers.OnPlayerVerified;
 			PlayerEvents.Destroying -= Handlers.OnPlayerDestroying;
 			PlayerEvents.ChangingRole -= Handlers.OnChangingRole;
-			PlayerEvents.Hurting -= Handlers.OnPlayerHurt;
 			PlayerEvents.Died -= Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem -= Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem -= Handlers.OnPickingUpItem;
@@ -409,7 +407,7 @@ namespace DiscordLog
 					RoundTime = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
 				}
 			}
-			Webhook.UpdateServerInfo(RoundInfo, RoundTime);
+			_ = Webhook.UpdateServerInfo(RoundInfo, RoundTime);
 			string PlayerNameList = "";
 			string PlayerRoleList = "";
 			string UserIdList = "";
@@ -433,7 +431,7 @@ namespace DiscordLog
                     UserIdList += $"{player.UserId}\n";
                 }
             }
-			Webhook.UpdateServerInfoStaffAsync(RoundInfo, RoundTime, PlayerNameList, PlayerRoleList, UserIdList);
+			_ = Webhook.UpdateServerInfoStaffAsync(RoundInfo, RoundTime, PlayerNameList, PlayerRoleList, UserIdList);
 		}
 	}
 }

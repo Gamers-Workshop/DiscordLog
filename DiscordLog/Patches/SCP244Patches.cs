@@ -23,7 +23,7 @@ namespace DiscordLog.Patches
 			try
 			{
 				Player player = Player.Get(__instance.Hub);
-				DiscordLog.Instance.LOG += $":inbox_tray: ``{player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) a récupéré {__instance.TargetPickup.Info.ItemId}.\n";
+				DiscordLog.Instance.LOG += $":inbox_tray: {Extensions.LogPlayer(player)} a récupéré {__instance.TargetPickup.Info.ItemId}.\n";
 			}
 			catch
 			{
@@ -41,7 +41,7 @@ namespace DiscordLog.Patches
 			try
 			{
 				Player player = Player.Get(__instance.Owner);
-				DiscordLog.Instance.LOG += $":teapot: ``{ player.Nickname}`` ({EventHandlers.ConvertID(player.UserId)}) a ouvert {__instance.ItemTypeId}.\n";
+				DiscordLog.Instance.LOG += $":teapot: {Extensions.LogPlayer(player)} a ouvert {__instance.ItemTypeId}.\n";
 			}
 			catch
 			{

@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace DiscordLog.Patches
 {
-    [HarmonyPatch(typeof(Log), nameof(Log.Error))]
+    //[HarmonyPatch(typeof(Log), nameof(Log.Error))]
     public class ErrorPatches
     {
         public static void Postfix(object message)
         {
-            if (DiscordLog.Instance.LOGError == null || !DiscordLog.Instance.LOGError.Contains(message.ToString()));
+            if (DiscordLog.Instance.LOGError == null || !DiscordLog.Instance.LOGError.Contains(message.ToString()))
                 DiscordLog.Instance.LOGError += message.ToString() + "\n";
         }
     }

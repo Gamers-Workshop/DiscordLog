@@ -33,7 +33,7 @@ namespace DiscordLog.Command.Suggestion
                 response = $"Vous devez donner une suggestion";
                 return false;
             }
-            Webhook.SugestionAsync(player, Extensions.FormatArguments(arguments, 0));
+            _ = Webhook.SugestionAsync(player, Extensions.FormatArguments(arguments, 0));
             response = $"Votre suggestion a été envoyé : \n{Extensions.FormatArguments(arguments, 0)}";
             return true;
         }

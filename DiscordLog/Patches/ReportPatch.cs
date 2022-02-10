@@ -11,14 +11,7 @@ namespace DiscordLog.Patches
 	internal static class LocalReportPatch
 	{
 		static bool Prefix(
-			ref bool __state,
-			string reporterUserId,
-			string reportedUserId,
-			string reason,
-			ref int reportedId,
-			string reporterNickname,
-			string reportedNickname,
-			bool friendlyFire)
+			ref bool __state)
         {
 			if (DiscordLog.Instance.Config.WebhookReport != "none")
 			{
