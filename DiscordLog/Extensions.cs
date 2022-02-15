@@ -33,9 +33,9 @@ namespace DiscordLog
         }
         public static string LogPickup(Pickup itemPickup)
         {
-            if (itemPickup.Base is AmmoPickup firearm)
+            if (itemPickup.Base is InventorySystem.Items.Firearms.FirearmPickup firearm)
             {
-                return $"{itemPickup.Type} [{firearm.SavedAmmo}/{firearm.MaxAmmo}]";
+                return $"{itemPickup.Type} [{firearm.Status.Ammo}]";
             }
             else if (itemPickup.Base is MicroHIDPickup microhid)
             {
