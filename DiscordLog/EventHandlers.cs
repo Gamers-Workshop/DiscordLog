@@ -170,7 +170,7 @@ namespace DiscordLog
 
         public void OnPlayerDeath(DiedEventArgs ev)
         {
-            if (ev.Target.Role == RoleType.None) return;
+            if (ev.Target.Role == RoleType.None || !RoundIsStart) return;
             string DamageString;
             if (ev.Handler.Type == DamageType.Custom && ev.Handler.Base is CustomReasonDamageHandler customReason)
             {

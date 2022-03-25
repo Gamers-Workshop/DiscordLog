@@ -17,39 +17,33 @@ namespace DiscordLog
         public static string LogItem(Item item)
         {
             if (item is Firearm firearm)
-            {
                 return $"{item.Type} [{firearm.Ammo}/{firearm.MaxAmmo}]";
-            }
             else if (item is MicroHid microhid)
-            {
                 return $"MicroHID [{(int)(microhid.Energy * 100)}%]";
-            }
             else if (item is Exiled.API.Features.Items.Radio radio)
-            {
                 return $"Radio [{radio.BatteryLevel}%]";
-            }
-            else
+            else if (item != null)
                 return $"{item.Type}";
+            else
+                return "Unknown";
         }
         public static string LogPickup(Pickup itemPickup)
         {
             if (itemPickup.Base is InventorySystem.Items.Firearms.FirearmPickup firearm)
-            {
                 return $"{itemPickup.Type} [{firearm.Status.Ammo}]";
-            }
             else if (itemPickup.Base is MicroHIDPickup microhid)
-            {
                 return $"MicroHID [{(int)(microhid.Energy * 100)}%]";
-            }
             else if (itemPickup.Base is RadioPickup radio)
-            {
                 return $"Radio [{(int)(radio.SavedBattery * 100)}%]";
-            }
-            else
+            else if (itemPickup != null)
                 return $"{itemPickup.Type}";
+            else
+                return "Unknown";
         }
         public static string LogPlayer(Player player)
         {
+            if (player == null)
+                return $"``Unknown`` (Unknown)";
             return $"``{player.Nickname}`` ({ConvertID(player.UserId)})";
         }
         public static string ConvertID(string UserID)

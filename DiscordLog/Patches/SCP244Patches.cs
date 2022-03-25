@@ -41,7 +41,7 @@ namespace DiscordLog.Patches
 			try
 			{
 				Player player = Player.Get(__instance.Owner);
-				DiscordLog.Instance.LOG += $":teapot: {Extensions.LogPlayer(player)} a ouvert {__instance.ItemTypeId}.\n";
+				DiscordLog.Instance.LOG += $":teapot: {Extensions.LogPlayer(player)} a ouvert {__instance.ItemTypeId} : {Map.FindParentRoom(__instance.gameObject).Type}.\n";
 			}
 			catch
 			{
@@ -92,7 +92,7 @@ namespace DiscordLog.Patches
 				}
 				if (__instance.State == Scp244State.Idle && Vector3.Dot(__instance.transform.up, Vector3.up) < __instance._activationDot)
 				{
-					DiscordLog.Instance.LOG += $":teapot: {__instance?.Info.ItemId} c'est ouvert.\n";
+					DiscordLog.Instance.LOG += $":teapot: {__instance?.Info.ItemId} c'est ouvert : {Map.FindParentRoom(__instance.gameObject).Type}.\n";
 					__instance.State = Scp244State.Active;
 				}
 				float num = (__instance.State == Scp244State.Active) ? __instance._timeToGrow : (-__instance._timeToDecay);
