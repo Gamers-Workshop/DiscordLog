@@ -58,7 +58,7 @@ namespace DiscordLog.Patches
 			{
 				if (__instance.State == Scp244State.Destroyed)
 				{
-					DiscordLog.Instance.LOG += $":teapot: {__instance?.Info.ItemId} a été cassé : {Map.FindParentRoom(__instance.gameObject)?.Type}\n";
+					DiscordLog.Instance.LOG += $":teapot: {__instance.Info.ItemId} a été cassé : {Map.FindParentRoom(__instance.gameObject)?.Type}\n";
 				}
 			}
 			catch

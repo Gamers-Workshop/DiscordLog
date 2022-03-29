@@ -22,7 +22,7 @@ namespace DiscordLog
                 return $"MicroHID [{(int)(microhid.Energy * 100)}%]";
             else if (item is Exiled.API.Features.Items.Radio radio)
                 return $"Radio [{radio.BatteryLevel}%]";
-            else if (item != null)
+            else if (item is not null)
                 return $"{item.Type}";
             else
                 return "Unknown";
@@ -35,14 +35,14 @@ namespace DiscordLog
                 return $"MicroHID [{(int)(microhid.Energy * 100)}%]";
             else if (itemPickup.Base is RadioPickup radio)
                 return $"Radio [{(int)(radio.SavedBattery * 100)}%]";
-            else if (itemPickup != null)
+            else if (itemPickup is not null)
                 return $"{itemPickup.Type}";
             else
                 return "Unknown";
         }
         public static string LogPlayer(Player player)
         {
-            if (player == null)
+            if (player is null)
                 return $"``Unknown`` (Unknown)";
             return $"``{player.Nickname}`` ({ConvertID(player.UserId)})";
         }
@@ -96,18 +96,16 @@ namespace DiscordLog
 
                 var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
 
-                using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-                {
-                    var result = streamReader.ReadToEnd();
-                    return Regex.Match(result, @"\x22personaname\x22:\x22(.+?)\x22").Groups[1].Value;
-                }
+                using var streamReader = new StreamReader(httpResponse.GetResponseStream());
+                var result = streamReader.ReadToEnd();
+                return Regex.Match(result, @"\x22personaname\x22:\x22(.+?)\x22").Groups[1].Value;
             }
             catch (Exception)
             {
                 Log.Error("An error has occured while contacting steam servers (Are they down? Invalid API key?)");
             }
 
-            return "Unknown";
+            return "Unknown (API Key Not valid)";
         }
     }
 }

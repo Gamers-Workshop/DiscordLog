@@ -35,7 +35,7 @@ namespace DiscordLog
 		public string LOGError = null;
 
 
-		public Dictionary<Player, string> NormalisedName = new Dictionary<Player, string>();
+		public Dictionary<Player, string> NormalisedName = new();
 
 
 		private int patchCounter;
@@ -210,7 +210,7 @@ namespace DiscordLog
 			while (true)
 			{
 				yield return Timing.WaitForSeconds(10f);
-				if (LOGError != null)
+				if (LOGError is not null)
 				{
 					if (LOGError.Length < 2001)
 					{
@@ -223,7 +223,7 @@ namespace DiscordLog
 						string LogLimite = string.Empty;
 						string logs = LOGError;
 						LOGError = null;
-						List<string> LogToSend = new List<string>();
+						List<string> LogToSend = new();
 						foreach (string ligne in logs.Split('\n'))
 						{
 							if (ligne.Count() + Limiteur < 1999)
@@ -255,7 +255,7 @@ namespace DiscordLog
 			while(true)
 			{
 				yield return Timing.WaitForSeconds(1f);
-				if (LOG != null)
+				if (LOG is not null)
 				{
 					if (LOG.Length < 2001)
 					{
@@ -268,7 +268,7 @@ namespace DiscordLog
 						string LogLimite = string.Empty;
 						string logs = LOG;
 						LOG = null;
-						List<string> LogToSend = new List<string>();
+						List<string> LogToSend = new();
 						foreach (string ligne in logs.Split('\n'))
 						{
 							if (ligne.Count() + Limiteur < 1999)
@@ -293,7 +293,7 @@ namespace DiscordLog
 						}
 					}
 				}
-				if (LOGStaff != null)
+				if (LOGStaff is not null)
 				{
 					yield return Timing.WaitForSeconds(0.25f);
 					if (LOGStaff.Length < 2001)
@@ -307,7 +307,7 @@ namespace DiscordLog
 						string LogLimite = string.Empty;
 						string logs = LOGStaff;
 						LOGStaff = null;
-						List<string> LogToSend = new List<string>();
+						List<string> LogToSend = new();
 						foreach (string ligne in logs.Split('\n'))
 						{
 							if (ligne.Count() + Limiteur < 1999)

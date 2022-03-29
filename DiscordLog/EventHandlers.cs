@@ -22,8 +22,8 @@ namespace DiscordLog
     public class EventHandlers
     {
         internal readonly DiscordLog plugin;
-        public static List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
-        private static readonly Dictionary<string, string> SteamNickName = new Dictionary<string, string>();
+        public static List<CoroutineHandle> Coroutines = new();
+        private static readonly Dictionary<string, string> SteamNickName = new();
         private bool RoundIsStart = false;
         private Player IntercomPlayerSpeek;
         public static Player Use914;
@@ -97,12 +97,12 @@ namespace DiscordLog
         }
         public void OnWarheadStart(StartingEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player is not null)
                 plugin.LOG += $":radioactive: {Extensions.LogPlayer(ev.Player)} a déclenché la détonation de l'Alpha Warhead.\n";
         }
         public void OnWarheadCancel(StoppingEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player is not null)
                 plugin.LOG += $":radioactive: {Extensions.LogPlayer(ev.Player)} a désactivé la détonation de l’Alpha Warhead.\n";
         }
         public void OnDetonated()
@@ -146,13 +146,13 @@ namespace DiscordLog
         }
         public void OnPlayerDestroying(DestroyingEventArgs ev)
         {
-            if (ev.Player == null) return;
+            if (ev.Player is null) return;
             plugin.LOG += $":chart_with_downwards_trend: {Extensions.LogPlayer(ev.Player)} a quitté le serveur.\n";
             plugin.NormalisedName.Remove(ev.Player);
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
-            if (!RoundIsStart || ev.Player == null || ev.Reason == SpawnReason.Died || ev.Reason == SpawnReason.Revived || ev.Reason == SpawnReason.RoundStart || !ev.IsAllowed) return;
+            if (!RoundIsStart || ev.Player is null || ev.Reason == SpawnReason.Died || ev.Reason == SpawnReason.Revived || ev.Reason == SpawnReason.RoundStart || !ev.IsAllowed) return;
             float TimeAlive = ev.Player.ReferenceHub.characterClassManager.AliveTime;
             Timing.CallDelayed(0.25f, () =>
             {
@@ -171,18 +171,17 @@ namespace DiscordLog
         public void OnPlayerDeath(DiedEventArgs ev)
         {
             if (ev.Target.Role == RoleType.None || !RoundIsStart) return;
-            string DamageString;
+
+            string DamageString = ev.Handler.Type.ToString();
+
             if (ev.Handler.Type == DamageType.Custom && ev.Handler.Base is CustomReasonDamageHandler customReason)
             {
                 DamageString = customReason.ServerLogsText.Remove(0,30);
                 if (DamageString == "Disconect") 
                     return;
             }
-            else
-            {
-                DamageString = ev.Handler.Type.ToString();
-            }
-            if (ev.Killer != null && ev.Killer != ev.Target)
+
+            if (ev.Killer is not null && ev.Killer != ev.Target)
             {
                 plugin.LOG += $":skull: {Extensions.LogPlayer(ev.Target)} est mort par {Extensions.LogPlayer(ev.Killer)} avec {DamageString}.\n";
             }
@@ -193,7 +192,7 @@ namespace DiscordLog
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player is not null)
                 if (ev.Item.Type == ItemType.SCP330)
                 {
                     plugin.LOG += $":outbox_tray: {Extensions.LogPlayer(ev.Player)} a jeté SCP330: ";
@@ -209,18 +208,18 @@ namespace DiscordLog
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player is not null)
                     plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {Extensions.LogPickup(ev.Pickup)}.\n";
         }
         public void OnPickingUpArmor(PickingUpArmorEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player is not null)
                 plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Pickup.Type}.\n";
         }
 
         public void OnEatenScp330(EatenScp330EventArgs ev)
         {
-            if (ev.Player != null)
+            if (ev.Player is not null)
                 plugin.LOG += $":candy: {Extensions.LogPlayer(ev.Player)} a manger un bonbon : {ev.Candy.Kind}.\n";
         }
 
@@ -229,38 +228,32 @@ namespace DiscordLog
             if (Exiled.API.Extensions.ItemExtensions.IsMedical(ev.Item.Type))
                 plugin.LOG += $":adhesive_bandage: {Extensions.LogPlayer(ev.Player)} s'est soigné avec {ev.Item.Type}.\n";
             else
-                switch (ev.Item.Type)
+                plugin.LOG += ev.Item.Type switch
                 {
-                    case ItemType.SCP207:
-                        plugin.LOG += $"<:ContaCola:881985143718445086> {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n";
-                        break;
-                    case ItemType.SCP268:
-                        plugin.LOG += $":billed_cap: {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n";
-                        break;
-                    default:
-                        plugin.LOG += $":??: {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n";
-                        break;
-                }
+                    ItemType.SCP207 => $"<:ContaCola:881985143718445086> {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n",
+                    ItemType.SCP268 => $":billed_cap: {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n",
+                    _ => $":??: {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n",
+                };
         }
         public void OnGeneratorUnlock(UnlockingGeneratorEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player is not null)
                 plugin.LOG += $":computer: {Extensions.LogPlayer(ev.Player)} a débloqué un générateur dans la salle : {ev.Generator.Room.Type}.\n";
         }
         public void OnStoppingGenerator(StoppingGeneratorEventArgs ev)
         {
             
-            if (ev.IsAllowed && ev.Player != null && ev.Generator.IsActivating)
+            if (ev.IsAllowed && ev.Player is not null && ev.Generator.IsActivating)
                 plugin.LOG += $":computer: {Extensions.LogPlayer(ev.Player)} a désactivé un générateur de la salle : {ev.Generator.Room.Type}.\n";
         }
         public void OnActivatingGenerator(ActivatingGeneratorEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player is not null)
                 plugin.LOG += $":computer: {Extensions.LogPlayer(ev.Player)} a activé un générateur de la salle : {ev.Generator.Room.Type}.\n";
         }
         public void OnActivatingWarheadPanel(ActivatingWarheadPanelEventArgs ev)
         {
-            if (!ev.IsAllowed && ev.Player == null) return;
+            if (!ev.IsAllowed && ev.Player is null) return;
 
             if (!UnityEngine.Object.FindObjectOfType<AlphaWarheadOutsitePanel>().keycardEntered)
                 plugin.LOG += $":radioactive: {Extensions.LogPlayer(ev.Player)} a ouvert la protection pour activé l'Alpha Warhead.\n";
@@ -276,51 +269,51 @@ namespace DiscordLog
 
         public void OnIntercomSpeaking(IntercomSpeakingEventArgs ev)
         {
-            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && Map.IntercomSpeaker == ev.Player)
+            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && Exiled.API.Features.Intercom.Speaker == ev.Player)
             {
                 IntercomPlayerSpeek = ev.Player;
                 plugin.LOG += $":loudspeaker: {Extensions.LogPlayer(ev.Player)} utilise l'intercom.\n";
             }
-            else if (ev.Player == null)
+            else if (ev.Player is null)
                 IntercomPlayerSpeek = null;
         }
         public void OnHandcuffing(HandcuffingEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Cuffer != null)
+            if (ev.IsAllowed && ev.Cuffer is not null)
                 plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été menoté par {Extensions.LogPlayer(ev.Cuffer)}.\n";
         }
         public void OnRemovingHandcuffs(RemovingHandcuffsEventArgs ev)
         {
             if (ev.IsAllowed)
-                if (ev.Cuffer != null)
+                if (ev.Cuffer is not null)
                     plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été démenoté par {Extensions.LogPlayer(ev.Cuffer)}.\n";
                 else
                     plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été démenoté.\n";
         }
         public void OnEnteringPocketDimension(EnteringPocketDimensionEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player is not null)
                 plugin.LOG += $":hole: {Extensions.LogPlayer(ev.Player)} est entré dans la dimension de poche.\n";
         }
         public void OnEscapingPocketDimension(EscapingPocketDimensionEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player is not null)
                 plugin.LOG += $":hole: {Extensions.LogPlayer(ev.Player)} a échappé a la dimension de poche.\n";
         }
         public void On914Activating(ActivatingEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Player != null)
+            if (ev.IsAllowed && ev.Player is not null)
                 Use914 = ev.Player;
         }
         
         public void OnFinishingRecall(FinishingRecallEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Target != null && ev.Scp049 != null)
+            if (ev.IsAllowed && ev.Target is not null && ev.Scp049 is not null)
                 plugin.LOG += $":zombie: {Extensions.LogPlayer(ev.Target)} a été ressuscité en Scp049-2 par {Extensions.LogPlayer(ev.Scp049)}.\n";
         }
         public void OnBanning(BanningEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
+            if (ev.IsAllowed && ev.Target is not null && ev.Issuer is not null)
             {
                 _ = Webhook.BanPlayerAsync(ev.Issuer, ev.Target, ev.Reason, ev.Duration);
                 plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par {Extensions.LogPlayer(ev.Issuer)}.\n";
@@ -328,7 +321,7 @@ namespace DiscordLog
         }
         public void OnKicking(KickingEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Target != null && ev.Issuer != null)
+            if (ev.IsAllowed && ev.Target is not null && ev.Issuer is not null)
             {
                 plugin.LOGStaff += $":mans_shoe: {Extensions.LogPlayer(ev.Target)} a été kick pour : ``{ev.Reason}`` ; par {Extensions.LogPlayer(ev.Issuer)}.\n";
                 _ = Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
@@ -338,24 +331,15 @@ namespace DiscordLog
         {
             if (ev.Details.OriginalName != "Unknown - offline ban") return;
 
-            var ticks = TimeSpan.FromTicks(ev.Details.Expires - ev.Details.IssuanceTime).TotalSeconds.ToString(CultureInfo.InvariantCulture);
-            var time = long.TryParse(ticks, out var timelong) ? timelong : -1;
             string TargetNick = "Unknown";
             if (ev.Details.Id.EndsWith("@steam"))
             {
-                TargetNick = "Unknown (API Key Not valid)";
-                try
-                {
-                    TargetNick = Extensions.GetUserName(ev.Details.Id);
-                }
-                catch (Exception ex)
-                {
-                    Log.Warn($"API key is not valide {ex}");
-                }
+                TargetNick = Extensions.GetUserName(ev.Details.Id);
             }
             plugin.LOGStaff += $":hammer: ``{TargetNick}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Issuer)}.\n";
 
-            _ = Webhook.OBanPlayerAsync(ev.Issuer, TargetNick, ev.Details.Id, ev.Details.Reason, time);
+            _ = Webhook.OBanPlayerAsync(ev.Issuer, TargetNick, ev.Details.Id, ev.Details.Reason,
+                long.TryParse(TimeSpan.FromTicks(ev.Details.Expires - ev.Details.IssuanceTime).TotalSeconds.ToString(CultureInfo.InvariantCulture), out var timelong) ? timelong : -1);
         }
     }
 }

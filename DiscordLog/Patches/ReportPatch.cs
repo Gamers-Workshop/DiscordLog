@@ -12,14 +12,14 @@ namespace DiscordLog.Patches
 	{
 		static bool Prefix(
 			ref bool __state)
-        {
-			if (DiscordLog.Instance.Config.WebhookReport != "none")
-			{
-				__state = true;
-				return false;
-			}
-			return true;
-        }
+		{
+			if (DiscordLog.Instance.Config.WebhookReport == "none")
+				return true;
+
+			__state = true;
+			return false;
+
+		}
 		static void Postfix(ref bool __result, bool __state)
 		{
 			__result = __state;

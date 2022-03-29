@@ -43,9 +43,9 @@ namespace DiscordLog.Patches
             {
                 try
                 {
-                    List<Player> Players = new List<Player>();
-                    List<Pickup> PickupTypes = new List<Pickup>();
-                    List<Item> ItemTypes = new List<Item>();
+                    List<Player> Players = new();
+                    List<Pickup> PickupTypes = new();
+                    List<Item> ItemTypes = new();
 
                     bool upgradeDropped = (mode & Scp914Mode.Dropped) == Scp914Mode.Dropped;
                     bool upgradeInventory = (mode & Scp914Mode.Inventory) == Scp914Mode.Inventory;
@@ -59,7 +59,7 @@ namespace DiscordLog.Patches
                             GameObject gameObject = collider.transform.root.gameObject;
                             Player player = Player.Get(gameObject);
 
-                            if (player != null && !Players.Contains(player))
+                            if (player is not null && !Players.Contains(player))
                                 Players.Add(player);
                             else if (gameObject.TryGetComponent(out ItemPickupBase pickup) && !PickupTypes.Any(x => x.Serial == pickup.Info.Serial))
                                 PickupTypes.Add(Pickup.Get(pickup));
@@ -73,7 +73,7 @@ namespace DiscordLog.Patches
                                     ItemTypes.Add(Item.Get(item.Value));
 
                     string str;
-                    if (EventHandlers.Use914 != null)
+                    if (EventHandlers.Use914 is not null)
                         str = $":gear: SCP-914 a été enclenché en {setting} par ``{EventHandlers.Use914.Nickname}`` ({Extensions.ConvertID(EventHandlers.Use914.UserId)}) :\n";
                     else
                         str = $":gear: SCP-914 a été enclenché en {setting} par Unknown :\n";

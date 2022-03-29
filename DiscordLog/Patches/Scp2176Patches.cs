@@ -20,7 +20,7 @@ namespace DiscordLog.Patches
 			{
 				try
 				{
-					DiscordLog.Instance.LOG += $":bulb: SCP2176 a été cassé : {Map.FindParentRoom(__instance.gameObject).Type}.\n";
+					DiscordLog.Instance.LOG += $":bulb: SCP2176 a été cassé : {Map.FindParentRoom(__instance.gameObject)?.Type}.\n";
 				}
 				catch
 				{

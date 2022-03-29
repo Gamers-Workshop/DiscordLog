@@ -18,7 +18,6 @@ namespace DiscordLog.Patches
         {
 			try
 			{
-				string Log = string.Empty;
 				if (__instance.Candies.Count >= 6)
 				{
 					__result = false;
@@ -43,7 +42,6 @@ namespace DiscordLog.Patches
 		{
 			try
 			{
-				string Log = string.Empty;
 				if (index < 0 || index > __instance.Candies.Count)
 				{
 					__result = CandyKindID.None;

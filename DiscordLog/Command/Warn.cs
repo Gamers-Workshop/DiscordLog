@@ -25,13 +25,13 @@ namespace DiscordLog.Command.Warn
 		{
             Player sanctionneur = null;
             if (sender is PlayerCommandSender playerCommandSender) sanctionneur = Player.Get(playerCommandSender.SenderId);
-            if (sanctionneur != null && !sanctionneur.CheckPermission("log.warn"))
+            if (sanctionneur is not null && !sanctionneur.CheckPermission("log.warn"))
             {
                 response = "Permission denied.";
                 return false;
             }
             Player Sanctioned = Player.Get(arguments.At(0));
-            if (Sanctioned == null)
+            if (Sanctioned is null)
             {
                 response = $"Player not found: {arguments.At(0)}";
                 return false;

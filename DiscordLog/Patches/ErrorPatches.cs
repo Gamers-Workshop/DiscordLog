@@ -15,7 +15,7 @@ namespace DiscordLog.Patches
         public static void Postfix(object message)
         {
             message = $"[{Assembly.GetCallingAssembly().GetName().Name}] ```{message}```";
-            if (DiscordLog.Instance.LOGError == null || !DiscordLog.Instance.LOGError.Contains(message.ToString()))
+            if (DiscordLog.Instance.LOGError is null || !DiscordLog.Instance.LOGError.Contains(message.ToString()))
                 DiscordLog.Instance.LOGError += message.ToString() + "\n";
         }
     }
@@ -25,7 +25,7 @@ namespace DiscordLog.Patches
         public static void Postfix(string message)
         {
             message = $"[{Assembly.GetCallingAssembly().GetName().Name}] ```{message}```";
-            if (DiscordLog.Instance.LOGError == null || !DiscordLog.Instance.LOGError.Contains(message.ToString()))
+            if (DiscordLog.Instance.LOGError is null || !DiscordLog.Instance.LOGError.Contains(message.ToString()))
                 DiscordLog.Instance.LOGError += message.ToString() + "\n";
         }
     }
