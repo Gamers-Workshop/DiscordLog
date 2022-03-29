@@ -25,8 +25,7 @@ namespace DiscordLog.Patches
 					return false;
 				}
 				__instance.Candies.Add(kind);
-				Player player = Player.Get(__instance.Owner);
-				DiscordLog.Instance.LOG += $":inbox_tray: {Extensions.LogPlayer(player)} a récupéré un bonbon : {kind}.\n";
+				DiscordLog.Instance.LOG += $":inbox_tray: {Extensions.LogPlayer(Player.Get(__instance.Owner))} a récupéré un bonbon : {kind}.\n";
 				__result = true;
 				return false;
 			}
@@ -53,8 +52,7 @@ namespace DiscordLog.Patches
 				CandyKindID result = __instance.Candies[index];
 				__instance.Candies.RemoveAt(index);
 				__instance.ServerRefreshBag();
-				Player player = Player.Get(__instance.Owner);
-				DiscordLog.Instance.LOG += $":outbox_tray: {Extensions.LogPlayer(player)} a jeté un bonbon : {result}.\n";
+				DiscordLog.Instance.LOG += $":outbox_tray: {Extensions.LogPlayer(Player.Get(__instance.Owner))} a jeté un bonbon : {result}.\n";
 				__result = result;
 				return false;
 			}

@@ -22,8 +22,7 @@ namespace DiscordLog.Patches
 		{
 			try
 			{
-				Player player = Player.Get(__instance.Hub);
-				DiscordLog.Instance.LOG += $":inbox_tray: {Extensions.LogPlayer(player)} a récupéré {__instance.TargetPickup.Info.ItemId}.\n";
+				DiscordLog.Instance.LOG += $":inbox_tray: {Extensions.LogPlayer(Player.Get(__instance.Hub))} a récupéré {__instance.TargetPickup.Info.ItemId}.\n";
 			}
 			catch
 			{
@@ -40,8 +39,7 @@ namespace DiscordLog.Patches
 		{
 			try
 			{
-				Player player = Player.Get(__instance.Owner);
-				DiscordLog.Instance.LOG += $":teapot: {Extensions.LogPlayer(player)} a ouvert {__instance.ItemTypeId} : {Map.FindParentRoom(__instance.gameObject).Type}.\n";
+				DiscordLog.Instance.LOG += $":teapot: {Extensions.LogPlayer(Player.Get(__instance.Owner))} a ouvert {__instance.ItemTypeId} : {Map.FindParentRoom(__instance.gameObject)?.Type}.\n";
 			}
 			catch
 			{
@@ -60,7 +58,7 @@ namespace DiscordLog.Patches
 			{
 				if (__instance.State == Scp244State.Destroyed)
 				{
-					DiscordLog.Instance.LOG += $":teapot: {__instance?.Info.ItemId} a été cassé par.\n";
+					DiscordLog.Instance.LOG += $":teapot: {__instance?.Info.ItemId} a été cassé : {Map.FindParentRoom(__instance.gameObject)?.Type}\n";
 				}
 			}
 			catch
@@ -92,7 +90,7 @@ namespace DiscordLog.Patches
 				}
 				if (__instance.State == Scp244State.Idle && Vector3.Dot(__instance.transform.up, Vector3.up) < __instance._activationDot)
 				{
-					DiscordLog.Instance.LOG += $":teapot: {__instance?.Info.ItemId} c'est ouvert : {Map.FindParentRoom(__instance.gameObject).Type}.\n";
+					DiscordLog.Instance.LOG += $":teapot: {__instance.Info.ItemId} c'est ouvert : {Map.FindParentRoom(__instance.gameObject)?.Type}.\n";
 					__instance.State = Scp244State.Active;
 				}
 				float num = (__instance.State == Scp244State.Active) ? __instance._timeToGrow : (-__instance._timeToDecay);
