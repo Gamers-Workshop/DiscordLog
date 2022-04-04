@@ -1,6 +1,6 @@
 ﻿using Exiled.API.Features;
 using Exiled.API.Features.Items;
-using InventorySystem.Items.Firearms.Ammo;
+using InventorySystem.Items.Firearms;
 using InventorySystem.Items.MicroHID;
 using InventorySystem.Items.Radio;
 using NorthwoodLib.Pools;
@@ -9,6 +9,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using Firearm = Exiled.API.Features.Items.Firearm;
 
 namespace DiscordLog
 {
@@ -24,7 +25,7 @@ namespace DiscordLog
         };
         public static string LogPickup(Pickup itemPickup) => itemPickup?.Base switch
         {
-            InventorySystem.Items.Firearms.FirearmPickup firearm => $"{itemPickup.Type} [{firearm.Status.Ammo}]",
+            FirearmPickup firearm => $"{itemPickup.Type} [{firearm.Status.Ammo}]",
             MicroHIDPickup microhid => $"MicroHID [{(int)(microhid.Energy * 100)}%]",
             RadioPickup radio => $"Radio [{(int)(radio.SavedBattery * 100)}%]",
             not null => $"{itemPickup.Type}",
@@ -66,10 +67,6 @@ namespace DiscordLog
             string msg = SB.ToString();
             StringBuilderPool.Shared.Return(SB);
             return msg;
-        }
-        public static void OpenReportWindow(this Player player, string text)
-        {
-            player.ReferenceHub.GetComponent<GameConsoleTransmission>().SendToClient(player.Connection, "[REPORTING] " + text, "white");
         }
         public static string GetUserName(string userid)
         {
