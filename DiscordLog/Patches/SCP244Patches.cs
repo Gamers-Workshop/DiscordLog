@@ -1,4 +1,5 @@
-﻿using Exiled.API.Features;
+﻿using Exiled.API.Extensions;
+using Exiled.API.Features;
 using HarmonyLib;
 using InventorySystem;
 using InventorySystem.Items.Usables.Scp244;
@@ -58,7 +59,7 @@ namespace DiscordLog.Patches
 			{
 				if (__instance.State == Scp244State.Destroyed)
 				{
-					DiscordLog.Instance.LOG += $":teapot: {__instance.Info.ItemId} a été cassé : {Map.FindParentRoom(__instance.gameObject)?.Type}\n";
+					DiscordLog.Instance.LOG += $":teapot: {__instance.Info.ItemId} a été cassé par {DamageTypeExtensions.GetDamageType(handler)} : {Map.FindParentRoom(__instance.gameObject)?.Type}\n";
 				}
 			}
 			catch

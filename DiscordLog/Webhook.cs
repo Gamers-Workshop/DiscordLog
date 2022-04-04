@@ -17,8 +17,8 @@ namespace DiscordLog
     {
         public static void SendWebhook(string objcontent)
         {
-            HttpClient http = new HttpClient();
-            DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook
+            HttpClient http = new();
+            DiscordWebhookData.DiscordWebhook webhook = new()
             {
                 AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
                 Content = objcontent,
@@ -31,8 +31,8 @@ namespace DiscordLog
         }
         public static void SendWebhookStaff(string objcontent)
         {
-            HttpClient http = new HttpClient();
-            DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook
+            HttpClient http = new();
+            DiscordWebhookData.DiscordWebhook webhook = new()
             {
                 AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
                 Content = objcontent,
@@ -45,8 +45,8 @@ namespace DiscordLog
         }
         public static void SendWebhookError(string objcontent)
         {
-            HttpClient http = new HttpClient();
-            DiscordWebhookData.DiscordWebhook webhook = new DiscordWebhookData.DiscordWebhook
+            HttpClient http = new();
+            DiscordWebhookData.DiscordWebhook webhook = new()
             {
                 AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
                 Content = objcontent,

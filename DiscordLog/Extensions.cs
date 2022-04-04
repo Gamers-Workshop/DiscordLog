@@ -14,38 +14,23 @@ namespace DiscordLog
 {
     public static class Extensions
     {
-        public static string LogItem(Item item)
+        public static string LogItem(Item item) => item switch
         {
-            if (item is Firearm firearm)
-                return $"{item.Type} [{firearm.Ammo}/{firearm.MaxAmmo}]";
-            else if (item is MicroHid microhid)
-                return $"MicroHID [{(int)(microhid.Energy * 100)}%]";
-            else if (item is Exiled.API.Features.Items.Radio radio)
-                return $"Radio [{radio.BatteryLevel}%]";
-            else if (item is not null)
-                return $"{item.Type}";
-            else
-                return "Unknown";
-        }
-        public static string LogPickup(Pickup itemPickup)
+            Firearm firearm => $"{item.Type} [{firearm.Ammo}/{firearm.MaxAmmo}]",
+            MicroHid microhid => $"MicroHID [{(int)(microhid.Energy * 100)}%]",
+            Exiled.API.Features.Items.Radio radio => $"Radio [{radio.BatteryLevel}%]",
+            not null => $"{item.Type}",
+            _ => "Unknown"
+        };
+        public static string LogPickup(Pickup itemPickup) => itemPickup?.Base switch
         {
-            if (itemPickup.Base is InventorySystem.Items.Firearms.FirearmPickup firearm)
-                return $"{itemPickup.Type} [{firearm.Status.Ammo}]";
-            else if (itemPickup.Base is MicroHIDPickup microhid)
-                return $"MicroHID [{(int)(microhid.Energy * 100)}%]";
-            else if (itemPickup.Base is RadioPickup radio)
-                return $"Radio [{(int)(radio.SavedBattery * 100)}%]";
-            else if (itemPickup is not null)
-                return $"{itemPickup.Type}";
-            else
-                return "Unknown";
-        }
-        public static string LogPlayer(Player player)
-        {
-            if (player is null)
-                return $"``Unknown`` (Unknown)";
-            return $"``{player.Nickname}`` ({ConvertID(player.UserId)})";
-        }
+            InventorySystem.Items.Firearms.FirearmPickup firearm => $"{itemPickup.Type} [{firearm.Status.Ammo}]",
+            MicroHIDPickup microhid => $"MicroHID [{(int)(microhid.Energy * 100)}%]",
+            RadioPickup radio => $"Radio [{(int)(radio.SavedBattery * 100)}%]",
+            not null => $"{itemPickup.Type}",
+            _ => "Unknown",
+        };
+        public static string LogPlayer(Player player) => player is null ? $"``Unknown`` (Unknown)" : $"``{player.Nickname}`` ({ConvertID(player.UserId)})";
         public static string ConvertID(string UserID)
         {
             if (string.IsNullOrEmpty(UserID)) return string.Empty;
@@ -91,13 +76,13 @@ namespace DiscordLog
             try
             {
                 //013D09D43A87F1D90ED3BEAA19BFCF98 -> Steam Api key to get the nickname of obanned users (Get your api key in https://steamcommunity.com/dev/apikey)
-                var httpWebRequest = (HttpWebRequest)WebRequest.Create($"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={DiscordLog.Instance.Config.SteamAPIKey}&steamids={userid}");
+                HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create($"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={DiscordLog.Instance.Config.SteamAPIKey}&steamids={userid}");
                 httpWebRequest.Method = "GET";
 
-                var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                HttpWebResponse httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
 
-                using var streamReader = new StreamReader(httpResponse.GetResponseStream());
-                var result = streamReader.ReadToEnd();
+                using StreamReader streamReader = new(httpResponse.GetResponseStream());
+                string result = streamReader.ReadToEnd();
                 return Regex.Match(result, @"\x22personaname\x22:\x22(.+?)\x22").Groups[1].Value;
             }
             catch (Exception)
