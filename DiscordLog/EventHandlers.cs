@@ -121,7 +121,7 @@ namespace DiscordLog
         public void OnGeneratorFinish(GeneratorActivatedEventArgs ev)
         {
             if (ev.IsAllowed)
-                plugin.LOG += $":computer: Le générateur dans la {Map.FindParentRoom(ev.Generator.gameObject).Type} est activé.\n";
+                plugin.LOG += $":computer: Le générateur dans la {ev.Generator.Room.Type} est activé.\n";
         }
         public void OnPlayerAuth(PreAuthenticatingEventArgs ev)
         {
@@ -234,8 +234,9 @@ namespace DiscordLog
             else
                 plugin.LOG += ev.Item.Type switch
                 {
-                    ItemType.SCP207 => $"<:ContaCola:881985143718445086> {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n",
-                    ItemType.SCP268 => $":billed_cap: {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n",
+                    ItemType.SCP207 => $"<:ContaCola:881985143718445086> {Extensions.LogPlayer(ev.Player)} a utilisé SCP207.\n",
+                    ItemType.SCP268 => $":billed_cap: {Extensions.LogPlayer(ev.Player)} a utilisé SCP268.\n",
+                    ItemType.SCP1853 => $"<:Scp1853:963526275216064572> {Extensions.LogPlayer(ev.Player)} a utilisé SCP1853.\n",
                     _ => $":??: {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n",
                 };
         }

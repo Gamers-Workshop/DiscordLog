@@ -85,19 +85,20 @@ namespace DiscordLog.Patches
 				}
 				if (!NetworkServer.active)
 				{
-					__instance._currentSizePercent = __instance._syncSizePercent;
-					__instance._currentSizePercent /= 255f;
+					__instance.CurrentSizePercent = (float)__instance._syncSizePercent;
+					__instance.CurrentSizePercent /= 255f;
 					return false;
 				}
 				if (__instance.State == Scp244State.Idle && Vector3.Dot(__instance.transform.up, Vector3.up) < __instance._activationDot)
 				{
-					DiscordLog.Instance.LOG += $":teapot: {__instance.Info.ItemId} c'est ouvert : {Map.FindParentRoom(__instance.gameObject)?.Type}.\n";
+					DiscordLog.Instance.LOG += $":teapot: {__instance.Info.ItemId} a été ouvert par {__instance.PreviousOwner.Nickname} : {Map.FindParentRoom(__instance.gameObject)?.Type}.\n";
 					__instance.State = Scp244State.Active;
+					__instance._lifeTime.Restart();
 				}
-				float num = (__instance.State == Scp244State.Active) ? __instance._timeToGrow : (-__instance._timeToDecay);
-				__instance._currentSizePercent = Mathf.Clamp01(__instance._currentSizePercent + Time.deltaTime / num);
-				__instance.Network_syncSizePercent = (byte)Mathf.RoundToInt(__instance._currentSizePercent * 255f);
-				if (!__instance.ModelDestroyed || __instance._currentSizePercent > 0f)
+				float num = (__instance.State == Scp244State.Active) ? __instance.TimeToGrow : (-__instance._timeToDecay);
+				__instance.CurrentSizePercent = Mathf.Clamp01(__instance.CurrentSizePercent + Time.deltaTime / num);
+				__instance.Network_syncSizePercent = (byte)Mathf.RoundToInt(__instance.CurrentSizePercent * 255f);
+				if (!__instance.ModelDestroyed || __instance.CurrentSizePercent > 0f)
 				{
 					return false;
 				}
