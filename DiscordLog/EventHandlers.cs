@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Enums;
 using Exiled.API.Features;
+using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Ammo;
@@ -221,12 +222,29 @@ namespace DiscordLog
                 plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Pickup.Type}.\n";
         }
 
+        public void OnPickingUpScp330(PickingUpScp330EventArgs ev)
+        {
+            if (!ev.IsAllowed || ev.Player is null) 
+                return;
+
+            plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré ses bonbon :\n";
+            foreach (CandyKindID Candy in ev.Pickup.StoredCandies)
+            {
+                plugin.LOG += $"  - {Candy}\n";
+            }
+        }
+
         public void OnEatenScp330(EatenScp330EventArgs ev)
         {
             if (ev.Player is not null)
                 plugin.LOG += $":candy: {Extensions.LogPlayer(ev.Player)} a manger un bonbon : {ev.Candy.Kind}.\n";
         }
-
+        public void OnInteractingScp330(InteractingScp330EventArgs ev)
+        {
+            if (!ev.IsAllowed || ev.Player is null)
+                return;
+        //    plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récolté un bonbon : {ev.}\n";
+        }
         public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
             if (Exiled.API.Extensions.ItemExtensions.IsMedical(ev.Item.Type))
