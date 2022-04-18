@@ -91,7 +91,7 @@ namespace DiscordLog.Patches
 				}
 				if (__instance.State == Scp244State.Idle && Vector3.Dot(__instance.transform.up, Vector3.up) < __instance._activationDot)
 				{
-					DiscordLog.Instance.LOG += $":teapot: {__instance.Info.ItemId} a été ouvert par {__instance.PreviousOwner.Nickname} : {Map.FindParentRoom(__instance.gameObject)?.Type}.\n";
+					DiscordLog.Instance.LOG += $":teapot: {__instance.Info.ItemId} a été ouvert par {Extensions.LogPlayer(Player.Get(__instance.PreviousOwner.Hub))} : {Map.FindParentRoom(__instance.gameObject)?.Type}.\n";
 					__instance.State = Scp244State.Active;
 					__instance._lifeTime.Restart();
 				}

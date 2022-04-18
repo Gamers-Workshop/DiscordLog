@@ -20,7 +20,7 @@ namespace DiscordLog.Patches
 			{
 				try
 				{
-					DiscordLog.Instance.LOG += $"<:SCP2176:963534500120383539> SCP2176 a été cassé par {__instance.PreviousOwner.Nickname} : {Map.FindParentRoom(__instance.gameObject)?.Type}.\n";
+					DiscordLog.Instance.LOG += $"<:SCP2176:963534500120383539> SCP2176 a été cassé par {Extensions.LogPlayer(Player.Get(__instance.PreviousOwner.Hub))} : {Map.FindParentRoom(__instance.gameObject)?.Type}.\n";
 				}
 				catch
 				{
