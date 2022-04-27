@@ -28,11 +28,11 @@ namespace DiscordLog.Patches
 
                 newInstructions.InsertRange(index, new[]
                 {
-                new CodeInstruction(OpCodes.Ldarg_0),
-                new CodeInstruction(OpCodes.Ldarg_2),
-                new CodeInstruction(OpCodes.Ldarg_3),
-                new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Scp914Patches), nameof(Scp914Events))),
-            });
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Ldarg_2),
+                    new CodeInstruction(OpCodes.Ldarg_3),
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Scp914Patches), nameof(Scp914Events))),
+                });
 
                 for (int z = 0; z < newInstructions.Count; z++)
                     yield return newInstructions[z];

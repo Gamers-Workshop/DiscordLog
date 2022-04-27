@@ -1,4 +1,5 @@
-﻿using Exiled.API.Features;
+﻿using Exiled.API.Extensions;
+using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.MicroHID;
@@ -25,7 +26,7 @@ namespace DiscordLog
         };
         public static string LogPickup(Pickup itemPickup) => itemPickup?.Base switch
         {
-            FirearmPickup firearm => $"{itemPickup.Type} [{firearm.Status.Ammo}]",
+            FirearmPickup firearm => $"{itemPickup.Type} {(firearm.Distributed ? $"[{itemPickup.GetMaxAmmo()}/{itemPickup.GetMaxAmmo()}]" : $"[{firearm.Status.Ammo}/{itemPickup.GetMaxAmmo()}]")}",
             MicroHIDPickup microhid => $"MicroHID [{(int)(microhid.Energy * 100)}%]",
             RadioPickup radio => $"Radio [{(int)(radio.SavedBattery * 100)}%]",
             not null => $"{itemPickup.Type}",
@@ -44,17 +45,6 @@ namespace DiscordLog
                 return $"{UserID}[:link:](<https://steamidfinder.com/lookup/{UserID.Replace("@steam", string.Empty)}\"SteamFinder\">)";
             }
             return UserID;
-        }
-        public static bool IsEnemy(this Player player, Team target)
-        {
-            if (player.Role == RoleType.Spectator || player.Role == RoleType.None || player.Role.Team == target)
-                return false;
-
-            return target == Team.SCP || target == Team.TUT ||
-                ((player.Role.Team != Team.MTF && player.Role.Team != Team.RSC) || (target != Team.MTF && target != Team.RSC))
-                &&
-                ((player.Role.Team != Team.CDP && player.Role.Team != Team.CHI) || (target != Team.CDP && target != Team.CHI))
-            ;
         }
         public static string FormatArguments(ArraySegment<string> sentence, int index)
         {

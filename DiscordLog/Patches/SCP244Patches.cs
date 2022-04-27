@@ -15,6 +15,7 @@ using UnityEngine;
 
 namespace DiscordLog.Patches
 {
+#pragma warning disable IDE0060
 	//SCP244 quand il est récupéré
 	[HarmonyPatch(typeof(Scp244SearchCompletor), nameof(Scp244SearchCompletor.Complete))]
 	public class Scp244SearchCompletorPatches
@@ -53,8 +54,8 @@ namespace DiscordLog.Patches
 	[HarmonyPatch(typeof(Scp244DeployablePickup), nameof(Scp244DeployablePickup.Damage))]
 	public class Scp244DamagePatches
 	{
-		public static void Postfix(Scp244DeployablePickup __instance, float damage, DamageHandlerBase handler, Vector3 exactHitPos)
-		{
+        public static void Postfix(Scp244DeployablePickup __instance, float damage, DamageHandlerBase handler, Vector3 exactHitPos)
+        {
 			try
 			{
 				if (__instance.State == Scp244State.Destroyed)
