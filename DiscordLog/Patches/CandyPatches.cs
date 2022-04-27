@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace DiscordLog.Patches
 {
 
-	[HarmonyPatch(typeof(Scp330Bag), nameof(Scp330Bag.TryRemove))]
+	//[HarmonyPatch(typeof(Scp330Bag), nameof(Scp330Bag.TryRemove))]
 	public class CandyDrop
     {
 		public static bool Prefix(Scp330Bag __instance, ref CandyKindID __result,int index)

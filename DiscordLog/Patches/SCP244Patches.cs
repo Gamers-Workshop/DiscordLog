@@ -16,7 +16,7 @@ using UnityEngine;
 namespace DiscordLog.Patches
 {
 	//SCP244 quand il est récupéré
-	[HarmonyPatch(typeof(Scp244SearchCompletor), nameof(Scp244SearchCompletor.Complete))]
+	/*[HarmonyPatch(typeof(Scp244SearchCompletor), nameof(Scp244SearchCompletor.Complete))]
 	public class Scp244SearchCompletorPatches
 	{
 		public static void Postfix(Scp244SearchCompletor __instance)
@@ -53,8 +53,8 @@ namespace DiscordLog.Patches
 	[HarmonyPatch(typeof(Scp244DeployablePickup), nameof(Scp244DeployablePickup.Damage))]
 	public class Scp244DamagePatches
 	{
-		public static void Postfix(Scp244DeployablePickup __instance, float damage, DamageHandlerBase handler, Vector3 exactHitPos)
-		{
+        public static void Postfix(Scp244DeployablePickup __instance, float damage, DamageHandlerBase handler, Vector3 exactHitPos)
+        {
 			try
 			{
 				if (__instance.State == Scp244State.Destroyed)
@@ -69,7 +69,7 @@ namespace DiscordLog.Patches
 			}
 		}
 	}
-
+	/*
 	//Scp244 quand il tombe
 	[HarmonyPatch(typeof(Scp244DeployablePickup), nameof(Scp244DeployablePickup.UpdateRange))]
 	public class Scp244UpdatePatches
@@ -115,5 +115,5 @@ namespace DiscordLog.Patches
 				return true;
 			}
 		}
-	}
+	}*/
 }

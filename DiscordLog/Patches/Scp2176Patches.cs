@@ -13,7 +13,7 @@ namespace DiscordLog.Patches
 {
     public class Scp2176Patches
     {
-		[HarmonyPatch(typeof(Scp2176Projectile), nameof(Scp2176Projectile.ServerShatter))]
+		//[HarmonyPatch(typeof(Scp2176Projectile), nameof(Scp2176Projectile.ServerShatter))]
 		public class Scp2176DamagePatches
 		{
 			public static void Postfix(Scp2176Projectile __instance)
