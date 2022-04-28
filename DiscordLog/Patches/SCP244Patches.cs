@@ -15,7 +15,6 @@ using UnityEngine;
 
 namespace DiscordLog.Patches
 {
-#pragma warning disable IDE0060
 	//SCP244 quand il est récupéré
 	/*[HarmonyPatch(typeof(Scp244SearchCompletor), nameof(Scp244SearchCompletor.Complete))]
 	public class Scp244SearchCompletorPatches
