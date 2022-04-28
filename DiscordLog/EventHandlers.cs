@@ -234,7 +234,7 @@ namespace DiscordLog
                 plugin.LOG += $"  - {Candy}\n";
             }
         }
-        public void OnDroppingUpScp330(DroppingUpScp330EventArgs ev)
+        public void OnDroppingUpScp330(DroppingScp330EventArgs ev)
         {
             if (!ev.IsAllowed)
                 return;
@@ -266,7 +266,7 @@ namespace DiscordLog
         public void OnPickingUpScp244(PickingUpScp244EventArgs ev)
         {
             if (ev.IsAllowed)
-                plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {Pickup.Get(ev.Pickup).Type}.\n";
+                plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Pickup.Type}.\n";
         }
         public void OnUsingScp244(UsingScp244EventArgs ev)
         {

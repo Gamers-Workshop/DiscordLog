@@ -115,7 +115,7 @@ namespace DiscordLog
 			PlayerEvents.PickingUpItem += Handlers.OnPickingUpItem;
 			PlayerEvents.PickingUpArmor += Handlers.OnPickingUpArmor;
 			Scp330Events.PickingUpScp330 += Handlers.OnPickingUpScp330;
-			Scp330Events.DroppingUpScp330 += Handlers.OnDroppingUpScp330;
+			Scp330Events.DroppingScp330 += Handlers.OnDroppingUpScp330;
 			Scp330Events.EatenScp330 += Handlers.OnEatenScp330;
 			Scp330Events.InteractingScp330 += Handlers.OnInteractingScp330;
 			Scp244Events.OpeningScp244 += Handlers.OnOpeningScp244;
@@ -170,7 +170,7 @@ namespace DiscordLog
 			PlayerEvents.PickingUpItem -= Handlers.OnPickingUpItem;
 			PlayerEvents.PickingUpArmor -= Handlers.OnPickingUpArmor;
 			Scp330Events.PickingUpScp330 -= Handlers.OnPickingUpScp330;
-			Scp330Events.DroppingUpScp330 -= Handlers.OnDroppingUpScp330;
+			Scp330Events.DroppingScp330 -= Handlers.OnDroppingUpScp330;
 			Scp330Events.EatenScp330 -= Handlers.OnEatenScp330;
 			Scp330Events.InteractingScp330 -= Handlers.OnInteractingScp330;
 			Scp244Events.OpeningScp244 -= Handlers.OnOpeningScp244;
