@@ -12,6 +12,8 @@ using Scp106Events = Exiled.Events.Handlers.Scp106;
 using Scp096Events = Exiled.Events.Handlers.Scp096;
 using Scp049Events = Exiled.Events.Handlers.Scp049;
 using Scp330Events = Exiled.Events.Handlers.Scp330;
+using Scp244Events = Exiled.Events.Handlers.Scp244;
+
 using System.Collections.Generic;
 using System.IO;
 using MEC;
@@ -114,8 +116,15 @@ namespace DiscordLog
 			PlayerEvents.DroppingItem += Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem += Handlers.OnPickingUpItem;
 			PlayerEvents.PickingUpArmor += Handlers.OnPickingUpArmor;
-			//PlayerEvents.PickingUpScp330 += Handlers.OnPickingUpScp330;
+			Scp330Events.PickingUpScp330 += Handlers.OnPickingUpScp330;
+			Scp330Events.DroppingScp330 += Handlers.OnDroppingUpScp330;
 			Scp330Events.EatenScp330 += Handlers.OnEatenScp330;
+			Scp330Events.InteractingScp330 += Handlers.OnInteractingScp330;
+			Scp244Events.OpeningScp244 += Handlers.OnOpeningScp244;
+			Scp244Events.DamagingScp244 += Handlers.OnDamagingScp244;
+			Scp244Events.PickingUpScp244 += Handlers.OnPickingUpScp244;
+			Scp244Events.UsingScp244 += Handlers.OnUsingScp244;
+			MapEvents.ExplodingGrenade += Handlers.OnExplodingGrenade;
 			PlayerEvents.UsedItem += Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator += Handlers.OnGeneratorUnlock;
@@ -162,8 +171,16 @@ namespace DiscordLog
 			PlayerEvents.DroppingItem -= Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem -= Handlers.OnPickingUpItem;
 			PlayerEvents.PickingUpArmor -= Handlers.OnPickingUpArmor;
-			//PlayerEvents.PickingUpScp330 -= Handlers.OnPickingUpScp330;
+			Scp330Events.PickingUpScp330 -= Handlers.OnPickingUpScp330;
+			Scp330Events.DroppingScp330 -= Handlers.OnDroppingUpScp330;
 			Scp330Events.EatenScp330 -= Handlers.OnEatenScp330;
+			Scp330Events.InteractingScp330 -= Handlers.OnInteractingScp330;
+			Scp244Events.OpeningScp244 -= Handlers.OnOpeningScp244;
+			Scp244Events.DamagingScp244 -= Handlers.OnDamagingScp244;
+			Scp244Events.PickingUpScp244 -= Handlers.OnPickingUpScp244;
+			Scp244Events.UsingScp244 -= Handlers.OnUsingScp244;
+			MapEvents.ExplodingGrenade -= Handlers.OnExplodingGrenade;
+
 			PlayerEvents.UsedItem -= Handlers.OnPlayerUsedItem;
 
 			PlayerEvents.UnlockingGenerator -= Handlers.OnGeneratorUnlock;

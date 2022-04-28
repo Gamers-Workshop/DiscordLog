@@ -10,32 +10,8 @@ using System.Threading.Tasks;
 
 namespace DiscordLog.Patches
 {
-	//SCP330 Log
-    [HarmonyPatch(typeof(Scp330Bag), nameof(Scp330Bag.TryAddSpecific))]
-	public class CandyPickup
-    {
-		public static bool Prefix(Scp330Bag __instance,ref bool __result,CandyKindID kind)
-        {
-			try
-			{
-				if (__instance.Candies.Count >= 6)
-				{
-					__result = false;
-					return false;
-				}
-				__instance.Candies.Add(kind);
-				DiscordLog.Instance.LOG += $":inbox_tray: {Extensions.LogPlayer(Player.Get(__instance.Owner))} a récupéré un bonbon : {kind}.\n";
-				__result = true;
-				return false;
-			}
-			catch
-            {
-				Log.Error("Error in CandyPickup Prefix");
-				return true;
-			}
-		}
-	}
-	[HarmonyPatch(typeof(Scp330Bag), nameof(Scp330Bag.TryRemove))]
+
+	//[HarmonyPatch(typeof(Scp330Bag), nameof(Scp330Bag.TryRemove))]
 	public class CandyDrop
     {
 		public static bool Prefix(Scp330Bag __instance, ref CandyKindID __result,int index)

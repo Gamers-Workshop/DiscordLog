@@ -192,6 +192,7 @@ namespace DiscordLog
         {
             if (!ev.IsAllowed)
                 return;
+
             if (ev.Item is Scp330 scp330)
             {
                 string objcontent = $":outbox_tray: {Extensions.LogPlayer(ev.Player)} a jeté SCP330:\n";
@@ -206,22 +207,68 @@ namespace DiscordLog
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
-            if (!ev.IsAllowed)
-                return;
-            plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {Extensions.LogPickup(ev.Pickup)}.\n";
+            if (ev.IsAllowed)
+                    plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {Extensions.LogPickup(ev.Pickup)}.\n";
         }
         public void OnPickingUpArmor(PickingUpArmorEventArgs ev)
         {
+            if (ev.IsAllowed)
+                plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Pickup.Type}.\n";
+        }
+        public void OnPickingUpScp330(PickingUpScp330EventArgs ev)
+        {
+            if (!ev.IsAllowed) 
+                return;
+
+            plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré ses bonbon :\n";
+            foreach (CandyKindID Candy in ev.Pickup.StoredCandies)
+            {
+                plugin.LOG += $"  - {Candy}\n";
+            }
+        }
+        public void OnDroppingUpScp330(DroppingScp330EventArgs ev)
+        {
             if (!ev.IsAllowed)
                 return;
-            plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Pickup.Type}.\n";
-        }
 
+            plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a jeté un bonbon : {ev.Candy}\n";
+        }
         public void OnEatenScp330(EatenScp330EventArgs ev)
         {
             plugin.LOG += $":candy: {Extensions.LogPlayer(ev.Player)} a manger un bonbon : {ev.Candy.Kind}.\n";
         }
+        public void OnInteractingScp330(InteractingScp330EventArgs ev)
+        {
+            if (!ev.IsAllowed || ev.Player is null)
+                return;
 
+            plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récolté un bonbon : {ev.Candy}\n";
+        }
+        public void OnOpeningScp244(OpeningScp244EventArgs ev)
+        {
+            if (ev.IsAllowed)
+                plugin.LOG += $":teapot: {ev.Pickup.Type} a été ouvert par {Extensions.LogPlayer(ev.Pickup.PreviousOwner)} : {Map.FindParentRoom(ev.Pickup.GameObject)?.Type}.\n";
+        }
+        public void OnDamagingScp244(DamagingScp244EventArgs ev)
+        {
+            if (ev.IsAllowed)
+                plugin.LOG += $":teapot: {Pickup.Get(ev.Scp244).Type} a été cassé par {Extensions.LogPlayer(Player.Get(ev.Scp244.PreviousOwner.Hub))} avec {ev.Handler.Type} : {Map.FindParentRoom(ev.Scp244.gameObject)?.Type}\n";
+        }
+        public void OnPickingUpScp244(PickingUpScp244EventArgs ev)
+        {
+            if (ev.IsAllowed)
+                plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Pickup.Type}.\n";
+        }
+        public void OnUsingScp244(UsingScp244EventArgs ev)
+        {
+            if (ev.IsAllowed)
+                plugin.LOG += $":teapot: {Extensions.LogPlayer(ev.Player)} a ouvert {ev.Scp244.Type} : {ev.Player.CurrentRoom?.Type}.\n";
+        }
+        public void OnExplodingGrenade(ExplodingGrenadeEventArgs ev)
+        {
+            if (ev.IsAllowed && ev.GrenadeType == GrenadeType.Scp2176)
+                plugin.LOG += $"<:SCP2176:963534500120383539> SCP2176 a été cassé par {Extensions.LogPlayer(ev.Thrower)} : {Map.FindParentRoom(ev.Grenade.gameObject)?.Type}.\n";
+        }
         public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
             if (ItemExtensions.IsMedical(ev.Item.Type))
