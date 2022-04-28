@@ -73,20 +73,22 @@ namespace DiscordLog
 			base.OnReloaded();
 			NormalisedName.Clear();
 
-			if (Instance.Config.WebhookUrlLogError != string.Empty)
+			if (!string.IsNullOrWhiteSpace(Instance.Config.WebhookUrlLogError))
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendLogError()));
-
-			if (Instance.Config.WebhookUrlLogJoueur != string.Empty)
+			if (!string.IsNullOrWhiteSpace(Instance.Config.WebhookUrlLogJoueur))
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendWebhook()));
-            if (Instance.Config.WebhookSi != "null" || Instance.Config.IdMessage != "null" )
+			if (!string.IsNullOrWhiteSpace(Instance.Config.WebhookUrlLogStaff))
+				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendWebhookStaff()));
+			if (Instance.Config.WebhookSi != "null" || Instance.Config.IdMessage != "null" )
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunUpdateWebhook()));
+
 			foreach (Player p in Player.List)
 			{
 				string PlayerName = p.Nickname.Normalize(System.Text.NormalizationForm.FormKD);
-				if (PlayerName.Length < 18)
+				if (PlayerName.Length < 17)
 					NormalisedName.Add(p, $"[{p.Id}] {PlayerName}");
 				else
-					NormalisedName.Add(p, $"[{p.Id}] {PlayerName.Remove(17)}");
+					NormalisedName.Add(p, $"[{p.Id}] {PlayerName.Remove(16)}");
 			}
 		}
 		private void RegistEvents()
@@ -227,42 +229,21 @@ namespace DiscordLog
 			while (true)
 			{
 				yield return Timing.WaitForSeconds(10f);
-				if (LOGError is not null)
+				if (LOGError is null)
+					continue;
+				if (LOGError.Length < 2001)
 				{
-					if (LOGError.Length < 2001)
+					Webhook.SendWebhookError(LOGError);
+					LOGError = null;
+				}
+				else
+				{
+					DiscordMessage(LOGError, out List<string> ListString);
+					LOGError = null;
+					foreach (string SendLog in ListString)
 					{
-						Webhook.SendWebhookError(LOGError);
-						LOGError = null;
-					}
-					else
-					{
-						int Limiteur = 0;
-						string LogLimite = string.Empty;
-						string logs = LOGError;
-						LOGError = null;
-						List<string> LogToSend = new();
-						foreach (string ligne in logs.Split('\n'))
-						{
-							if (ligne.Count() + Limiteur < 1999)
-							{
-								Limiteur += ligne.Count() + 1;
-								LogLimite += ligne + "\n";
-							}
-							else
-							{
-								LogToSend.Add(LogLimite);
-								LogLimite = string.Empty;
-								Limiteur = 0;
-								Limiteur = ligne.Count() + 1;
-								LogLimite = ligne + "\n";
-							}
-						}
-						LogToSend.Add(LogLimite);
-						foreach (string SendLog in LogToSend)
-						{
-							Webhook.SendWebhookError(SendLog);
-							yield return Timing.WaitForSeconds(5f);
-						}
+						Webhook.SendWebhookError(SendLog);
+						yield return Timing.WaitForSeconds(5f);
 					}
 				}
 			}
@@ -272,82 +253,69 @@ namespace DiscordLog
 			while(true)
 			{
 				yield return Timing.WaitForSeconds(1f);
-				if (LOG is not null)
+				if (LOG is null)
+					continue;
+				if (LOG.Length < 2001)
 				{
-					if (LOG.Length < 2001)
-					{
-						Webhook.SendWebhook(LOG);
-						LOG = null;
-					}
-					else
-                    {
-						int Limiteur = 0;
-						string LogLimite = string.Empty;
-						string logs = LOG;
-						LOG = null;
-						List<string> LogToSend = new();
-						foreach (string ligne in logs.Split('\n'))
-						{
-							if (ligne.Count() + Limiteur < 1999)
-							{
-								Limiteur += ligne.Count() + 1;
-								LogLimite += ligne + "\n";
-							}
-							else
-                            {
-								LogToSend.Add(LogLimite);
-								LogLimite = string.Empty;
-								Limiteur = 0;
-								Limiteur = ligne.Count() + 1;
-								LogLimite = ligne + "\n";
-							}
-						}
-						LogToSend.Add(LogLimite);
-						foreach (string SendLog in LogToSend)
-                        {
-							Webhook.SendWebhook(SendLog);
-							yield return Timing.WaitForSeconds(0.25f);
-						}
-					}
+					Webhook.SendWebhook(LOG);
+					LOG = null;
+					continue;
 				}
-				if (LOGStaff is not null)
+
+				DiscordMessage(LOG, out List<string> ListString);
+				LOG = null;
+				foreach (string SendLog in ListString)
 				{
+					Webhook.SendWebhook(SendLog);
 					yield return Timing.WaitForSeconds(0.25f);
-					if (LOGStaff.Length < 2001)
-					{
-						Webhook.SendWebhookStaff(LOGStaff);
-						LOGStaff = null;
-					}
-					else
-					{
-						int Limiteur = 0;
-						string LogLimite = string.Empty;
-						string logs = LOGStaff;
-						LOGStaff = null;
-						List<string> LogToSend = new();
-						foreach (string ligne in logs.Split('\n'))
-						{
-							if (ligne.Count() + Limiteur < 1999)
-							{
-								Limiteur += ligne.Count() + 1;
-								LogLimite += ligne + "\n";
-							}
-							else
-							{
-								LogToSend.Add(LogLimite);
-								Limiteur = ligne.Count() + 1;
-								LogLimite = ligne + "\n";
-							}
-						}
-						LogToSend.Add(LogLimite);
-						foreach (string SendLog in LogToSend)
-						{
-							Webhook.SendWebhookStaff(SendLog);
-							yield return Timing.WaitForSeconds(0.25f);
-						}
-					}
 				}
 			}
+		}
+
+		public IEnumerator<float> RunSendWebhookStaff()
+		{
+			while (true)
+			{
+				yield return Timing.WaitForSeconds(1f);
+				if (LOGStaff is null)
+					continue;
+				if (LOGStaff.Length < 2001)
+				{
+					Webhook.SendWebhookStaff(LOGStaff);
+					LOGStaff = null;
+					continue;
+				}
+
+				DiscordMessage(LOGStaff, out List<string> ListString);
+				LOGStaff = null;
+				foreach (string SendLog in ListString)
+				{
+					Webhook.SendWebhookStaff(SendLog);
+					yield return Timing.WaitForSeconds(0.25f);
+				}
+			}
+		}
+
+		public void DiscordMessage(string message, out List<string> ListString)
+        {
+			int Limiteur = 0;
+			string LogLimite = string.Empty;
+			ListString = new();
+			foreach (string ligne in message.Split('\n'))
+			{
+				if (ligne.Count() + Limiteur < 1996)
+				{
+					Limiteur += ligne.Count() + 1;
+					LogLimite += ligne + "\n_ _";
+				}
+				else
+				{
+					ListString.Add(LogLimite);
+					Limiteur = ligne.Count() + 1;
+					LogLimite = ligne + "\n";
+				}
+			}
+			ListString.Add(LogLimite);
 		}
 		public IEnumerator<float> RunUpdateWebhook()
 		{
