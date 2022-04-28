@@ -215,13 +215,6 @@ namespace DiscordLog
             if (ev.IsAllowed)
                 plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Pickup.Type}.\n";
         }
-        public void OnPickingUpArmor(PickingUpArmorEventArgs ev)
-        {
-            if (!ev.IsAllowed)
-                return;
-            plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Pickup.Type}.\n";
-        }
-
         public void OnPickingUpScp330(PickingUpScp330EventArgs ev)
         {
             if (!ev.IsAllowed) 
