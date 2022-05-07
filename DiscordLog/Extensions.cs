@@ -1,12 +1,17 @@
 ﻿using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
+using Exiled.API.Structs;
 using InventorySystem.Items.Firearms;
+using InventorySystem.Items.Firearms.Attachments;
+using InventorySystem.Items.Firearms.Attachments.Components;
 using InventorySystem.Items.MicroHID;
 using InventorySystem.Items.Radio;
 using NorthwoodLib.Pools;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -79,5 +84,38 @@ namespace DiscordLog
 
             return "Unknown (API Key Not valid)";
         }
+
+        public static byte GetMaxAmmo(this Pickup pickup)
+        {
+            if (pickup.Base is not FirearmPickup firearm)
+                return 0;
+            byte ammo = pickup.Type.GetMaxAmmo();
+
+            if (firearm.Status.Flags.HasFlag(FirearmStatusFlags.Chambered))
+                ammo++;
+
+            return ammo += (byte)UnityEngine.Mathf.Clamp(GetAttachmentsValue(firearm, AttachmentParam.MagazineCapacityModifier), byte.MinValue, byte.MaxValue);
+        }
+
+        public static float GetAttachmentsValue(this FirearmPickup firearmPickup, AttachmentParam attachmentParam)
+        {
+            IEnumerable<AttachmentIdentifier> attachements = firearmPickup.Info.ItemId.GetAttachmentIdentifiers(firearmPickup.Status.Attachments);
+
+            AttachmentParameterDefinition definitionOfParam = AttachmentsUtils.GetDefinitionOfParam((int)attachmentParam);
+            float num = definitionOfParam.DefaultValue;
+
+            foreach (AttachmentIdentifier attachement in attachements)
+            {
+                Attachment attachment = AttachmentsList.FirstOrDefault(x => x.Name == attachement.Name);
+                if (attachment is null || !attachment.TryGetValue((int)attachmentParam, out float paraValue))
+                    continue;
+
+                num = AttachmentsUtils.MixValue(num, paraValue, definitionOfParam.MixingMode);
+            }
+            return num;
+        }
+        private static Attachment[] attachmentsValue;
+        public static Attachment[] AttachmentsList => attachmentsValue ??= UnityEngine.Object.FindObjectsOfType<Attachment>();
+
     }
 }
