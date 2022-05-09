@@ -72,15 +72,11 @@ namespace DiscordLog.Patches
                                 if (!heldOnly || item.Key == player.Inventory.CurItem.SerialNumber)
                                     ItemTypes.Add(Item.Get(item.Value));
 
-                    string str;
-                    if (EventHandlers.Use914 is not null)
-                        str = $":gear: SCP-914 a été enclenché en {setting} par ``{EventHandlers.Use914.Nickname}`` ({Extensions.ConvertID(EventHandlers.Use914.UserId)}) :\n";
-                    else
-                        str = $":gear: SCP-914 a été enclenché en {setting} par Unknown :\n";
+                    string str = $":gear: SCP-914 a été enclenché en {setting} par {Extensions.LogPlayer(EventHandlers.Use914)} :\n";
 
                     if (PickupTypes.Any() || ItemTypes.Any())
                     {
-                        str += $"**Item{((PickupTypes.Count() + ItemTypes.Count()) <= 1 ? "" : "s")}**\n";
+                        str += $"**Item{((PickupTypes.Count() + ItemTypes.Count()) > 1 ? "s" : "")}**\n";
                         foreach (var item in PickupTypes.OrderBy(x => x.Type))
                             if (!ItemExtensions.IsAmmo(item.Type))
                                 str += $"   - {Extensions.LogPickup(item)}\n";
@@ -89,7 +85,7 @@ namespace DiscordLog.Patches
                     }
                     if (Players.Any())
                     {
-                        str += $"**Joueur{(Players.Count() <= 1 ? "" : "s")}**\n";
+                        str += $"**Joueur{(Players.Count() > 1 ? "s" : "")}**\n";
                         foreach (Player player in Players)
                             str += $"   - {Extensions.LogPlayer(player)}\n";
                     }
