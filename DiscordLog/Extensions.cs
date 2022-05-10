@@ -2,6 +2,8 @@
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.API.Structs;
+using InventorySystem;
+using InventorySystem.Items;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms.Attachments.Components;
@@ -84,7 +86,18 @@ namespace DiscordLog
 
             return "Unknown (API Key Not valid)";
         }
-
+        public static byte GetMaxAmmo(this ItemType item)
+        {
+            if (!InventoryItemLoader.AvailableItems.TryGetValue(item, out ItemBase itemBase) || itemBase is not InventorySystem.Items.Firearms.Firearm firearm)
+                return 0;
+            return firearm switch
+            {
+                AutomaticFirearm auto => auto._baseMaxAmmo,
+                Shotgun shotgun => shotgun._ammoCapacity,
+                ParticleDisruptor => 5,
+                _ => 6,
+            };
+        }
         public static byte GetMaxAmmo(this Pickup pickup)
         {
             if (pickup.Base is not FirearmPickup firearm)
