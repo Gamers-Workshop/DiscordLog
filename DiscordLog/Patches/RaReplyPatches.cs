@@ -61,7 +61,7 @@ namespace DiscordLog
             try
             {
                 List<string> args = query.Trim().Split(QueryProcessor.SpaceArray, 512, StringSplitOptions.RemoveEmptyEntries).ToList();
-                if (args.Count() == 0) return;
+                if (args.IsEmpty()) return;
                 if (query.StartsWith("$0 1"))
                     return;
 
@@ -70,56 +70,52 @@ namespace DiscordLog
                 switch (args.ElementAtOrDefault(0).ToLower())
                 {
                     case "jail":
-                        {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a jail {Extensions.LogPlayer(Player.Get(args.ElementAtOrDefault(1)))}.\n";
-                        }
+                        DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a jail {Extensions.LogPlayer(Player.Get(args.ElementAtOrDefault(1)))}.\n";
                         return;
                     case "forceclass":
+                        if (Enum.TryParse(args.ElementAtOrDefault(2), out RoleType role))
                         {
-                            if (int.TryParse(args.ElementAtOrDefault(2), out int Role))
-                            {
-                                string Receiver = string.Empty;
+                            string Receiver = string.Empty;
 
-                                string[] Users = args.ElementAtOrDefault(1).Split('.');
-                                List<Player> PlyList = new();
-                                foreach (string s in Users)
-                                {
-                                    if (int.TryParse(s, out int id) && Player.Get(id) is not null)
-                                        PlyList.Add(Player.Get(id));
-                                    else if (Player.Get(s) is not null)
-                                        PlyList.Add(Player.Get(s));
-                                }
-                                foreach (Player ply in PlyList)
-                                {
-                                    Receiver += $"\n - {Extensions.LogPlayer(ply)}";
-                                }
-                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a changé en {(RoleType)Role} : {Receiver}\n";
+                            string[] Users = args.ElementAtOrDefault(1).Split('.');
+                            List<Player> PlyList = new();
+                            foreach (string s in Users)
+                            {
+                                if (int.TryParse(s, out int id) && Player.Get(id) is not null)
+                                    PlyList.Add(Player.Get(id));
+                                else if (Player.Get(s) is not null)
+                                    PlyList.Add(Player.Get(s));
                             }
+                            foreach (Player ply in PlyList)
+                            {
+                                Receiver += $"\n - {Extensions.LogPlayer(ply)}";
+                            }
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a changé en {role} : {Receiver}\n";
+                            return;
                         }
-                        return;
+                        break;
                     case "give":
+                        if (Enum.TryParse(args.ElementAtOrDefault(2), out ItemType itemType))
                         {
-                            if (int.TryParse(args.ElementAtOrDefault(2), out int Item))
-                            {
-                                string Receiver = string.Empty;
+                            string Receiver = string.Empty;
 
-                                string[] Users = args.ElementAtOrDefault(1).Split('.');
-                                List<Player> PlyList = new();
-                                foreach (string s in Users)
-                                {
-                                    if (int.TryParse(s, out int id) && Player.Get(id) is not null)
-                                        PlyList.Add(Player.Get(id));
-                                    else if (Player.Get(s) is not null)
-                                        PlyList.Add(Player.Get(s));
-                                }
-                                foreach (Player ply in PlyList)
-                                {
-                                    Receiver += $"\n - {Extensions.LogPlayer(ply)}\n";
-                                }
-                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a donné : {(ItemType)Item} {Receiver}\n";
+                            string[] Users = args.ElementAtOrDefault(1).Split('.');
+                            List<Player> PlyList = new();
+                            foreach (string s in Users)
+                            {
+                                if (int.TryParse(s, out int id) && Player.Get(id) is not null)
+                                    PlyList.Add(Player.Get(id));
+                                else if (Player.Get(s) is not null)
+                                    PlyList.Add(Player.Get(s));
                             }
+                            foreach (Player ply in PlyList)
+                            {
+                                Receiver += $"\n - {Extensions.LogPlayer(ply)}";
+                            }
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a donné : {itemType} {Receiver}\n";
+                            return;
                         }
-                        return;
+                        break;
                     case "overwatch":
                         {
                             string Receiver = string.Empty;
@@ -137,16 +133,18 @@ namespace DiscordLog
                             {
                                 Receiver += $"\n - {Extensions.LogPlayer(ply)}";
                             }
-                            if (args.ElementAtOrDefault(1) == "0")
+                            if (args.ElementAtOrDefault(2) is "0")
                             {
                                 DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à enlever l'overwatch : {Receiver}\n";
+                                return;
                             }
-                            else if (args.ElementAtOrDefault(1) == "1")
+                            if (args.ElementAtOrDefault(2) is "1")
                             {
                                 DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à mis l'overwatch : {Receiver}\n";
+                                return;
                             }
                         }
-                        return;
+                        break;
                     case "bring":
                         {
                             string Receiver = string.Empty;
@@ -168,9 +166,7 @@ namespace DiscordLog
                         }
                         return;
                     case "goto":
-                        {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} se tp à {Extensions.LogPlayer(Player.Get(args.ElementAtOrDefault(1)))}.\n";
-                        }
+                        DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} se tp à {Extensions.LogPlayer(Player.Get(args.ElementAtOrDefault(1)))}.\n";
                         return;
                     case "$1":
                         {
@@ -257,12 +253,8 @@ namespace DiscordLog
                             DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à {args.ElementAtOrDefault(0)} : {Receiver}\n";
                         }
                         return;
-                    default:
-                        {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{query}``.\n";
-                            return;
-                        }
                 }
+                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{query}``.\n";
             }
             catch (System.Exception ex)
             {
