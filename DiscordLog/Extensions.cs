@@ -112,6 +112,9 @@ namespace DiscordLog
 
         public static float GetAttachmentsValue(this FirearmPickup firearmPickup, AttachmentParam attachmentParam)
         {
+            if ((uint)firearmPickup.Info.ItemId.GetBaseCode() > firearmPickup.Status.Attachments)
+                return 0;
+
             IEnumerable<AttachmentIdentifier> attachements = firearmPickup.Info.ItemId.GetAttachmentIdentifiers(firearmPickup.Status.Attachments);
 
             AttachmentParameterDefinition definitionOfParam = AttachmentsUtils.GetDefinitionOfParam((int)attachmentParam);

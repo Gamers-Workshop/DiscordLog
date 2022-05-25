@@ -41,7 +41,7 @@ namespace DiscordLog
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunSendWebhook(), Segment.RealtimeUpdate));
             if (!string.IsNullOrWhiteSpace(DiscordLog.Instance.Config.WebhookUrlLogStaff))
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunSendWebhookStaff(), Segment.RealtimeUpdate));
-            if (DiscordLog.Instance.Config.WebhookSi != "null" || DiscordLog.Instance.Config.IdMessage != "null" )
+            if (DiscordLog.Instance.Config.WebhookSi != "null" && DiscordLog.Instance.Config.IdMessage != "null" )
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunUpdateWebhook(), Segment.RealtimeUpdate));
             plugin.LOG += ":zzz: En attente de joueurs...\n";
             RoundIsStart = false;
@@ -55,7 +55,7 @@ namespace DiscordLog
                     if (player.TryGetSessionVariable("NewRole", out Tuple<string, string> newrole))
                         RoundStart += $"    - {Extensions.LogPlayer(player)} a spawn en {newrole.Item1}.\n";
                     else
-                        RoundStart += $"    - {Extensions.LogPlayer(player)} a spawn en {player.Role}.\n";
+                        RoundStart += $"    - {Extensions.LogPlayer(player)} a spawn en {player.Role.Type}.\n";
                 plugin.LOG += RoundStart;
                 RoundIsStart = true;
             });
@@ -308,10 +308,12 @@ namespace DiscordLog
             if (!ev.IsAllowed)
                 return;
 
-            if (!Warhead.IsKeycardActivated)
-                plugin.LOG += $":radioactive: {Extensions.LogPlayer(ev.Player)} a ouvert la protection pour activé l'Alpha Warhead.\n";
-            else if (Warhead.IsKeycardActivated)
+            if (Warhead.IsKeycardActivated)
+            {
                 plugin.LOG += $":radioactive: {Extensions.LogPlayer(ev.Player)} a fermer la protection pour activé l'Alpha Warhead.\n";
+                return;
+            }
+            plugin.LOG += $":radioactive: {Extensions.LogPlayer(ev.Player)} a ouvert la protection pour activé l'Alpha Warhead.\n";
         }
         public void OnLocalReporting(LocalReportingEventArgs ev)
         {
@@ -326,8 +328,9 @@ namespace DiscordLog
             {
                 IntercomPlayerSpeek = ev.Player;
                 plugin.LOG += $":loudspeaker: {Extensions.LogPlayer(ev.Player)} utilise l'intercom.\n";
+                return;
             }
-            else if (ev.Player is null)
+            if (ev.Player is null)
                 IntercomPlayerSpeek = null;
         }
         public void OnHandcuffing(HandcuffingEventArgs ev)
@@ -370,23 +373,22 @@ namespace DiscordLog
         }
         public void OnBanning(BanningEventArgs ev)
         {
-            if (ev.IsAllowed)
-            {
-                _ = Webhook.BanPlayerAsync(ev.Issuer, ev.Target, ev.Reason, ev.Duration);
-                plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par {Extensions.LogPlayer(ev.Issuer)}.\n";
-            } 
+            if (!ev.IsAllowed) 
+                return;
+            _ = Webhook.BanPlayerAsync(ev.Issuer, ev.Target, ev.Reason, ev.Duration);
+            plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par {Extensions.LogPlayer(ev.Issuer)}.\n";
         }
         public void OnKicking(KickingEventArgs ev)
         {
-            if (ev.IsAllowed)
-            {
-                plugin.LOGStaff += $":mans_shoe: {Extensions.LogPlayer(ev.Target)} a été kick pour : ``{ev.Reason}`` ; par {Extensions.LogPlayer(ev.Issuer)}.\n";
-                _ = Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
-            }
+            if (!ev.IsAllowed) 
+                return;
+            plugin.LOGStaff += $":mans_shoe: {Extensions.LogPlayer(ev.Target)} a été kick pour : ``{ev.Reason}`` ; par {Extensions.LogPlayer(ev.Issuer)}.\n";
+            _ = Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
         }
         public void OnBanned(BannedEventArgs ev)
         {
-            if (ev.Details.OriginalName != "Unknown - offline ban") return;
+            if (ev.Details.OriginalName != "Unknown - offline ban") 
+                return;
 
             string TargetNick = "Unknown";
             if (ev.Details.Id.EndsWith("@steam"))
