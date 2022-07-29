@@ -1,6 +1,7 @@
 ﻿using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
+using Exiled.API.Features.Pickups;
 using Exiled.API.Structs;
 using InventorySystem;
 using InventorySystem.Items;
@@ -18,6 +19,9 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using Firearm = Exiled.API.Features.Items.Firearm;
+using FirearmPickup = InventorySystem.Items.Firearms.FirearmPickup;
+using MicroHIDPickup = InventorySystem.Items.MicroHID.MicroHIDPickup;
+using RadioPickup = InventorySystem.Items.Radio.RadioPickup;
 
 namespace DiscordLog
 {
