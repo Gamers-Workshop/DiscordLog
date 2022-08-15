@@ -79,7 +79,7 @@ namespace DiscordLog
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendWebhook()));
 			if (!string.IsNullOrWhiteSpace(Instance.Config.WebhookUrlLogStaff))
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendWebhookStaff()));
-			if (Instance.Config.WebhookSi != "null" || Instance.Config.IdMessage != "null" )
+			if (Instance.Config.WebhookSi is not "null" || Instance.Config.IdMessage is not "null" )
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunUpdateWebhook()));
 
 			foreach (Player p in Player.List)
@@ -115,14 +115,11 @@ namespace DiscordLog
 			PlayerEvents.Died += Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem += Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem += Handlers.OnPickingUpItem;
-			PlayerEvents.PickingUpArmor += Handlers.OnPickingUpArmor;
-			Scp330Events.PickingUpScp330 += Handlers.OnPickingUpScp330;
 			Scp330Events.DroppingScp330 += Handlers.OnDroppingUpScp330;
 			Scp330Events.EatenScp330 += Handlers.OnEatenScp330;
 			Scp330Events.InteractingScp330 += Handlers.OnInteractingScp330;
 			Scp244Events.OpeningScp244 += Handlers.OnOpeningScp244;
 			Scp244Events.DamagingScp244 += Handlers.OnDamagingScp244;
-			Scp244Events.PickingUpScp244 += Handlers.OnPickingUpScp244;
 			Scp244Events.UsingScp244 += Handlers.OnUsingScp244;
 			MapEvents.ExplodingGrenade += Handlers.OnExplodingGrenade;
 			PlayerEvents.UsedItem += Handlers.OnPlayerUsedItem;
@@ -170,14 +167,11 @@ namespace DiscordLog
 			PlayerEvents.Died -= Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem -= Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem -= Handlers.OnPickingUpItem;
-			PlayerEvents.PickingUpArmor -= Handlers.OnPickingUpArmor;
-			Scp330Events.PickingUpScp330 -= Handlers.OnPickingUpScp330;
 			Scp330Events.DroppingScp330 -= Handlers.OnDroppingUpScp330;
 			Scp330Events.EatenScp330 -= Handlers.OnEatenScp330;
 			Scp330Events.InteractingScp330 -= Handlers.OnInteractingScp330;
 			Scp244Events.OpeningScp244 -= Handlers.OnOpeningScp244;
 			Scp244Events.DamagingScp244 -= Handlers.OnDamagingScp244;
-			Scp244Events.PickingUpScp244 -= Handlers.OnPickingUpScp244;
 			Scp244Events.UsingScp244 -= Handlers.OnUsingScp244;
 			MapEvents.ExplodingGrenade -= Handlers.OnExplodingGrenade;
 

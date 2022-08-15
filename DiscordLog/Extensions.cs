@@ -43,7 +43,8 @@ namespace DiscordLog
             not null => $"{itemPickup.Type}",
             _ => "Unknown",
         };
-        public static string LogPlayer(Player player) => player is null ? $"``Unknown`` (Unknown)" : $"``{player.Nickname}`` ({ConvertID(player.UserId)})";
+        public static string LogPlayer(Player player) => player is null ? $"``Unknown`` (Unknown)" :
+            $"``{player.Nickname}`` ({(player.DoNotTrack ? $"||{ConvertID(player.UserId)}||" : ConvertID(player.UserId))})";
         public static string ConvertID(string UserID)
         {
             if (string.IsNullOrEmpty(UserID)) return string.Empty;

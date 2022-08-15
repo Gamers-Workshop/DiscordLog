@@ -3,21 +3,16 @@ using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs;
-using InventorySystem.Items.Firearms;
-using InventorySystem.Items.Firearms.Ammo;
-using InventorySystem.Items.MicroHID;
-using InventorySystem.Items.Radio;
 using InventorySystem.Items.Usables.Scp330;
 using MEC;
-using Newtonsoft.Json.Serialization;
-using NorthwoodLib;
 using PlayerStatsSystem;
 using Respawning;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using UnityEngine;
+
+using Scp330Pickup = Exiled.API.Features.Pickups.Scp330Pickup;
 
 namespace DiscordLog
 {
@@ -190,7 +185,7 @@ namespace DiscordLog
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
-            if (!ev.IsAllowed)
+            if (!ev.IsAllowed || ev.Item.Category is ItemCategory.Ammo)
                 return;
 
             if (ev.Item is Scp330 scp330)
@@ -207,24 +202,20 @@ namespace DiscordLog
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
-            if (ev.IsAllowed)
-                    plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {Extensions.LogPickup(ev.Pickup)}.\n";
-        }
-        public void OnPickingUpArmor(PickingUpArmorEventArgs ev)
-        {
-            if (ev.IsAllowed)
-                plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Armor.Type}.\n";
-        }
-        public void OnPickingUpScp330(PickingUpScp330EventArgs ev)
-        {
-            if (!ev.IsAllowed) 
+            if (!ev.IsAllowed)
                 return;
 
-            plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré ses bonbon :\n";
-            foreach (CandyKindID Candy in ev.Scp330.Candies)
+            if (ev.Pickup is Scp330Pickup scp330)
             {
-                plugin.LOG += $"  - {Candy}\n";
+                plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré ses bonbon :\n";
+                foreach (CandyKindID Candy in scp330.Candies)
+                {
+                    plugin.LOG += $"  - {Candy}\n";
+                }
+                return;
             }
+        
+            plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {Extensions.LogPickup(ev.Pickup)}.\n";
         }
         public void OnDroppingUpScp330(DroppingScp330EventArgs ev)
         {
@@ -253,11 +244,6 @@ namespace DiscordLog
         {
             if (ev.IsAllowed)
                 plugin.LOG += $":teapot: {ev.Scp244.Type} a été cassé par {Extensions.LogPlayer(ev.Scp244.PreviousOwner)} avec {ev.Handler.Type} : {ev.Scp244.Room?.Type ?? RoomType.Unknown}\n";
-        }
-        public void OnPickingUpScp244(PickingUpScp244EventArgs ev)
-        {
-            if (ev.IsAllowed)
-                plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {ev.Scp244.Type}.\n";
         }
         public void OnUsingScp244(UsingScp244EventArgs ev)
         {
@@ -292,7 +278,6 @@ namespace DiscordLog
         }
         public void OnStoppingGenerator(StoppingGeneratorEventArgs ev)
         {
-
             if (!ev.IsAllowed)
                 return;
             plugin.LOG += $":computer: {Extensions.LogPlayer(ev.Player)} a désactivé un générateur de la salle : {ev.Generator.Room.Type}.\n";
