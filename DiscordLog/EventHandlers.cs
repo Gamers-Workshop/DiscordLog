@@ -39,6 +39,7 @@ namespace DiscordLog
             if (DiscordLog.Instance.Config.WebhookSi != "null" && DiscordLog.Instance.Config.IdMessage != "null" )
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunUpdateWebhook(), Segment.RealtimeUpdate));
             plugin.LOG += ":zzz: En attente de joueurs...\n";
+            plugin.LOGStaff += $"Server Start \nExiled Version {Exiled.Loader.Loader.VersionName} | SCP:SL Version {Server.Version} | Seed {Map.Seed}";
             RoundIsStart = false;
         }
         public void OnRoundStart()
