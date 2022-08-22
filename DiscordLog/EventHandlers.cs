@@ -203,7 +203,7 @@ namespace DiscordLog
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
-            if (!ev.IsAllowed || ev.Pickup. is ItemCategory.Ammo)
+            if (!ev.IsAllowed || ev.Pickup.Type.IsAmmo())
                 return;
 
             if (ev.Pickup is Scp330Pickup scp330)
