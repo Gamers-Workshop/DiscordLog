@@ -186,7 +186,7 @@ namespace DiscordLog
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
-            if (!ev.IsAllowed || ev.Item.Category is ItemCategory.Ammo)
+            if (!ev.IsAllowed)
                 return;
 
             if (ev.Item is Scp330 scp330)
@@ -203,7 +203,7 @@ namespace DiscordLog
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
-            if (!ev.IsAllowed)
+            if (!ev.IsAllowed || ev.Pickup. is ItemCategory.Ammo)
                 return;
 
             if (ev.Pickup is Scp330Pickup scp330)
