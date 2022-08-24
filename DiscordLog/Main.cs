@@ -18,6 +18,8 @@ using System.Collections.Generic;
 using System.IO;
 using MEC;
 using System.Linq;
+using DiscordWebhookData;
+using FMOD.Studio;
 
 namespace DiscordLog
 {
@@ -79,7 +81,7 @@ namespace DiscordLog
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendWebhook()));
 			if (!string.IsNullOrWhiteSpace(Instance.Config.WebhookUrlLogStaff))
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunSendWebhookStaff()));
-			if (Instance.Config.WebhookSi is not "null" || Instance.Config.IdMessage is not "null" )
+			if (!string.IsNullOrWhiteSpace(Instance.Config.WebhookSi) || !string.IsNullOrWhiteSpace(Instance.Config.IdMessage))
 				EventHandlers.Coroutines.Add(Timing.RunCoroutine(RunUpdateWebhook()));
 
 			foreach (Player p in Player.List)
@@ -322,95 +324,123 @@ namespace DiscordLog
 			}
 		}
 		public void UpdateWebhook()
-		{
-			string RoundInfo;
-			string RoundTime;
-			int PlayerCount = Player.List.Where((p) => !p.IsOverwatchEnabled).Count();
+        {
+            int PlayerCount = Player.List.Count();
+
+            DiscordFiels RoundInfo = new()
+			{
+				Name = null,
+				Value = null,
+				Inline = false,
+			};
+			DiscordFiels PlayerConnected = new()
+			{
+				Name = $"{(PlayerCount <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
+				Value = $"{PlayerCount}/{CustomNetworkManager.slots}",
+			};
 			if (Round.IsStarted)
 			{
-				if (Round.IsLocked)
+                RoundInfo.Value = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+
+                if (Round.IsLocked)
 				{
-					RoundInfo = "La partie est bloquée";
-					RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+					RoundInfo.Name = "La partie est bloquée";
 				}
 				else
 				{
-					RoundInfo = "La partie est en cours";
-					RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+					RoundInfo.Name = "La partie est en cours";
 				}
 			}
 			else
 			{
 				if (Round.IsLobbyLocked)
 				{
-					if (PlayerCount < 2)
+                    RoundInfo.Name = "En attente des joueurs";
+
+                    if (PlayerCount < 2)
 					{
-						RoundInfo = "En attente des joueurs";
-						RoundTime = $"{2 - PlayerCount} {(2 - PlayerCount <= 1 ? "joueur manquant" : "joueurs manquants")}";
+                        RoundInfo.Value = $"{2 - PlayerCount} {(2 - PlayerCount <= 1 ? "joueur manquant" : "joueurs manquants")}";
 					}
 					else
 					{
-						RoundInfo = "En attente des joueurs";
-						RoundTime = $"Le lobby est lock";
+                        RoundInfo.Value = $"Le lobby est lock";
 					}
 				}
-				else if (GameCore.RoundStart.singleton.NetworkTimer == -1)
-				{
-					if (RoundSummary.roundTime == 0)
+				else if (GameCore.RoundStart.singleton.NetworkTimer is -1)
+                {
+                    RoundInfo.Value = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+
+                    if (RoundSummary.roundTime is 0)
 					{
-						RoundInfo = "La partie est en cours";
-						RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+                        RoundInfo.Name = "La partie est en cours";
 					}
 					else
 					{
-						RoundInfo = "La partie se termine";
-						RoundTime = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+                        RoundInfo.Name = "La partie se termine";
 					}
 				}
-				else if (GameCore.RoundStart.singleton.NetworkTimer == -2)
+				else if (GameCore.RoundStart.singleton.NetworkTimer is -2)
 				{
-					if (PlayerCount < 2)
+                    RoundInfo.Name = "En attente des joueurs";
+
+                    if (PlayerCount < 2)
 					{
-						RoundInfo = "En attente des joueurs";
-						RoundTime = $"{2 - PlayerCount} {(2 - PlayerCount <= 1 ? "joueur manquant" : "joueurs manquants")}";
+                        RoundInfo.Value = $"{2 - PlayerCount} {(2 - PlayerCount <= 1 ? "joueur manquant" : "joueurs manquants")}";
 					}
 					else
 					{
-						RoundInfo = "En attente des joueurs";
-						RoundTime = $"Départ de la game dans 30 secondes";
+                        RoundInfo.Value = $"Départ de la game dans 30 secondes";
 					}
 				}
 				else
 				{
-					RoundInfo = "En attente des joueurs";
-					RoundTime = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
+					RoundInfo.Name = "En attente des joueurs";
+                    RoundInfo.Value = $"Départ de la game dans {GameCore.RoundStart.singleton.NetworkTimer} seconde{(GameCore.RoundStart.singleton.NetworkTimer <= 1 ? "" : "s")}";
 				}
 			}
-			_ = Webhook.UpdateServerInfo(RoundInfo, RoundTime);
-			string PlayerNameList = "";
-			string PlayerRoleList = "";
-			string UserIdList = "";
-			if (Player.List.Count() != 0)
+			Webhook.UpdateServerInfo(PlayerConnected, RoundInfo);
+			DiscordFiels DiscordPlayerName = null;
+			DiscordFiels PlayerRole = null;
+            DiscordFiels UserId = null;
+			if (Player.List.Any())
 			{
-				foreach (Player player in Player.List) 
+                DiscordPlayerName = new()
+                {
+                    Name = "Pseudo",
+                    Value = "",
+                    Inline = true,
+                };
+                PlayerRole = new()
+                {
+                    Name = "Rôle(Hp)",
+                    Value = "",
+                    Inline = true,
+                };
+                UserId = new()
+                {
+                    Name = "UserID",
+                    Value = "",
+                    Inline = true,
+                };
+                foreach (Player player in Player.List) 
 				{
 					NormalisedName.TryGetValue(player, out string PlayerName);
-					PlayerNameList += $"{PlayerName}\n";
-					if (player.Role.Team == Team.RIP)
+                    DiscordPlayerName.Value += $"{PlayerName}\n";
+					if (player.Role.Team is Team.RIP)
 						if (player.IsOverwatchEnabled)
-							PlayerRoleList += $"Overwatch\n";
+                            PlayerRole.Value += $"Overwatch\n";
 						else
-							PlayerRoleList += $"{player.Role.Type}\n";
+                            PlayerRole.Value += $"{player.Role.Type}\n";
 					else if (player.TryGetSessionVariable("NewRole", out Tuple<string,string> NewRole))
-						PlayerRoleList += $"{NewRole.Item1}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
-					else if (player.Role == RoleType.Scp079)
-						PlayerRoleList += $"Scp079({(player.IsGodModeEnabled ? $"GodMod" : $"{Generator.Get(GeneratorState.Engaged).Count()}/3 Gen")})\n";
+                        PlayerRole.Value += $"{NewRole.Item1}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
+					else if (player.Role.Type is RoleType.Scp079)
+                        PlayerRole.Value += $"Scp079({Generator.Get(GeneratorState.Engaged).Count()}/3 Gen)\n";
 					else
-						PlayerRoleList += $"{player.Role.Type}({(player.IsGodModeEnabled ? $"GodMod" : $"{(int)player.Health}Hp")})\n";
-                    UserIdList += $"{player.UserId}\n";
+                        PlayerRole.Value += $"{player.Role.Type}({(player.IsGodModeEnabled ? $"GodMod" : $"{(int)player.Health}Hp")})\n";
+                    UserId.Value += $"{player.UserId}\n";
                 }
             }
-			_ = Webhook.UpdateServerInfoStaffAsync(RoundInfo, RoundTime, PlayerNameList, PlayerRoleList, UserIdList);
+			Webhook.UpdateServerInfoStaffAsync(PlayerConnected, RoundInfo, DiscordPlayerName, PlayerRole, UserId);
 		}
 	}
 }

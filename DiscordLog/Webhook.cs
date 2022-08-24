@@ -1,5 +1,6 @@
 ﻿using DiscordWebhookData;
 using Exiled.API.Features;
+using FMOD.Studio;
 using Newtonsoft.Json;
 using System;
 using System.Globalization;
@@ -15,6 +16,12 @@ namespace DiscordLog
 {
     class Webhook
     {
+        public static JsonSerializerSettings SerialiseSetting = new()
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            
+            Formatting = Formatting.Indented
+        };
         public static void SendWebhook(string objcontent)
         {
             HttpClient http = new();
@@ -57,165 +64,85 @@ namespace DiscordLog
             var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
             http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogError, content);
         }
-        public static async Task UpdateServerInfo(string RoundInfo, string RoundTime)
-        {
-            WebRequest wr = (HttpWebRequest)WebRequest.Create($"{DiscordLog.Instance.Config.WebhookSi}/messages/{DiscordLog.Instance.Config.IdMessage}");
-            wr.ContentType = "application/json";
-            wr.Method = "PATCH";
 
-            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
+        public static async Task SendWebhookInformationDisocrd(string link,string method, string json)
+        {
+            json = json.Replace("null,", string.Empty);
+
+            WebRequest wr = WebRequest.Create(link);
+            wr.ContentType = "application/json";
+            wr.Method = method;
+            using (var Request = await wr.GetRequestStreamAsync())
             {
-                string json = JsonConvert.SerializeObject(new
-                {
-                    username = "SCP:SL",
-                    embeds = new[]
-                    {
-                        new
-                            {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 14310235,
-                                fields = new[]
-                                {
-                                new
-                                {
-                                    name = RoundInfo,
-                                    value = RoundTime,
-                                    inline = false,
-                                },
-                                new
-                                {
-                                    name = $"{(Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
-                                    value = $"{Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().ToList().Count}/{CustomNetworkManager.slots}",
-                                    inline = false,
-                                },
-                                },
-                                footer = new
-                                {
-                                    icon_url = "",
-                                    text = "Actualisé",
-                                },
-                                timestamp = DateTime.Now,
-                            },
-                    }
-                });
+                using var sw = new StreamWriter(Request);
                 await sw.WriteAsync(json);
+                sw.Dispose();
             }
-            var response = (HttpWebResponse)await wr.GetResponseAsync();
+            var response = await wr.GetResponseAsync();
+            response.Dispose();
             wr.Abort();
         }
-        public static async Task UpdateServerInfoStaffAsync(string RoundInfo, string RoundTime, string PlayerNameList, string PlayerRoleList, string UserIdList)
+        public static void UpdateServerInfo(DiscordFiels PlayerConnected, DiscordFiels RoundInfo)
         {
-            if (PlayerNameList != "" || PlayerRoleList != "" || UserIdList != "")
-            {
-                WebRequest wr = (HttpWebRequest)WebRequest.Create($"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}");
-                wr.ContentType = "application/json";
-                wr.Method = "PATCH";
-                using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
+            _ = SendWebhookInformationDisocrd(
+                $"{DiscordLog.Instance.Config.WebhookSi}/messages/{DiscordLog.Instance.Config.IdMessage}",
+                "PATCH",
+                JsonConvert.SerializeObject(new DiscordWebhookData.DiscordWebhook()
                 {
-                    string json = JsonConvert.SerializeObject(new
+                    Username = "SCP:SL",
+                    Embeds = new DiscordWebhookData.DiscordEmbed[]
                     {
-                        username = "SCP:SL",
-                        embeds = new[]
+                        new DiscordWebhookData.DiscordEmbed()
                         {
-                            new
+                            Title = DiscordLog.Instance.Config.SIName,
+                            Color = 14310235,
+                            Fields = new DiscordFiels[]
                             {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 14310235,
-                                fields = new[]
-                                {
-                                    new
-                                    {
-                                        name = RoundInfo,
-                                        value = RoundTime,
-                                        inline = false,
-                                    },
-                                    new
-                                    {
-                                        name = "Pseudo",
-                                        value = PlayerNameList,
-                                        inline = true,
-                                    },
-                                    new
-                                    {
-                                        name = "Rôle(Hp)",
-                                        value = PlayerRoleList,
-                                        inline = true,
-                                    },
-                                    new
-                                    {
-                                        name = "UserID",
-                                        value = UserIdList,
-                                        inline = true,
-                                    },
-                                    new
-                                    {
-                                        name = $"{(Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
-                                        value = $"{Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().ToList().Count}/{CustomNetworkManager.slots}",
-                                        inline = false,
-                                    },
-                                },
-                                footer = new
-                                {
-                                    icon_url = "",
-                                    text = "Actualisé",
-                                },
-                                timestamp = DateTime.Now,
+                                RoundInfo,
+                                PlayerConnected,
                             },
-                        }
-                    });
-                    await sw.WriteAsync(json);
-                }
-                var response = (HttpWebResponse)await wr.GetResponseAsync();
-                wr.Abort();
-            }
-            else
-            {
-                WebRequest wr = (HttpWebRequest)WebRequest.Create($"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}");
-                wr.ContentType = "application/json";
-                wr.Method = "PATCH";
-                using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
+                            Footer = new DiscordFooter
+                            {
+                                Text = "Actualisé",
+                            },
+                            Timestamp = DateTime.Now,
+                        },
+                    }
+                },
+                SerialiseSetting));
+        }
+        public static void UpdateServerInfoStaffAsync(DiscordFiels PlayerConnected, DiscordFiels RoundInfo, DiscordFiels PlayerNameList, DiscordFiels PlayerRoleList, DiscordFiels UserIdList)
+        {
+            _ = SendWebhookInformationDisocrd(
+                $"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}",
+                "PATCH",
+                JsonConvert.SerializeObject(
+                new DiscordWebhookData.DiscordWebhook()
                 {
-                    string json = JsonConvert.SerializeObject(new
+                    Username = "SCP:SL",
+                    Embeds = new DiscordWebhookData.DiscordEmbed[]
                     {
-                        username = "SCP:SL",
-                        embeds = new[]
+                        new DiscordWebhookData.DiscordEmbed()
                         {
-                        new
+                            Title = DiscordLog.Instance.Config.SIName,
+                            Color = 14310235,
+                            Fields = new DiscordFiels[]
                             {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 14310235,
-                                fields = new[]
-                                {
-                                new
-                                {
-                                    name = RoundInfo,
-                                    value = RoundTime,
-                                    inline = false,
-                                },
-                                new
-                                {
-                                    name = $"{(Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().Count <= 1 ? "Joueur connecté" : "Joueurs connectés")}",
-                                    value = $"{Player.List.Where((p) => p.Role != RoleType.None && !p.IsOverwatchEnabled).ToList().ToList().Count}/{CustomNetworkManager.slots}",
-                                    inline = false,
-                                },
-                                },
-                                footer = new
-                                {
-                                    icon_url = "",
-                                    text = "Actualisé",
-                                },
-                                timestamp = DateTime.Now,
+                                RoundInfo,
+                                PlayerNameList,
+                                PlayerRoleList,
+                                UserIdList,
+                                PlayerConnected,
                             },
-                        }
-                    });
-                    await sw.WriteAsync(json);
-                }
-                var response = (HttpWebResponse)await wr.GetResponseAsync();
-                wr.Abort();
-            }
+                        Footer = new DiscordFooter
+                        {
+                            Text = "Actualisé",
+                        },
+                        Timestamp = DateTime.Now,
+                        },
+                    },
+                }, 
+                SerialiseSetting));
         }
         public static async Task BanPlayerAsync(Player player, Player sanctioned, string reason, long Duration)
         {

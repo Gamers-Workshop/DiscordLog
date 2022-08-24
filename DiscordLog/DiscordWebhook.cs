@@ -14,10 +14,12 @@ namespace DiscordWebhookData
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
-    public partial class DiscordWebhook
+    public class DiscordWebhook
     {
         [JsonProperty("content")]
         public string Content { get; set; }
+        [JsonProperty("embeds")]
+        public DiscordEmbed[] Embeds { get; set; }
         [JsonProperty("username")]
         public string Username { get; set; }
         [JsonProperty("avatar_url")]
@@ -25,35 +27,61 @@ namespace DiscordWebhookData
         // ReSharper disable once InconsistentNaming
         [JsonProperty("tts")]
         public bool IsTTS { get; set; }
+        [JsonProperty("allowed_mentions")]
+        public DiscordAllowedMention AllowedMentions { get; set; }
     }
-
-    public partial class User
+    public class DiscordEmbed
     {
-        [JsonProperty("username")]
-        public string Username { get; set; }
+        [JsonProperty("title")]
+        public string Title { get; set; }
+        [JsonProperty("description")]
+        public string Description { get; set; }
+        [JsonProperty("content")]
+        public string Content { get; set; }
+        [JsonProperty("color")]
+        public int? Color { get; set; }
 
-        [JsonProperty("discriminator")]
-        [JsonConverter(typeof(ParseStringConverter))]
-        public long Discriminator { get; set; }
+        [JsonProperty("fields")]
+        public DiscordFiels[] Fields { get; set; }
+        [JsonProperty("footer")]
+        public DiscordFooter Footer { get; set; }
 
-        [JsonProperty("id")]
-        public string Id { get; set; }
-
-        [JsonProperty("avatar")]
-        public string Avatar { get; set; }
+        [JsonProperty("timestamp")]
+        public DateTime Timestamp { get; set; }
     }
-
-
-    public partial class DiscordWebhook
+    public class DiscordFiels
     {
-        public static DiscordWebhook FromJson(string json) => JsonConvert.DeserializeObject<DiscordWebhook>(json, Converter.Settings);
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        [JsonProperty("value")]
+        public string Value { get; set; }
+        [JsonProperty("inline")]
+        public bool? Inline { get; set; }
+    }
+    public class DiscordFooter
+    {
+        [JsonProperty("text")]
+        public string Text { get; set; }
+        [JsonProperty("icon_url")]
+        public string IconUrl { get; set; }
+        [JsonProperty("proxy_icon_url")]
+        public string ProxyIconUrl { get; set; }
+    }
+    public class DiscordAllowedMention
+    {
+        [JsonProperty("parse")]
+        public string[] Parse { get; set; }
+        [JsonProperty("roles")]
+        public string[] Roles { get; set; }
+        [JsonProperty("users")]
+        public string[] Users { get; set; }
+        [JsonProperty("replied_user")]
+        public bool RepliedUser { get; set; }
     }
 
     public static class Serialize
     {
         public static string ToJson(this DiscordWebhook self) => JsonConvert.SerializeObject(self, Converter.Settings);
-    //    public static string ToJson(this Serverinfo self) => JsonConvert.SerializeObject(self, Converter.Settings);
-
     }
 
     internal static class Converter
@@ -67,36 +95,5 @@ namespace DiscordWebhookData
                 new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
             },
         };
-    }
-
-    internal class ParseStringConverter : JsonConverter
-    {
-        public override bool CanConvert(Type t) => t == typeof(long) || t == typeof(long?);
-
-        public override object ReadJson(JsonReader reader, Type t, object existingValue, JsonSerializer serializer)
-        {
-            if (reader.TokenType == JsonToken.Null) return null;
-            var value = serializer.Deserialize<string>(reader);
-            long l;
-            if (Int64.TryParse(value, out l))
-            {
-                return l;
-            }
-            throw new Exception("Cannot unmarshal type long");
-        }
-
-        public override void WriteJson(JsonWriter writer, object untypedValue, JsonSerializer serializer)
-        {
-            if (untypedValue is null)
-            {
-                serializer.Serialize(writer, null);
-                return;
-            }
-            var value = (long)untypedValue;
-            serializer.Serialize(writer, value.ToString());
-            return;
-        }
-
-        public static readonly ParseStringConverter Singleton = new ParseStringConverter();
     }
 }

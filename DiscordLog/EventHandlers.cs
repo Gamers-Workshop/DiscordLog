@@ -36,7 +36,7 @@ namespace DiscordLog
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunSendWebhook(), Segment.RealtimeUpdate));
             if (!string.IsNullOrWhiteSpace(DiscordLog.Instance.Config.WebhookUrlLogStaff))
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunSendWebhookStaff(), Segment.RealtimeUpdate));
-            if (DiscordLog.Instance.Config.WebhookSi != "null" && DiscordLog.Instance.Config.IdMessage != "null" )
+            if (!string.IsNullOrWhiteSpace(DiscordLog.Instance.Config.WebhookSi) && !string.IsNullOrWhiteSpace(DiscordLog.Instance.Config.IdMessage))
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunUpdateWebhook(), Segment.RealtimeUpdate));
             plugin.LOG += ":zzz: En attente de joueurs...\n";
             plugin.LOGStaff += $"Server Start \nExiled Version {Exiled.Loader.Loader.VersionName} | SCP:SL Version {Server.Version} | Seed {Map.Seed}";

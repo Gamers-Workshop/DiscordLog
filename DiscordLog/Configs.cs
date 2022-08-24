@@ -11,8 +11,7 @@ namespace DiscordLog
         [Description("Debug Plugin")]
         public bool Debugplugin { get; set; }
         [Description("Webhook url : Erreur Console")]
-        public string WebhookUrlLogError { get; set; } = "https://discord.com/api/webhooks/777294073522159636/JjHtkklY7fTVNaTKmr39Ip0rxsU7b-ts-dtjis7hM6HIoJ3zdtsiU0x4GTT3s8iTNq6m";
-
+        public string WebhookUrlLogError { get; set; } = string.Empty;
         [Description("Box Warn")]
         public bool WarnBox { get; set; } = false;
         [Description("clé d'API Web Steam (https://steamcommunity.com/dev/registerkey)")]
@@ -36,17 +35,17 @@ namespace DiscordLog
         [Description("WebhookName")]
         public string WebhookName { get; set; } = string.Empty;
         [Description("Server Info Name")]
-        public string SIName { get; set; } = "none";
+        public string SIName { get; set; } = string.Empty;
         [Description("Webhook URL Serveur info")]
-        public string WebhookSi { get; set; } = "none";
+        public string WebhookSi { get; set; } = string.Empty;
         [Description("Webhook Id Message")]
-        public string IdMessage { get; set; } = "none";
+        public string IdMessage { get; set; } = string.Empty;
         [Description("Webhook URL Serveur info Staff")]
-        public string WebhookSiStaff { get; set; } = "none";
+        public string WebhookSiStaff { get; set; } = string.Empty;
         [Description("Webhook Id Message")]
-        public string IdMessageStaff { get; set; } = "none";
+        public string IdMessageStaff { get; set; } = string.Empty;
         [Description("RoleID to ping")]
-        public string WebhookReport { get; set; } = "none";
+        public string WebhookReport { get; set; } = string.Empty;
 
         public string Ping { get; set; } = "<@&(Roleid)> <@(Memberid)>";
     }
