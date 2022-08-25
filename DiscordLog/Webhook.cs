@@ -1,18 +1,12 @@
 ﻿using DiscordWebhookData;
-using Exiled.API.Extensions;
 using Exiled.API.Features;
-using FMOD.Studio;
 using Newtonsoft.Json;
 using System;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using UnityEngine;
-using static UnityWebRequestDispatcher;
 
 namespace DiscordLog
 {
