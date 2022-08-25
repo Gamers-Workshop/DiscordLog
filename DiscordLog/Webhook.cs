@@ -1,4 +1,5 @@
 ﻿using DiscordWebhookData;
+using Exiled.API.Extensions;
 using Exiled.API.Features;
 using FMOD.Studio;
 using Newtonsoft.Json;
@@ -11,6 +12,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using static UnityWebRequestDispatcher;
 
 namespace DiscordLog
 {
@@ -18,9 +20,7 @@ namespace DiscordLog
     {
         public static JsonSerializerSettings SerialiseSetting = new()
         {
-            NullValueHandling = NullValueHandling.Ignore,
-            
-            Formatting = Formatting.Indented
+            NullValueHandling = NullValueHandling.Ignore,    
         };
         public static void SendWebhook(string objcontent)
         {
@@ -78,7 +78,11 @@ namespace DiscordLog
                 await sw.WriteAsync(json);
                 sw.Dispose();
             }
-            var response = await wr.GetResponseAsync();
+            var response = (HttpWebResponse)await wr.GetResponseAsync();
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                Log.Error($"An error occurred while sending log message: {response.StatusCode}\n{response.ContentType}");
+            }
             response.Dispose();
             wr.Abort();
         }
