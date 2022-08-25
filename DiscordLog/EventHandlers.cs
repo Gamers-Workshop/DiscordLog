@@ -2,7 +2,14 @@
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
-using Exiled.Events.EventArgs;
+using Exiled.Events.EventArgs.Map;
+using Exiled.Events.EventArgs.Player;
+using Exiled.Events.EventArgs.Scp049;
+using Exiled.Events.EventArgs.Scp244;
+using Exiled.Events.EventArgs.Scp330;
+using Exiled.Events.EventArgs.Scp914;
+using Exiled.Events.EventArgs.Server;
+using Exiled.Events.EventArgs.Warhead;
 using InventorySystem.Items.Usables.Scp330;
 using MEC;
 using PlayerStatsSystem;
@@ -168,21 +175,21 @@ namespace DiscordLog
             if (!RoundIsStart)
                 return;
 
-            string DamageString = ev.Handler.Type.ToString();
+            string DamageString = ev.DamageHandler.Type.ToString();
 
-            if (ev.Handler.Type == DamageType.Custom && ev.Handler.Base is CustomReasonDamageHandler customReason)
+            if (ev.DamageHandler.Type is DamageType.Custom && ev.DamageHandler.Base is CustomReasonDamageHandler customReason)
             {
                 DamageString = customReason.ServerLogsText.Remove(0, 30);
                 if (DamageString == "Disconect")
                     return;
             }
 
-            if (ev.Killer is null || ev.Killer == ev.Target)
+            if (ev.Player is null || ev.Player == ev.Target)
             {
                 plugin.LOG += $":skull: {Extensions.LogPlayer(ev.Target)} est mort par {DamageString}.\n";
                 return;
             }
-            plugin.LOG += $":skull: {Extensions.LogPlayer(ev.Target)} est mort par {Extensions.LogPlayer(ev.Killer)} avec {DamageString}.\n";
+            plugin.LOG += $":skull: {Extensions.LogPlayer(ev.Target)} est mort par {Extensions.LogPlayer(ev.Player)} avec {DamageString}.\n";
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
@@ -239,12 +246,12 @@ namespace DiscordLog
         public void OnOpeningScp244(OpeningScp244EventArgs ev)
         {
             if (ev.IsAllowed)
-                plugin.LOG += $":teapot: {ev.Scp244.Type} a été ouvert par {Extensions.LogPlayer(ev.Scp244.PreviousOwner)} : {ev.Scp244.Room?.Type ?? RoomType.Unknown}.\n";
+                plugin.LOG += $":teapot: {ev.Pickup.Type} a été ouvert par {Extensions.LogPlayer(ev.Pickup.PreviousOwner)} : {ev.Pickup.Room?.Type ?? RoomType.Unknown}.\n";
         }
         public void OnDamagingScp244(DamagingScp244EventArgs ev)
         {
             if (ev.IsAllowed)
-                plugin.LOG += $":teapot: {ev.Scp244.Type} a été cassé par {Extensions.LogPlayer(ev.Scp244.PreviousOwner)} avec {ev.Handler.Type} : {ev.Scp244.Room?.Type ?? RoomType.Unknown}\n";
+                plugin.LOG += $":teapot: {ev.Pickup.Type} a été cassé par {Extensions.LogPlayer(ev.Pickup.PreviousOwner)} avec {ev.Handler.Type} : {ev.Pickup.Room?.Type ?? RoomType.Unknown}\n";
         }
         public void OnUsingScp244(UsingScp244EventArgs ev)
         {
@@ -253,8 +260,8 @@ namespace DiscordLog
         }
         public void OnExplodingGrenade(ExplodingGrenadeEventArgs ev)
         {
-            if (ev.IsAllowed && ev.Grenade.GrenadeType == GrenadeType.Scp2176)
-                plugin.LOG += $"<:SCP2176:963534500120383539> SCP2176 a été cassé par {Extensions.LogPlayer(ev.Thrower)} : {ev.Grenade.Room?.Type ?? RoomType.Unknown}.\n";
+            if (ev.IsAllowed && ev.Projectile.ProjectileType is ProjectileType.Scp2176)
+                plugin.LOG += $"<:SCP2176:963534500120383539> SCP2176 a été cassé par {Extensions.LogPlayer(ev.Player)} : {ev.Projectile.Room?.Type ?? RoomType.Unknown}.\n";
         }
         public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
@@ -304,7 +311,7 @@ namespace DiscordLog
         public void OnLocalReporting(LocalReportingEventArgs ev)
         {
             if (DiscordLog.Instance.Config.WebhookReport != "none")
-                _ = Webhook.ReportAsync(ev.Issuer, ev.Target, DiscordLog.Instance.Config.WebhookReport, DiscordLog.Instance.Config.Ping, ev.Reason);
+                _ = Webhook.ReportAsync(ev.Player, ev.Target, DiscordLog.Instance.Config.WebhookReport, DiscordLog.Instance.Config.Ping, ev.Reason);
             ev.IsAllowed = true;
         }
 
@@ -323,18 +330,18 @@ namespace DiscordLog
         {
             if (!ev.IsAllowed)
                 return;
-            plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été menoté par {Extensions.LogPlayer(ev.Cuffer)}.\n";
+            plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été menoté par {Extensions.LogPlayer(ev.Player)}.\n";
         }
         public void OnRemovingHandcuffs(RemovingHandcuffsEventArgs ev)
         {
             if (!ev.IsAllowed)
                 return;
-            if (ev.Cuffer is null)
+            if (ev.Player is null)
             {
                 plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été démenoté.\n";
                 return;
             }
-            plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été démenoté par {Extensions.LogPlayer(ev.Cuffer)}.\n";
+            plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Target)} a été démenoté par {Extensions.LogPlayer(ev.Player)}.\n";
         }
         public void OnEnteringPocketDimension(EnteringPocketDimensionEventArgs ev)
         {
@@ -355,21 +362,21 @@ namespace DiscordLog
         public void OnFinishingRecall(FinishingRecallEventArgs ev)
         {
             if (ev.IsAllowed)
-                plugin.LOG += $":zombie: {Extensions.LogPlayer(ev.Target)} a été ressuscité en Scp049-2 par {Extensions.LogPlayer(ev.Scp049)}.\n";
+                plugin.LOG += $":zombie: {Extensions.LogPlayer(ev.Target)} a été ressuscité en Scp049-2 par {Extensions.LogPlayer(ev.Player)}.\n";
         }
         public void OnBanning(BanningEventArgs ev)
         {
             if (!ev.IsAllowed) 
                 return;
-            _ = Webhook.BanPlayerAsync(ev.Issuer, ev.Target, ev.Reason, ev.Duration);
-            plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par {Extensions.LogPlayer(ev.Issuer)}.\n";
+            _ = Webhook.BanPlayerAsync(ev.Player, ev.Target, ev.Reason, ev.Duration);
+            plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par {Extensions.LogPlayer(ev.Player)}.\n";
         }
         public void OnKicking(KickingEventArgs ev)
         {
             if (!ev.IsAllowed) 
                 return;
-            plugin.LOGStaff += $":mans_shoe: {Extensions.LogPlayer(ev.Target)} a été kick pour : ``{ev.Reason}`` ; par {Extensions.LogPlayer(ev.Issuer)}.\n";
-            _ = Webhook.KickPlayerAsync(ev.Issuer, ev.Target, ev.Reason);
+            plugin.LOGStaff += $":mans_shoe: {Extensions.LogPlayer(ev.Target)} a été kick pour : ``{ev.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
+            _ = Webhook.KickPlayerAsync(ev.Player, ev.Target, ev.Reason);
         }
         public void OnBanned(BannedEventArgs ev)
         {
@@ -381,9 +388,9 @@ namespace DiscordLog
             {
                 TargetNick = Extensions.GetUserName(ev.Details.Id);
             }
-            plugin.LOGStaff += $":hammer: ``{TargetNick}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Issuer)}.\n";
+            plugin.LOGStaff += $":hammer: ``{TargetNick}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
 
-            _ = Webhook.OBanPlayerAsync(ev.Issuer, TargetNick, ev.Details.Id, ev.Details.Reason,
+            _ = Webhook.OBanPlayerAsync(ev.Player, TargetNick, ev.Details.Id, ev.Details.Reason,
             long.TryParse(TimeSpan.FromTicks(ev.Details.Expires - ev.Details.IssuanceTime).TotalSeconds.ToString(CultureInfo.InvariantCulture), out var timelong) ? timelong : -1);
         }
     }
