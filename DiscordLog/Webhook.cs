@@ -7,18 +7,20 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Routing;
+using System.Web.UI.WebControls;
 
 namespace DiscordLog
 {
     class Webhook
     {
+        public static HttpClient http = new();
         public static JsonSerializerSettings SerialiseSetting = new()
         {
             NullValueHandling = NullValueHandling.Ignore,    
         };
         public static void SendWebhook(string objcontent)
         {
-            HttpClient http = new();
             DiscordWebhookData.DiscordWebhook webhook = new()
             {
                 AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
@@ -32,7 +34,6 @@ namespace DiscordLog
         }
         public static void SendWebhookStaff(string objcontent)
         {
-            HttpClient http = new();
             DiscordWebhookData.DiscordWebhook webhook = new()
             {
                 AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
@@ -46,7 +47,6 @@ namespace DiscordLog
         }
         public static void SendWebhookError(string objcontent)
         {
-            HttpClient http = new();
             DiscordWebhookData.DiscordWebhook webhook = new()
             {
                 AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
@@ -61,24 +61,25 @@ namespace DiscordLog
 
         public static async Task SendWebhookInformationDisocrd(string link,string method, string json)
         {
-            json = json.Replace("null,", string.Empty);
+            try
+            {
+                // Clear null property
+                json = json.Replace("null,", string.Empty);
 
-            WebRequest wr = WebRequest.Create(link);
-            wr.ContentType = "application/json";
-            wr.Method = method;
-            using (var Request = await wr.GetRequestStreamAsync())
-            {
-                using var sw = new StreamWriter(Request);
-                await sw.WriteAsync(json);
-                sw.Dispose();
+                // Create HttpRequest
+                using HttpRequestMessage request = new(new HttpMethod(method), link);
+                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                // Sending and getting Response
+                using HttpResponseMessage response = await http.SendAsync(request);
+
+                // if Response return not good Status Warn
+                if (response.StatusCode is not HttpStatusCode.OK)
+                    Log.Warn($"StatusCode: {response.StatusCode} ReasonPhrase: {response.ReasonPhrase} \n ```{await response.Content.ReadAsStringAsync()}```");
             }
-            var response = (HttpWebResponse)await wr.GetResponseAsync();
-            if (response.StatusCode != HttpStatusCode.OK)
+            catch (Exception ex)
             {
-                Log.Error($"An error occurred while sending log message: {response.StatusCode}\n{response.ContentType}");
+                Log.Error(ex);
             }
-            response.Dispose();
-            wr.Abort();
         }
         public static void UpdateServerInfo(DiscordFiels PlayerConnected, DiscordFiels RoundInfo)
         {
