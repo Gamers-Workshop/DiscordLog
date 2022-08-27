@@ -248,7 +248,7 @@ namespace DiscordLog
 		{
 			while(true)
 			{
-				yield return Timing.WaitForSeconds(1f);
+				yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 2f : 1f);
 				if (LOG is null)
 					continue;
 				if (LOG.Length < 2001)
@@ -263,7 +263,7 @@ namespace DiscordLog
 				foreach (string SendLog in ListString)
 				{
 					Webhook.SendWebhook(SendLog);
-					yield return Timing.WaitForSeconds(0.25f);
+					yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 2f : 0.5f);
 				}
 			}
 		}
@@ -287,7 +287,7 @@ namespace DiscordLog
 				foreach (string SendLog in ListString)
 				{
 					Webhook.SendWebhookStaff(SendLog);
-					yield return Timing.WaitForSeconds(0.25f);
+					yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 2f : 0.5f);
 				}
 			}
 		}
@@ -319,7 +319,7 @@ namespace DiscordLog
 
 			while(true)
 			{
-				yield return Timing.WaitForSeconds(1f);
+				yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 5f : 1f);
 				UpdateWebhook();
 			}
 		}
