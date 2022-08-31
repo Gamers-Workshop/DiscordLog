@@ -37,7 +37,7 @@ namespace DiscordLog
 		public string LOG = null;
 		public string LOGStaff = null;
 		public string LOGError = null;
-
+		public int DiscordPreventSpamming;
 
 		public Dictionary<Player, string> NormalisedName = new();
 
@@ -229,7 +229,7 @@ namespace DiscordLog
 					continue;
 				if (LOGError.Length < 2001)
 				{
-					Webhook.SendWebhookError(LOGError);
+					Webhook.SendWebhookMessage(Config.WebhookUrlLogError, LOGError);
 					LOGError = null;
 				}
 				else
@@ -238,7 +238,7 @@ namespace DiscordLog
 					LOGError = null;
 					foreach (string SendLog in ListString)
 					{
-						Webhook.SendWebhookError(SendLog);
+						Webhook.SendWebhookMessage(Config.WebhookUrlLogError, SendLog);
 						yield return Timing.WaitForSeconds(5f);
 					}
 				}
@@ -248,12 +248,12 @@ namespace DiscordLog
 		{
 			while(true)
 			{
-				yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 2f : 1f);
+				yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 4f : 1.5f);
 				if (LOG is null)
 					continue;
 				if (LOG.Length < 2001)
 				{
-					Webhook.SendWebhook(LOG);
+					Webhook.SendWebhookMessage(Config.WebhookUrlLogJoueur, LOG);
 					LOG = null;
 					continue;
 				}
@@ -262,8 +262,8 @@ namespace DiscordLog
 				LOG = null;
 				foreach (string SendLog in ListString)
 				{
-					Webhook.SendWebhook(SendLog);
-					yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 2f : 0.5f);
+					Webhook.SendWebhookMessage(Config.WebhookUrlLogJoueur, SendLog);
+					yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 2f : 1f);
 				}
 			}
 		}
@@ -272,12 +272,12 @@ namespace DiscordLog
 		{
 			while (true)
 			{
-				yield return Timing.WaitForSeconds(1f);
-				if (LOGStaff is null)
+				yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 4f : 1.5f);
+                if (LOGStaff is null)
 					continue;
 				if (LOGStaff.Length < 2001)
 				{
-					Webhook.SendWebhookStaff(LOGStaff);
+					Webhook.SendWebhookMessage(Config.WebhookUrlLogStaff, LOGStaff);
 					LOGStaff = null;
 					continue;
 				}
@@ -286,8 +286,8 @@ namespace DiscordLog
 				LOGStaff = null;
 				foreach (string SendLog in ListString)
 				{
-					Webhook.SendWebhookStaff(SendLog);
-					yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 2f : 0.5f);
+					Webhook.SendWebhookMessage(Config.WebhookUrlLogStaff, SendLog);
+					yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 2f : 1f);
 				}
 			}
 		}
@@ -319,7 +319,7 @@ namespace DiscordLog
 
 			while(true)
 			{
-				yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 5f : 1f);
+				yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 5f : 1.2f);
 				UpdateWebhook();
 			}
 		}

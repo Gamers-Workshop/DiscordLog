@@ -53,8 +53,8 @@ namespace DiscordLog
         {
             Timing.CallDelayed(0.5f, () =>
             {
-                string RoundStart = $":triangular_flag_on_post: Démarrage de la partie avec {Player.List.Where((p) => p.Role != RoleType.None).Count()} joueurs.\n";
-                foreach (Player player in Player.List.Where((p) => p.Role != RoleType.None).OrderBy(x => x.Role.Team))
+                string RoundStart = $":triangular_flag_on_post: Démarrage de la partie avec {Player.List.Count()} joueurs.\n";
+                foreach (Player player in Player.List.OrderBy(x => x.Role.Team))
                     if (player.TryGetSessionVariable("NewRole", out Tuple<string, string> newrole))
                         RoundStart += $"    - {Extensions.LogPlayer(player)} a spawn en {newrole.Item1}.\n";
                     else
@@ -80,9 +80,9 @@ namespace DiscordLog
             if (!ev.IsAllowed || !ev.Players.Any()) return;
             string objcontent = ":snake: La Main du Serpent est arrivée sur le site.\n";
 
-            if (ev.NextKnownTeam == SpawnableTeamType.NineTailedFox)
+            if (ev.NextKnownTeam is SpawnableTeamType.NineTailedFox)
                 objcontent = ":helicopter: L’équipe Epsilon est arrivée sur le site.\n";
-            else if (ev.NextKnownTeam == SpawnableTeamType.ChaosInsurgency)
+            else if (ev.NextKnownTeam is SpawnableTeamType.ChaosInsurgency)
                 objcontent = ":articulated_lorry: L’Insurrection du Chaos est arrivée sur le site.\n";
 
             foreach (Player playerrespawn in ev.Players)
@@ -317,14 +317,18 @@ namespace DiscordLog
 
         public void OnIntercomSpeaking(IntercomSpeakingEventArgs ev)
         {
-            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player && Exiled.API.Features.Intercom.Speaker == ev.Player)
+            if (ev.Player is null)
+            {
+                IntercomPlayerSpeek = null; // I would love to add all the voice :) in an audio files
+                return;
+            }
+
+            if (ev.IsAllowed && IntercomPlayerSpeek != ev.Player)
             {
                 IntercomPlayerSpeek = ev.Player;
                 plugin.LOG += $":loudspeaker: {Extensions.LogPlayer(ev.Player)} utilise l'intercom.\n";
                 return;
             }
-            if (ev.Player is null)
-                IntercomPlayerSpeek = null;
         }
         public void OnHandcuffing(HandcuffingEventArgs ev)
         {
@@ -391,7 +395,7 @@ namespace DiscordLog
             plugin.LOGStaff += $":hammer: ``{TargetNick}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
 
             _ = Webhook.OBanPlayerAsync(ev.Player, TargetNick, ev.Details.Id, ev.Details.Reason,
-            long.TryParse(TimeSpan.FromTicks(ev.Details.Expires - ev.Details.IssuanceTime).TotalSeconds.ToString(CultureInfo.InvariantCulture), out var timelong) ? timelong : -1);
+            long.TryParse(TimeSpan.FromTicks(ev.Details.Expires - ev.Details.IssuanceTime).TotalSeconds.ToString(CultureInfo.InvariantCulture), out long timelong) ? timelong : -1);
         }
     }
 }

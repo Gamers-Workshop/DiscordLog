@@ -1,89 +1,73 @@
 ﻿using DiscordWebhookData;
 using Exiled.API.Features;
+using MEC;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Routing;
 using System.Web.UI.WebControls;
+using UnityEngine;
+using UnityEngine.Networking;
 
 namespace DiscordLog
 {
     class Webhook
     {
+        public static Dictionary<string, DateTime> DiscordLimitter = new();
         public static HttpClient http = new();
         public static JsonSerializerSettings SerialiseSetting = new()
         {
             NullValueHandling = NullValueHandling.Ignore,    
         };
-        public static void SendWebhook(string objcontent)
+        public static void SendWebhookMessage(string url, string objcontent)
         {
             DiscordWebhookData.DiscordWebhook webhook = new()
             {
                 AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
                 Content = objcontent,
                 IsTTS = false,
-                Username = DiscordLog.Instance.Config.WebhookName
+                Username = DiscordLog.Instance.Config.WebhookName,
             };
             string webhookstr = webhook.ToJson();
-            var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
-            http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogJoueur, content);
-        }
-        public static void SendWebhookStaff(string objcontent)
-        {
-            DiscordWebhookData.DiscordWebhook webhook = new()
-            {
-                AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
-                Content = objcontent,
-                IsTTS = false,
-                Username = DiscordLog.Instance.Config.WebhookName
-            };
-            string webhookstr = webhook.ToJson();
-            var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
-            http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogStaff, content);
-        }
-        public static void SendWebhookError(string objcontent)
-        {
-            DiscordWebhookData.DiscordWebhook webhook = new()
-            {
-                AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
-                Content = objcontent,
-                IsTTS = false,
-                Username = DiscordLog.Instance.Config.WebhookName
-            };
-            string webhookstr = webhook.ToJson();
-            var content = new StringContent(webhookstr, Encoding.UTF8, "application/json");
-            http.PostAsync(DiscordLog.Instance.Config.WebhookUrlLogError, content);
+            EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(url, "POST", webhookstr)));
         }
 
-        public static async Task SendWebhookInformationDisocrd(string link,string method, string json)
+        public static IEnumerator<float> SendWebhookInformationDiscord(string link, string method, string json)
         {
-            try
+            if (DiscordLimitter.TryGetValue(link, out DateTime dateTime))
             {
-                // Clear null property
-                json = json.Replace("null,", string.Empty);
-
-                // Create HttpRequest
-                using HttpRequestMessage request = new(new HttpMethod(method), link);
-                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-                // Sending and getting Response
-                using HttpResponseMessage response = await http.SendAsync(request);
-
-                // if Response return not good Status Warn
-                if (response.StatusCode is not HttpStatusCode.OK)
-                    Log.Warn($"StatusCode: {response.StatusCode} ReasonPhrase: {response.ReasonPhrase} \n ```{await response.Content.ReadAsStringAsync()}```");
+                float time = (float)(DateTime.Now - dateTime).TotalSeconds;
+                EventHandlers.Coroutines.Add(Timing.CallDelayed(time / 2 + time, () =>
+                EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(link, method, json)))));
             }
-            catch (Exception ex)
+            using UnityWebRequest discordWWW = UnityWebRequest.Put(link, json);
+            discordWWW.method = method;
+            discordWWW.SetRequestHeader("Content-Type", "application/json");
+            yield return Timing.WaitUntilDone(discordWWW.SendWebRequest());
+            if (discordWWW.isHttpError || discordWWW.isNetworkError)
             {
-                Log.Error(ex);
+                Log.Error(
+                    $"link {link}\n" +
+                    $"Error when attempting to send report to discord log: {discordWWW.error}\n" +
+                    $"StatusCode: {(HttpStatusCode)discordWWW.responseCode}\n" +
+                    $"redirectLimit: {discordWWW.redirectLimit}\n" +
+                    $"timeout: {discordWWW.timeout}\n");
+                if (discordWWW.method is not "PATCH")
+                {
+                    EventHandlers.Coroutines.Add(Timing.CallDelayed(discordWWW.redirectLimit, () =>
+                    EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(link, method, json)))));
+                }
             }
         }
         public static void UpdateServerInfo(DiscordFiels PlayerConnected, DiscordFiels RoundInfo)
         {
-            _ = SendWebhookInformationDisocrd(
+            EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(
                 $"{DiscordLog.Instance.Config.WebhookSi}/messages/{DiscordLog.Instance.Config.IdMessage}",
                 "PATCH",
                 JsonConvert.SerializeObject(new DiscordWebhookData.DiscordWebhook()
@@ -108,11 +92,11 @@ namespace DiscordLog
                         },
                     }
                 },
-                SerialiseSetting));
+                SerialiseSetting))));
         }
         public static void UpdateServerInfoStaffAsync(DiscordFiels PlayerConnected, DiscordFiels RoundInfo, DiscordFiels PlayerNameList, DiscordFiels PlayerRoleList, DiscordFiels UserIdList)
         {
-            _ = SendWebhookInformationDisocrd(
+            EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(
                 $"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}",
                 "PATCH",
                 JsonConvert.SerializeObject(
@@ -141,7 +125,7 @@ namespace DiscordLog
                         },
                     },
                 }, 
-                SerialiseSetting));
+                SerialiseSetting).Replace("null,", string.Empty))));
         }
         public static async Task BanPlayerAsync(Player player, Player sanctioned, string reason, long Duration)
         {
