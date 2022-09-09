@@ -23,7 +23,7 @@ namespace DiscordLog
         public static HttpClient http = new();
         public static JsonSerializerSettings SerialiseSetting = new()
         {
-            NullValueHandling = NullValueHandling.Ignore,    
+            NullValueHandling = NullValueHandling.Ignore,
         };
         public static void SendWebhookMessage(string url, string objcontent)
         {
@@ -52,22 +52,32 @@ namespace DiscordLog
             yield return Timing.WaitUntilDone(discordWWW.SendWebRequest());
             if (discordWWW.isHttpError || discordWWW.isNetworkError)
             {
-                Log.Error(
+                if (discordWWW.responseCode is 429)
+                {
+                    Log.Warn(
                     $"link {link}\n" +
                     $"Error when attempting to send report to discord log: {discordWWW.error}\n" +
                     $"StatusCode: {(HttpStatusCode)discordWWW.responseCode}\n" +
-                    $"redirectLimit: {discordWWW.redirectLimit}\n" +
-                    $"timeout: {discordWWW.timeout}\n");
-                if (discordWWW.method is not "PATCH")
-                {
+                    $"redirectLimit: {discordWWW.redirectLimit}\n");
+
                     EventHandlers.Coroutines.Add(Timing.CallDelayed(discordWWW.redirectLimit, () =>
                     EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(link, method, json)))));
                 }
+                if (method is "PATCH" && (HttpStatusCode)discordWWW.responseCode is HttpStatusCode.BadGateway or HttpStatusCode.GatewayTimeout or HttpStatusCode.ServiceUnavailable)
+                    yield break;
+                Log.Error(
+                $"link {link}\n" +
+                $"Error when attempting to send report to discord log: {discordWWW.error}\n" +
+                $"StatusCode: {(HttpStatusCode)discordWWW.responseCode}\n" +
+                $"content: \n {json}");
+
             }
         }
         public static void UpdateServerInfo(DiscordFiels PlayerConnected, DiscordFiels RoundInfo)
         {
-            EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(
+            EventHandlers.Coroutines.Add(
+                Timing.RunCoroutine(
+                SendWebhookInformationDiscord(
                 $"{DiscordLog.Instance.Config.WebhookSi}/messages/{DiscordLog.Instance.Config.IdMessage}",
                 "PATCH",
                 JsonConvert.SerializeObject(new DiscordWebhookData.DiscordWebhook()
@@ -96,7 +106,9 @@ namespace DiscordLog
         }
         public static void UpdateServerInfoStaffAsync(DiscordFiels PlayerConnected, DiscordFiels RoundInfo, DiscordFiels PlayerNameList, DiscordFiels PlayerRoleList, DiscordFiels UserIdList)
         {
-            EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(
+            EventHandlers.Coroutines.Add(
+                Timing.RunCoroutine(
+                SendWebhookInformationDiscord(
                 $"{DiscordLog.Instance.Config.WebhookSiStaff}/messages/{DiscordLog.Instance.Config.IdMessageStaff}",
                 "PATCH",
                 JsonConvert.SerializeObject(
@@ -124,393 +136,353 @@ namespace DiscordLog
                         Timestamp = DateTime.Now,
                         },
                     },
-                }, 
+                },
                 SerialiseSetting).Replace("null,", string.Empty))));
         }
-        public static async Task BanPlayerAsync(Player player, Player sanctioned, string reason, long Duration)
+        public static void BanPlayerAsync(Player player, Player sanctioned, string reason, long Duration)
         {
-            WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
-            wr.ContentType = "application/json";
-            wr.Method = "POST";
-            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
-            {
-                string json = JsonConvert.SerializeObject(new
-                {
-                    username = "SCP:SL",
-                    embeds = new[]
+            EventHandlers.Coroutines.Add(
+                Timing.RunCoroutine(
+                SendWebhookInformationDiscord(
+                DiscordLog.Instance.Config.WebhookUrlLogSanction,
+                "POST",
+                JsonConvert.SerializeObject(
+                    new DiscordWebhookData.DiscordWebhook()
                     {
-                        new
+                        Username = "SCP:SL",
+                        Embeds = new DiscordWebhookData.DiscordEmbed[]
+                        {
+                            new DiscordWebhookData.DiscordEmbed()
                             {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 16711680,
-                                fields = new[]
+                                Title = DiscordLog.Instance.Config.SIName,
+                                Description = "",
+                                Color = 16711680,
+                                Fields = new DiscordFiels[]
                                 {
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Ban",
-                                        value = $"{Extensions.LogPlayer(sanctioned)}",
-                                        inline = false,
+                                        Name = "Ban",
+                                        Value = $"{Extensions.LogPlayer(sanctioned)}",
                                     },
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Raison",
-                                        value = $"``{reason}``",
-                                        inline = false,
+                                        Name = $"Raison",
+                                        Value = $"``{reason}``",
                                     },
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Détail sanction",
-                                        value = $"Le    : <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}>\n" +
+                                        Name = $"Détail sanction",
+                                        Value = $"Le    : <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}>\n" +
                                                 $"Durée : {(Duration < 31536000 ? TimeSpan.FromSeconds(Duration).ToString("%d'd. '%h'h. '%m'min.'") : $"{Duration/31536000} ans")}\n" +
                                                 $"Unban : <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}> -> <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}:R>",
-                                        inline = false,
                                     },
                                 },
-                                footer = new
+                                Footer = new DiscordFooter
                                 {
-                                    icon_url = "",
-                                    text = $"Ban par {player.Nickname} ({player.UserId})",
+                                    IconUrl = "",
+                                    Text = $"Ban par {player.Nickname} ({player.UserId})",
                                 },
-                                timestamp = DateTime.Now,
+                                Timestamp = DateTime.Now,
                             },
-                    }
-                });
-                await sw.WriteAsync(json);
-            }
-            var response = (HttpWebResponse)await wr.GetResponseAsync();
-            wr.Abort();
+                        }
+                    }))));
         }
-        public static async Task OBanPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, string reason, long Duration)
+        public static void OBanPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, string reason, long Duration)
         {
-            WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
-            wr.ContentType = "application/json";
-            wr.Method = "POST";
-            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
-            {
-                string json = JsonConvert.SerializeObject(new
-                {
-                    username = "SCP:SL",
-                    embeds = new[]
+            EventHandlers.Coroutines.Add(
+                Timing.RunCoroutine(
+                SendWebhookInformationDiscord(
+                DiscordLog.Instance.Config.WebhookUrlLogSanction,
+                "POST",
+                JsonConvert.SerializeObject(
+                    new DiscordWebhookData.DiscordWebhook()
                     {
-                        new
+                        Username = "SCP:SL",
+                        Embeds = new DiscordWebhookData.DiscordEmbed[]
+                        {
+                            new DiscordWebhookData.DiscordEmbed()
                             {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 16711680,
-                                fields = new[]
+                                Title = DiscordLog.Instance.Config.SIName,
+                                Description = "",
+                                Color = 16711680,
+                                Fields = new DiscordFiels[]
                                 {
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Oban",
-                                        value = $"``{sanctionedNickname}``({Extensions.ConvertID(sanctionedUserId)})",
-                                        inline = false,
+                                        Name = "OBan",
+                                        Value = $"{sanctionedNickname}({sanctionedUserId})",
                                     },
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Raison",
-                                        value = $"``{reason}``",
-                                        inline = false,
+                                        Name = $"Raison",
+                                        Value = $"``{reason}``",
                                     },
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Détail sanction",
-                                        value = $"Le    : <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}>\n" +
+                                        Name = $"Détail sanction",
+                                        Value = $"Le    : <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}>\n" +
                                                 $"Durée : {(Duration < 31536000 ? TimeSpan.FromSeconds(Duration).ToString("%d'd. '%h'h. '%m'min.'") : $"{Duration/31536000} ans")}\n" +
                                                 $"Unban : <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}> -> <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}:R>",
-                                        inline = false,
-                                    }
+                                    },
                                 },
-                                footer = new
+                                Footer = new DiscordFooter
                                 {
-                                    icon_url = "",
-                                    text = $"Oban par {player.Nickname} ({player.UserId})",
+                                    IconUrl = "",
+                                    Text = $"OBan par {player.Nickname} ({player.UserId})",
                                 },
-                                timestamp = DateTime.Now,
+                                Timestamp = DateTime.Now,
                             },
-                    }
-                });
-                await sw.WriteAsync(json);
-            }
-            var response = (HttpWebResponse)await wr.GetResponseAsync();
-            wr.Abort();
+                        }
+                    }))));
         }
-        public static async Task KickPlayerAsync(Player player, Player sanctioned, string reason)
+        public static void KickPlayerAsync(Player player, Player sanctioned, string reason)
         {
-            WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
-            wr.ContentType = "application/json";
-            wr.Method = "POST";
-            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
+            EventHandlers.Coroutines.Add(
+            Timing.RunCoroutine(
+            SendWebhookInformationDiscord(
+            DiscordLog.Instance.Config.WebhookUrlLogSanction,
+            "POST",
+            JsonConvert.SerializeObject(
+            new DiscordWebhookData.DiscordWebhook()
             {
-                string json = JsonConvert.SerializeObject(new
+                Username = "SCP:SL",
+                Embeds = new DiscordWebhookData.DiscordEmbed[]
                 {
-                    username = "SCP:SL",
-                    embeds = new[]
+                    new DiscordWebhookData.DiscordEmbed()
                     {
-                        new
+                        Title = DiscordLog.Instance.Config.SIName,
+                        Description = "",
+                        Color = 14310235,
+                        Fields = new DiscordFiels[]
+                        {
+                            new DiscordFiels
                             {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 14310235,
-                                fields = new[]
-                                {
-                                    new
-                                    {
-                                        name = $"Kick",
-                                        value = $"{Extensions.LogPlayer(sanctioned)}",
-                                        inline = false,
-                                    },
-                                    new
-                                    {
-                                        name = $"Raison",
-                                        value = $"``{reason}``",
-                                        inline = false,
-                                    },
-                                },
-                                footer = new
-                                {
-                                    icon_url = "",
-                                    text = $"kick par {player.Nickname} ({player.UserId})",
-                                },
-                                timestamp = DateTime.Now,
+                                Name = $"Kick",
+                                Value = $"{Extensions.LogPlayer(sanctioned)}",
                             },
-                    }
-                });
-                await sw.WriteAsync(json);
-            }
-            var response = (HttpWebResponse)await wr.GetResponseAsync();
-            wr.Abort();
+                            new DiscordFiels
+                            {
+                                Name = $"Raison",
+                                Value = $"``{reason}``",
+                            },
+                        },
+                        Footer = new DiscordFooter
+                        {
+                            IconUrl = "",
+                            Text = $"kick par {player.Nickname} ({player.UserId})",
+                        },
+                        Timestamp = DateTime.Now,
+                    },
+                }
+            }))));
         }
-        public static async Task WarnPlayerAsync(Player player, Player sanctioned, string reason)
+        public static void WarnPlayerAsync(Player player, Player sanctioned, string reason)
         {
-            WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
-            wr.ContentType = "application/json";
-            wr.Method = "POST";
-            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
-            {
-                string json = JsonConvert.SerializeObject(new
+            EventHandlers.Coroutines.Add(
+            Timing.RunCoroutine(
+            SendWebhookInformationDiscord(
+            DiscordLog.Instance.Config.WebhookUrlLogSanction,
+            "POST",
+            JsonConvert.SerializeObject(
+                new DiscordWebhookData.DiscordWebhook()
                 {
-                    username = "SCP:SL",
-                    embeds = new[]
+                    Username = "SCP:SL",
+                    Embeds = new DiscordWebhookData.DiscordEmbed[]
                     {
-                        new
-                            {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 16773376,
-                                fields = new[]
+                        new DiscordWebhookData.DiscordEmbed()
+                        {
+                                Title = DiscordLog.Instance.Config.SIName,
+                                Description = "",
+                                Color = 16773376,
+                                Fields = new DiscordFiels[]
                                 {
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Warn",
-                                        value = $"{Extensions.LogPlayer(sanctioned)}",
-                                        inline = false,
+                                        Name = "Warn",
+                                        Value = $"{Extensions.LogPlayer(sanctioned)}",
                                     },
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Raison",
-                                        value = $"``{reason}``",
-                                        inline = false,
+                                        Name = $"Raison",
+                                        Value = $"``{reason}``",
                                     },
                                 },
-                                footer = new
+                                Footer = new DiscordFooter
                                 {
-                                    icon_url = "",
-                                    text = $"Warn par {player.Nickname} ({player.UserId})",
+                                    IconUrl = "",
+                                    Text = $"Warn par {player.Nickname} ({player.UserId})",
                                 },
-                                timestamp = DateTime.Now,
+                                Timestamp = DateTime.Now,
                             },
                     }
-                });
-                await sw.WriteAsync(json);
-            }
-            var response = (HttpWebResponse)await wr.GetResponseAsync();
-            wr.Abort();
+                }))));
         }
-        public static async Task OwarnPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, string reason)
+        public static void OWarnPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, string reason)
         {
-            WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSanction);
-            wr.ContentType = "application/json";
-            wr.Method = "POST";
-            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
-            {
-                string json = JsonConvert.SerializeObject(new
+            EventHandlers.Coroutines.Add(
+            Timing.RunCoroutine(
+            SendWebhookInformationDiscord(
+            DiscordLog.Instance.Config.WebhookUrlLogSanction,
+            "POST",
+            JsonConvert.SerializeObject(
+                new DiscordWebhookData.DiscordWebhook()
                 {
-                    username = "SCP:SL",
-                    embeds = new[]
+                    Username = "SCP:SL",
+                    Embeds = new DiscordWebhookData.DiscordEmbed[]
                     {
-                        new
-                            {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 16773376,
-                                fields = new[]
+                        new DiscordWebhookData.DiscordEmbed()
+                        {
+                                Title = DiscordLog.Instance.Config.SIName,
+                                Description = "",
+                                Color = 16773376,
+                                Fields = new DiscordFiels[]
                                 {
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Warn",
-                                        value = $"``{sanctionedNickname}`` ({Extensions.ConvertID(sanctionedUserId)})",
-                                        inline = false,
+                                        Name = "Owarn",
+                                        Value = $"``{sanctionedNickname}``({sanctionedUserId})",
                                     },
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Raison",
-                                        value = $"``{reason}``",
-                                        inline = false,
+                                        Name = $"Raison",
+                                        Value = $"``{reason}``",
                                     },
                                 },
-                                footer = new
+                                Footer = new DiscordFooter
                                 {
-                                    icon_url = "",
-                                    text = $"Warn par {player.Nickname} ({player.UserId})",
+                                    IconUrl = "",
+                                    Text = $"Owarn par {player.Nickname} ({player.UserId})",
                                 },
-                                timestamp = DateTime.Now,
+                                Timestamp = DateTime.Now,
                             },
                     }
-                });
-                await sw.WriteAsync(json);
-            }
-            var response = (HttpWebResponse)await wr.GetResponseAsync();
-            wr.Abort();
+                }))));
         }
-        public static async Task BugInfoAsync(Player player, string Info)
+
+
+        public static void BugInfoAsync(Player player, string Info)
         {
-            WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogBug);
-            wr.ContentType = "application/json";
-            wr.Method = "POST";
-            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
-            {
-                string json = JsonConvert.SerializeObject(new
+            EventHandlers.Coroutines.Add(
+            Timing.RunCoroutine(
+            SendWebhookInformationDiscord(
+            DiscordLog.Instance.Config.WebhookUrlLogSanction,
+            "POST",
+            JsonConvert.SerializeObject(
+                new DiscordWebhookData.DiscordWebhook()
                 {
-                    username = "SCP:SL",
-                    embeds = new[]
+                    Username = "SCP:SL",
+                    Embeds = new DiscordWebhookData.DiscordEmbed[]
                     {
-                        new
+                        new DiscordWebhookData.DiscordEmbed()
                             {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 16773376,
-                                fields = new[]
+                                Title = DiscordLog.Instance.Config.SIName,
+                                Description = "",
+                                Color = 16773376,
+                                Fields = new DiscordFiels[]
                                 {
-                                    new
+                                    new DiscordFiels 
                                     {
-                                        name = $"Bug",
-                                        value = $"{Extensions.LogPlayer(player)}",
-                                        inline = false,
+                                        Name = $"Bug",
+                                        Value = $"{Extensions.LogPlayer(player)}",
                                     },
-                                    new
+                                    new DiscordFiels 
                                     {
-                                        name = $"Info",
-                                        value = $"``{Info}``",
-                                        inline = false,
+                                        Name = $"Info",
+                                        Value = $"``{Info}``",
                                     },
                                 },
-                                footer = new
+                                Footer = new DiscordFooter 
                                 {
-                                    icon_url = "",
-                                    text = $"Signalé par {player.Nickname} ({player.UserId})",
+                                    IconUrl = "",
+                                    Text = $"Signalé par {player.Nickname} ({player.UserId})",
                                 },
-                                timestamp = DateTime.Now,
+                                Timestamp = DateTime.Now,
                             },
                     }
-                });
-                await sw.WriteAsync(json);
-            }
-            var response = (HttpWebResponse)await wr.GetResponseAsync();
-            wr.Abort();
+                }))));
         }
-        public static async Task SugestionAsync(Player player, string Info)
+        public static void SugestionAsync(Player player, string Info)
         {
-            WebRequest wr = (HttpWebRequest)WebRequest.Create(DiscordLog.Instance.Config.WebhookUrlLogSuggestion);
-            wr.ContentType = "application/json";
-            wr.Method = "POST";
-            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
-            {
-                string json = JsonConvert.SerializeObject(new
+            EventHandlers.Coroutines.Add(
+                Timing.RunCoroutine(
+                SendWebhookInformationDiscord(
+                DiscordLog.Instance.Config.WebhookUrlLogSanction,
+                "POST",
+                JsonConvert.SerializeObject(
+                new DiscordWebhookData.DiscordWebhook()
                 {
-                    username = "SCP:SL",
-                    embeds = new[]
+                    Username = "SCP:SL",
+                    Embeds = new DiscordWebhookData.DiscordEmbed[]
                     {
-                        new
+                        new DiscordWebhookData.DiscordEmbed
                             {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 16773376,
-                                fields = new[]
+                                Title = DiscordLog.Instance.Config.SIName,
+                                Description = "",
+                                Color = 16773376,
+                                Fields = new DiscordFiels[]
                                 {
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Sugestion",
-                                        value = $"{Extensions.LogPlayer(player)}",
-                                        inline = false,
+                                        Name = $"Sugestion",
+                                        Value = $"{Extensions.LogPlayer(player)}",
                                     },
-                                    new
+                                    new DiscordFiels
                                     {
-                                        name = $"Info",
-                                        value = $"``{Info}``",
-                                        inline = false,
+                                        Name = $"Info",
+                                        Value = $"``{Info}``",
                                     },
                                 },
-                                footer = new
+                                Footer = new DiscordFooter
                                 {
-                                    icon_url = "",
-                                    text = $"Sugesté par {player.Nickname} ({player.UserId})",
+                                    IconUrl = "",
+                                    Text = $"Sugesté par {player.Nickname} ({player.UserId})",
                                 },
-                                timestamp = DateTime.Now,
+                                Timestamp = DateTime.Now,
                             },
                     }
-                });
-                await sw.WriteAsync(json);
-            }
-            var response = (HttpWebResponse)await wr.GetResponseAsync();
-            wr.Abort();
+                }))));
         }
-        public static async Task ReportAsync(Player Reporter, Player Reported, string WebhookUrl,string pings, string reason = "Aucune raison donnée")
+        public static void ReportAsync(Player Reporter, Player Reported, string reason = "Aucune raison donnée")
         {
-            WebRequest wr = (HttpWebRequest)WebRequest.Create(WebhookUrl);
-            wr.ContentType = "application/json";
-            wr.Method = "POST";
-            using (var sw = new StreamWriter(await wr.GetRequestStreamAsync()))
+            EventHandlers.Coroutines.Add(
+                        Timing.RunCoroutine(
+                        SendWebhookInformationDiscord(
+                        DiscordLog.Instance.Config.WebhookReport,
+                        "POST",
+                        JsonConvert.SerializeObject(
+            new DiscordWebhookData.DiscordWebhook()
             {
-                string json = JsonConvert.SerializeObject(new
+                Username = "SCP:SL",
+                Content = DiscordLog.Instance.Config.Ping,
+                Embeds = new DiscordWebhookData.DiscordEmbed[]
                 {
-                    username = "SCP:SL",
-                    content = pings,
-                    embeds = new[]
-                    {
-                        new
+                        new DiscordWebhookData.DiscordEmbed
+                        {
+                            Title = DiscordLog.Instance.Config.SIName,
+                            Description = "",
+                            Color = 16773376,
+                            Fields = new DiscordFiels[]
                             {
-                                title = DiscordLog.Instance.Config.SIName,
-                                description = "",
-                                color = 16773376,
-                                fields = new[]
+                                new DiscordFiels
                                 {
-                                    new
-                                    {
-                                        name = $"Report",
-                                        value = $"[{Reported.Id}] {Extensions.LogPlayer(Reported)}",
-                                        inline = false,
-                                    },
-                                    new
-                                    {
-                                        name = $"Reason",
-                                        value = $"``{reason}``",
-                                        inline = false,
-                                    },
+                                    Name = $"Report",
+                                    Value = $"[{Reported.Id}] {Extensions.LogPlayer(Reported)}",
                                 },
-                                footer = new
+                                new DiscordFiels
                                 {
-                                    icon_url = "",
-                                    text = $"Report par [{Reporter.Id}] {Reporter.Nickname} ({Reporter.UserId})",
+                                    Name = $"Reason",
+                                    Value = $"``{reason}``",
                                 },
-                                timestamp = DateTime.Now,
                             },
-                    }
-                });
-                await sw.WriteAsync(json);
-            }
-            var response = (HttpWebResponse)await wr.GetResponseAsync();
-            wr.Abort();
+                            Footer = new DiscordFooter
+                            {
+                                IconUrl = "",
+                                Text = $"Report par [{Reporter.Id}] {Reporter.Nickname} ({Reporter.UserId})",
+                            },
+                            Timestamp = DateTime.Now,
+                        },
+                }
+            }))));
         }
     }
 }

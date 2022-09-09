@@ -50,7 +50,7 @@ namespace DiscordLog.Command.Warn
                 return false;
             }
 
-            _ = Webhook.OwarnPlayerAsync(sanctionneur, SanctionedNickname, arguments.At(0), Extensions.FormatArguments(arguments, 1));
+            Webhook.OWarnPlayerAsync(sanctionneur,SanctionedNickname, arguments.At(0), Extensions.FormatArguments(arguments, 1));
             response = $"Player {arguments.At(0)} Pseudo = {SanctionedNickname} has been warned : {Extensions.FormatArguments(arguments, 1)}";
             return true;
         }

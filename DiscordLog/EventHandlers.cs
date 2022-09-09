@@ -154,8 +154,8 @@ namespace DiscordLog
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
-            if (!RoundIsStart || ev.Reason == SpawnReason.Died || ev.Reason == SpawnReason.Revived || ev.Reason == SpawnReason.RoundStart || !ev.IsAllowed) return;
-            if (ev.Reason == SpawnReason.Escaped)
+            if (!RoundIsStart || ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart || !ev.IsAllowed) return;
+            if (ev.Reason is SpawnReason.Escaped)
             {
                 float TimeAlive = ev.Player.ReferenceHub.characterClassManager.AliveTime;
 
@@ -311,7 +311,7 @@ namespace DiscordLog
         public void OnLocalReporting(LocalReportingEventArgs ev)
         {
             if (DiscordLog.Instance.Config.WebhookReport != "none")
-                _ = Webhook.ReportAsync(ev.Player, ev.Target, DiscordLog.Instance.Config.WebhookReport, DiscordLog.Instance.Config.Ping, ev.Reason);
+                Webhook.ReportAsync(ev.Player, ev.Target, ev.Reason);
             ev.IsAllowed = true;
         }
 
@@ -372,7 +372,7 @@ namespace DiscordLog
         {
             if (!ev.IsAllowed) 
                 return;
-            _ = Webhook.BanPlayerAsync(ev.Player, ev.Target, ev.Reason, ev.Duration);
+            Webhook.BanPlayerAsync(ev.Player, ev.Target, ev.Reason, ev.Duration);
             plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par {Extensions.LogPlayer(ev.Player)}.\n";
         }
         public void OnKicking(KickingEventArgs ev)
@@ -380,7 +380,7 @@ namespace DiscordLog
             if (!ev.IsAllowed) 
                 return;
             plugin.LOGStaff += $":mans_shoe: {Extensions.LogPlayer(ev.Target)} a été kick pour : ``{ev.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
-            _ = Webhook.KickPlayerAsync(ev.Player, ev.Target, ev.Reason);
+            Webhook.KickPlayerAsync(ev.Player, ev.Target, ev.Reason);
         }
         public void OnBanned(BannedEventArgs ev)
         {
@@ -394,7 +394,7 @@ namespace DiscordLog
             }
             plugin.LOGStaff += $":hammer: ``{TargetNick}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
 
-            _ = Webhook.OBanPlayerAsync(ev.Player, TargetNick, ev.Details.Id, ev.Details.Reason,
+            Webhook.OBanPlayerAsync(ev.Player, TargetNick, ev.Details.Id, ev.Details.Reason,
             long.TryParse(TimeSpan.FromTicks(ev.Details.Expires - ev.Details.IssuanceTime).TotalSeconds.ToString(CultureInfo.InvariantCulture), out long timelong) ? timelong : -1);
         }
     }

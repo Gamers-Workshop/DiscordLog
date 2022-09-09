@@ -33,7 +33,7 @@ namespace DiscordLog.Command.Bug
                 response = $"Vous devez donner signaler un bug";
                 return false;
             }
-            _ = Webhook.BugInfoAsync(player, Extensions.FormatArguments(arguments, 0));
+            Webhook.BugInfoAsync(player, Extensions.FormatArguments(arguments, 0));
             response = $"Votre bug a été envoyé : \n{Extensions.FormatArguments(arguments, 0)}";
             return true;
         }
