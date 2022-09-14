@@ -229,7 +229,7 @@ namespace DiscordLog
 					continue;
 				if (LOGError.Length < 2001)
 				{
-					Webhook.SendWebhookMessage(Config.WebhookUrlLogError, LOGError);
+					Webhook.SendWebhookMessage(Config.WebhookUrlLogError, LOGError, false);
 					LOGError = null;
 				}
 				else
@@ -238,7 +238,7 @@ namespace DiscordLog
 					LOGError = null;
 					foreach (string SendLog in ListString)
 					{
-						Webhook.SendWebhookMessage(Config.WebhookUrlLogError, SendLog);
+						Webhook.SendWebhookMessage(Config.WebhookUrlLogError, SendLog, false);
 						yield return Timing.WaitForSeconds(5f);
 					}
 				}

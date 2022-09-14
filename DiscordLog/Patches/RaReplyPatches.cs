@@ -6,26 +6,75 @@ using RemoteAdmin;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
-using System.Threading.Tasks;
 using System.Linq;
 
 using static HarmonyLib.AccessTools;
+using System.Text.RegularExpressions;
 
-namespace DiscordLog
+namespace DiscordLog.Patches
 {
     [HarmonyPatch(typeof(PlayerCommandSender), nameof(PlayerCommandSender.RaReply))]
     public class RaReplyPatches
     {
-        public static void Prefix(string text)
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
-            if (!text.StartsWith("$"))
-                DiscordLog.Instance.LOGStaff += $"{text}\n";
+            List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent(instructions);
+            const int index = 0;
+
+            Label returnLabel = generator.DefineLabel();
+
+            newInstructions.InsertRange(index, new[]
+            {
+                new (OpCodes.Nop),
+                new (OpCodes.Ldarg_0),
+                new (OpCodes.Ldstr, "$"),
+                new (OpCodes.Callvirt, Method(typeof(string), nameof(string.StartsWith),new[] { typeof(string) })),
+                new (OpCodes.Ldc_I4_0),
+                new (OpCodes.Ceq),
+                new (OpCodes.Brfalse_S, returnLabel),
+                new (OpCodes.Call, PropertyGetter(typeof(DiscordLog), nameof(DiscordLog.Instance))),
+                new (OpCodes.Dup),
+                new (OpCodes.Ldfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
+                new (OpCodes.Ldarg_0),
+                new (OpCodes.Ldstr, "\n"),
+                new (OpCodes.Call, Method(typeof(string), nameof(string.Concat),new[] { typeof(string),typeof(string),typeof(string) })),
+                new (OpCodes.Stfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
+                new CodeInstruction(OpCodes.Ret).WithLabels(returnLabel),
+            });
+
+            for (int z = 0; z < newInstructions.Count; z++)
+                yield return newInstructions[z];
+
+            ListPool<CodeInstruction>.Shared.Return(newInstructions);
         }
     }
 
     [HarmonyPatch(typeof(ConsoleCommandSender), nameof(ConsoleCommandSender.RaReply))]
     public class GamCoreReplyPAtches
     {
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        {
+            List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent(instructions);
+            const int index = 0;
+
+            newInstructions.InsertRange(index, new[]
+            {
+                new (OpCodes.Nop),
+                new (OpCodes.Call, PropertyGetter(typeof(DiscordLog), nameof(DiscordLog.Instance))),
+                new (OpCodes.Dup),
+                new (OpCodes.Ldfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
+                new (OpCodes.Ldarg_0),
+                new (OpCodes.Ldstr, "\n"),
+                new (OpCodes.Call, Method(typeof(string), nameof(string.Concat),new[] { typeof(string),typeof(string),typeof(string) })),
+                new (OpCodes.Stfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
+                new CodeInstruction(OpCodes.Ret),
+            });
+
+            for (int z = 0; z < newInstructions.Count; z++)
+                yield return newInstructions[z];
+
+            ListPool<CodeInstruction>.Shared.Return(newInstructions);
+        }
         public static void Prefix(string text)
         {
             DiscordLog.Instance.LOGStaff += $"{text}\n";
@@ -37,7 +86,6 @@ namespace DiscordLog
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
         {
-            Harmony.DEBUG = true;
             List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent(instructions);
             const int index = 0;
 
@@ -52,7 +100,6 @@ namespace DiscordLog
                 yield return newInstructions[z];
 
             ListPool<CodeInstruction>.Shared.Return(newInstructions);
-            Harmony.DEBUG = false;
         }
 
         private static void LogCommand(string query, CommandSender sender)
@@ -254,7 +301,7 @@ namespace DiscordLog
                         }
                         return;
                 }
-                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{query}``.\n";
+                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{Regex.Replace(query, "<[^>]*?>", string.Empty)}``.\n";
             }
             catch (System.Exception ex)
             {

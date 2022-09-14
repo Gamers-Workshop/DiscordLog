@@ -25,20 +25,18 @@ namespace DiscordLog
         {
             NullValueHandling = NullValueHandling.Ignore,
         };
-        public static void SendWebhookMessage(string url, string objcontent)
+        public static void SendWebhookMessage(string url, string objcontent, bool islogged = true)
         {
-            DiscordWebhookData.DiscordWebhook webhook = new()
+            EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(url, "POST", JsonConvert.SerializeObject(new DiscordWebhookData.DiscordWebhook()
             {
                 AvatarUrl = DiscordLog.Instance.Config.WebhookAvatar,
                 Content = objcontent,
                 IsTTS = false,
                 Username = DiscordLog.Instance.Config.WebhookName,
-            };
-            string webhookstr = webhook.ToJson();
-            EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(url, "POST", webhookstr)));
+            }), islogged)));
         }
 
-        public static IEnumerator<float> SendWebhookInformationDiscord(string link, string method, string json)
+        public static IEnumerator<float> SendWebhookInformationDiscord(string link, string method, string json, bool islogged = true)
         {
             if (DiscordLimitter.TryGetValue(link, out DateTime dateTime))
             {
@@ -63,7 +61,7 @@ namespace DiscordLog
                     EventHandlers.Coroutines.Add(Timing.CallDelayed(discordWWW.redirectLimit, () =>
                     EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(link, method, json)))));
                 }
-                if (method is "PATCH" && (HttpStatusCode)discordWWW.responseCode is HttpStatusCode.BadGateway or HttpStatusCode.GatewayTimeout or HttpStatusCode.ServiceUnavailable)
+                if (method is "PATCH" && (HttpStatusCode)discordWWW.responseCode is HttpStatusCode.BadGateway or HttpStatusCode.GatewayTimeout or HttpStatusCode.ServiceUnavailable or HttpStatusCode.InternalServerError)
                     yield break;
                 Log.Error(
                 $"link {link}\n" +
