@@ -25,21 +25,18 @@ namespace DiscordLog.Patches
 
             newInstructions.InsertRange(index, new[]
             {
-                new (OpCodes.Nop),
-                new (OpCodes.Ldarg_0),
+                new (OpCodes.Ldarg_1),
                 new (OpCodes.Ldstr, "$"),
                 new (OpCodes.Callvirt, Method(typeof(string), nameof(string.StartsWith),new[] { typeof(string) })),
-                new (OpCodes.Ldc_I4_0),
-                new (OpCodes.Ceq),
-                new (OpCodes.Brfalse_S, returnLabel),
+                new (OpCodes.Brtrue_S, returnLabel),
                 new (OpCodes.Call, PropertyGetter(typeof(DiscordLog), nameof(DiscordLog.Instance))),
                 new (OpCodes.Dup),
                 new (OpCodes.Ldfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
-                new (OpCodes.Ldarg_0),
+                new (OpCodes.Ldarg_1),
                 new (OpCodes.Ldstr, "\n"),
                 new (OpCodes.Call, Method(typeof(string), nameof(string.Concat),new[] { typeof(string),typeof(string),typeof(string) })),
                 new (OpCodes.Stfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
-                new CodeInstruction(OpCodes.Ret).WithLabels(returnLabel),
+                new CodeInstruction(OpCodes.Nop).WithLabels(returnLabel),
             });
 
             for (int z = 0; z < newInstructions.Count; z++)
@@ -63,21 +60,17 @@ namespace DiscordLog.Patches
                 new (OpCodes.Call, PropertyGetter(typeof(DiscordLog), nameof(DiscordLog.Instance))),
                 new (OpCodes.Dup),
                 new (OpCodes.Ldfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
-                new (OpCodes.Ldarg_0),
+                new (OpCodes.Ldarg_1),
                 new (OpCodes.Ldstr, "\n"),
                 new (OpCodes.Call, Method(typeof(string), nameof(string.Concat),new[] { typeof(string),typeof(string),typeof(string) })),
                 new (OpCodes.Stfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
-                new CodeInstruction(OpCodes.Ret),
+                new CodeInstruction(OpCodes.Nop),
             });
 
             for (int z = 0; z < newInstructions.Count; z++)
                 yield return newInstructions[z];
 
             ListPool<CodeInstruction>.Shared.Return(newInstructions);
-        }
-        public static void Prefix(string text)
-        {
-            DiscordLog.Instance.LOGStaff += $"{text}\n";
         }
     }
 
