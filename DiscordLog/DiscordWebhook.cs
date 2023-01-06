@@ -29,6 +29,8 @@ namespace DiscordWebhookData
         public bool IsTTS { get; set; }
         [JsonProperty("allowed_mentions")]
         public DiscordAllowedMention AllowedMentions { get; set; }
+        [JsonProperty("thread_name")]
+        public string ThreadName { get; set; }
     }
     public class DiscordEmbed
     {

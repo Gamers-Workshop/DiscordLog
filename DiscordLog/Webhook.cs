@@ -50,25 +50,11 @@ namespace DiscordLog
             yield return Timing.WaitUntilDone(discordWWW.SendWebRequest());
             if (discordWWW.isHttpError || discordWWW.isNetworkError)
             {
-                if (discordWWW.responseCode is 429)
-                {
-                    Log.Warn(
-                    $"link {link}\n" +
-                    $"Error when attempting to send report to discord log: {discordWWW.error}\n" +
-                    $"StatusCode: {(HttpStatusCode)discordWWW.responseCode}\n" +
-                    $"redirectLimit: {discordWWW.redirectLimit}\n");
-
-                    EventHandlers.Coroutines.Add(Timing.CallDelayed(discordWWW.redirectLimit, () =>
-                    EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(link, method, json)))));
-                }
-                if (method is "PATCH" && (HttpStatusCode)discordWWW.responseCode is HttpStatusCode.BadGateway or HttpStatusCode.GatewayTimeout or HttpStatusCode.ServiceUnavailable or HttpStatusCode.InternalServerError)
-                    yield break;
-                Log.Error(
+                Log.Warn(
                 $"link {link}\n" +
                 $"Error when attempting to send report to discord log: {discordWWW.error}\n" +
                 $"StatusCode: {(HttpStatusCode)discordWWW.responseCode}\n" +
                 $"content: \n {json}");
-
             }
         }
         public static void UpdateServerInfo(DiscordFiels PlayerConnected, DiscordFiels RoundInfo)
@@ -183,7 +169,7 @@ namespace DiscordLog
                                 Timestamp = DateTime.Now,
                             },
                         }
-                    }))));
+                    },SerialiseSetting))));
         }
         public static void OBanPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, string reason, long Duration)
         {
@@ -231,7 +217,7 @@ namespace DiscordLog
                                 Timestamp = DateTime.Now,
                             },
                         }
-                    }))));
+                    },SerialiseSetting))));
         }
         public static void KickPlayerAsync(Player player, Player sanctioned, string reason)
         {
@@ -272,7 +258,7 @@ namespace DiscordLog
                         Timestamp = DateTime.Now,
                     },
                 }
-            }))));
+            }, SerialiseSetting))));
         }
         public static void WarnPlayerAsync(Player player, Player sanctioned, string reason)
         {
@@ -313,7 +299,7 @@ namespace DiscordLog
                                 Timestamp = DateTime.Now,
                             },
                     }
-                }))));
+                }, SerialiseSetting))));
         }
         public static void OWarnPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, string reason)
         {
@@ -354,11 +340,11 @@ namespace DiscordLog
                                 Timestamp = DateTime.Now,
                             },
                     }
-                }))));
+                }, SerialiseSetting))));
         }
 
 
-        public static void BugInfoAsync(Player player, string Info)
+        public static void BugInfoAsync(Player player, string Title, string Info)
         {
             EventHandlers.Coroutines.Add(
             Timing.RunCoroutine(
@@ -369,6 +355,7 @@ namespace DiscordLog
                 new DiscordWebhookData.DiscordWebhook()
                 {
                     Username = "SCP:SL",
+                    ThreadName = $"[BUG] {Title}",
                     Embeds = new DiscordWebhookData.DiscordEmbed[]
                     {
                         new DiscordWebhookData.DiscordEmbed()
@@ -397,9 +384,9 @@ namespace DiscordLog
                                 Timestamp = DateTime.Now,
                             },
                     }
-                }))));
+                }, SerialiseSetting))));
         }
-        public static void SugestionAsync(Player player, string Info)
+        public static void SugestionAsync(Player player, string Title, string Info)
         {
             EventHandlers.Coroutines.Add(
                 Timing.RunCoroutine(
@@ -410,6 +397,7 @@ namespace DiscordLog
                 new DiscordWebhookData.DiscordWebhook()
                 {
                     Username = "SCP:SL",
+                    ThreadName = $"[SUGGESTION] {Title}",
                     Embeds = new DiscordWebhookData.DiscordEmbed[]
                     {
                         new DiscordWebhookData.DiscordEmbed
@@ -438,7 +426,7 @@ namespace DiscordLog
                                 Timestamp = DateTime.Now,
                             },
                     }
-                }))));
+                }, SerialiseSetting))));
         }
         public static void ReportAsync(Player Reporter, Player Reported, string reason = "Aucune raison donnée")
         {
@@ -480,7 +468,7 @@ namespace DiscordLog
                             Timestamp = DateTime.Now,
                         },
                 }
-            }))));
+            }, SerialiseSetting))));
         }
     }
 }

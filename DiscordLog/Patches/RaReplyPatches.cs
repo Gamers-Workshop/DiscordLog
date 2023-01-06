@@ -10,6 +10,7 @@ using System.Linq;
 
 using static HarmonyLib.AccessTools;
 using System.Text.RegularExpressions;
+using PlayerRoles;
 
 namespace DiscordLog.Patches
 {
@@ -46,7 +47,7 @@ namespace DiscordLog.Patches
         }
     }
 
-    [HarmonyPatch(typeof(ConsoleCommandSender), nameof(ConsoleCommandSender.RaReply))]
+    [HarmonyPatch(typeof(ServerConsoleSender), nameof(ServerConsoleSender.RaReply))]
     public class GamCoreReplyPAtches
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
@@ -102,7 +103,7 @@ namespace DiscordLog.Patches
             {
                 List<string> args = query.Trim().Split(QueryProcessor.SpaceArray, 512, StringSplitOptions.RemoveEmptyEntries).ToList();
                 if (args.IsEmpty()) return;
-                if (query.StartsWith("$0 1"))
+                if (query.StartsWith("$7 0"))
                     return;
 
                 Player player = sender is PlayerCommandSender playerCommandSender ? Player.Get(playerCommandSender) : Server.Host;
@@ -113,7 +114,7 @@ namespace DiscordLog.Patches
                         DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a jail {Extensions.LogPlayer(Player.Get(args.ElementAtOrDefault(1)))}.\n";
                         return;
                     case "forceclass":
-                        if (Enum.TryParse(args.ElementAtOrDefault(2), out RoleType role))
+                        if (Enum.TryParse(args.ElementAtOrDefault(2), out RoleTypeId role))
                         {
                             string Receiver = string.Empty;
 

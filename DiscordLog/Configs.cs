@@ -9,7 +9,7 @@ namespace DiscordLog
         public bool IsEnabled { get; set; }
 
         [Description("Debug Plugin")]
-        public bool Debugplugin { get; set; }
+        public bool Debug { get; set; }
         [Description("Webhook url : Erreur Console")]
         public string WebhookUrlLogError { get; set; } = string.Empty;
         [Description("Box Warn")]

@@ -31,7 +31,7 @@ namespace DiscordLog
         {
             Firearm firearm => $"{item.Type} [{firearm.Ammo}/{firearm.MaxAmmo}]",
             MicroHid microhid => $"MicroHID [{(int)(microhid.Energy * 100)}%]",
-            Exiled.API.Features.Items.Radio radio => $"Radio [{radio.BatteryLevel}%]",
+            Radio radio => $"Radio [{radio.BatteryLevel}%]",
             not null => $"{item.Type}",
             _ => "Unknown"
         };
@@ -86,7 +86,7 @@ namespace DiscordLog
             }
             catch (Exception)
             {
-                Log.Error("An error has occured while contacting steam servers (Are they down? Invalid API key?)");
+                Log.Warn("An error has occured while contacting steam servers (Are they down? Invalid API key?)");
             }
 
             return "Unknown (API Key Not valid)";
@@ -117,10 +117,10 @@ namespace DiscordLog
 
         public static float GetAttachmentsValue(this FirearmPickup firearmPickup, AttachmentParam attachmentParam)
         {
-            if ((uint)firearmPickup.Info.ItemId.GetBaseCode() > firearmPickup.Status.Attachments)
+            if ((uint)firearmPickup.Info.ItemId.GetFirearmType().GetBaseCode() > firearmPickup.Status.Attachments)
                 return 0;
 
-            IEnumerable<AttachmentIdentifier> attachements = firearmPickup.Info.ItemId.GetAttachmentIdentifiers(firearmPickup.Status.Attachments);
+            IEnumerable<AttachmentIdentifier> attachements = firearmPickup.Info.ItemId.GetFirearmType().GetAttachmentIdentifiers(firearmPickup.Status.Attachments);
 
             AttachmentParameterDefinition definitionOfParam = AttachmentsUtils.GetDefinitionOfParam((int)attachmentParam);
             float num = definitionOfParam.DefaultValue;

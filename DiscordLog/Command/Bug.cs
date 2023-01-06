@@ -1,13 +1,9 @@
 ﻿using CommandSystem;
+using Exiled.API.Extensions;
 using Exiled.API.Features;
-using Exiled.Permissions.Extensions;
-using MEC;
 using RemoteAdmin;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordLog.Command.Bug
 {
@@ -21,7 +17,7 @@ namespace DiscordLog.Command.Bug
 
         public string[] Aliases { get; } = new string[] {  };
 
-        public string Description { get; } = "bug <Le bug que vous avez rencontrez>";
+        public string Description { get; } = "bug <Titre de votre bug>,<Le bug que vous avez rencontrez>";
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
@@ -33,7 +29,19 @@ namespace DiscordLog.Command.Bug
                 response = $"Vous devez donner signaler un bug";
                 return false;
             }
-            Webhook.BugInfoAsync(player, Extensions.FormatArguments(arguments, 0));
+            string text = Extensions.FormatArguments(arguments, 0);
+            if (!text.Contains(','))
+            {
+                response = $"Vous devez utilisé une virgule (,) pour donné un titre";
+                return false;
+            }
+            string title = text.GetBefore(',');
+            if (title.Length > 50)
+            {
+                response = $"réduisé la contité de caractére pour le titre";
+                return false;
+            }
+            Webhook.BugInfoAsync(player, title, text.Remove(0, title.Count()));
             response = $"Votre bug a été envoyé : \n{Extensions.FormatArguments(arguments, 0)}";
             return true;
         }

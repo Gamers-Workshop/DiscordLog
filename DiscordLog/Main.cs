@@ -20,6 +20,9 @@ using MEC;
 using System.Linq;
 using DiscordWebhookData;
 using FMOD.Studio;
+using PlayerRoles;
+using GameCore;
+using Log = Exiled.API.Features.Log;
 
 namespace DiscordLog
 {
@@ -340,7 +343,7 @@ namespace DiscordLog
 			};
 			if (Round.IsStarted)
 			{
-                RoundInfo.Value = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+                RoundInfo.Value = $"Durée de la partie - {((int)RoundStart.RoundLength.TotalSeconds) / 60:00}:{(int)RoundStart.RoundLength.TotalSeconds % 60:00}";
 
                 if (Round.IsLocked)
 				{
@@ -368,7 +371,7 @@ namespace DiscordLog
 				}
 				else if (GameCore.RoundStart.singleton.NetworkTimer is -1)
                 {
-                    RoundInfo.Value = $"Durée de la partie - {RoundSummary.roundTime / 60:00}:{RoundSummary.roundTime % 60:00}";
+                    RoundInfo.Value = $"Durée de la partie - {(int)RoundStart.RoundLength.TotalSeconds / 60:00}:{(int)RoundStart.RoundLength.TotalSeconds % 60:00}";
 
                     if (RoundSummary.roundTime is 0)
 					{
@@ -426,14 +429,14 @@ namespace DiscordLog
 				{
 					NormalisedName.TryGetValue(player, out string PlayerName);
                     DiscordPlayerName.Value += $"{PlayerName}\n";
-					if (player.Role.Team is Team.RIP)
+					if (player.Role.Team is Team.Dead)
 						if (player.IsOverwatchEnabled)
                             PlayerRole.Value += $"Overwatch\n";
 						else
                             PlayerRole.Value += $"{player.Role.Type}\n";
 					else if (player.TryGetSessionVariable("NewRole", out Tuple<string,string> NewRole))
                         PlayerRole.Value += $"{NewRole.Item1}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
-					else if (player.Role.Type is RoleType.Scp079)
+					else if (player.Role.Type is RoleTypeId.Scp079)
                         PlayerRole.Value += $"Scp079({Generator.Get(GeneratorState.Engaged).Count()}/3 Gen)\n";
 					else
                         PlayerRole.Value += $"{player.Role.Type}({(player.IsGodModeEnabled ? $"GodMod" : $"{(int)player.Health}Hp")})\n";

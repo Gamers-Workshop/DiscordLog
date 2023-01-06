@@ -10,6 +10,7 @@ using Exiled.Events.EventArgs.Scp330;
 using Exiled.Events.EventArgs.Scp914;
 using Exiled.Events.EventArgs.Server;
 using Exiled.Events.EventArgs.Warhead;
+using GameCore;
 using InventorySystem.Items.Usables.Scp330;
 using MEC;
 using PlayerStatsSystem;
@@ -46,7 +47,7 @@ namespace DiscordLog
             if (!string.IsNullOrWhiteSpace(DiscordLog.Instance.Config.WebhookSi) && !string.IsNullOrWhiteSpace(DiscordLog.Instance.Config.IdMessage))
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunUpdateWebhook(), Segment.RealtimeUpdate));
             plugin.LOG += ":zzz: En attente de joueurs...\n";
-            plugin.LOGStaff += $"Server Start \nExiled Version {Exiled.Loader.Loader.VersionName} | SCP:SL Version {Server.Version} | Seed {Map.Seed}";
+            plugin.LOGStaff += $"Server Start \nExiled Version {Exiled.Loader.Loader.Version} | SCP:SL Version {Server.Version} | Seed {Map.Seed}";
             RoundIsStart = false;
         }
         public void OnRoundStart()
@@ -157,7 +158,7 @@ namespace DiscordLog
             if (!RoundIsStart || ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart || !ev.IsAllowed) return;
             if (ev.Reason is SpawnReason.Escaped)
             {
-                float TimeAlive = ev.Player.ReferenceHub.characterClassManager.AliveTime;
+                double TimeAlive = RoundStart.RoundStartTimer.Elapsed.TotalSeconds;
 
                 if (ev.Player.IsCuffed)
                 {
@@ -184,12 +185,12 @@ namespace DiscordLog
                     return;
             }
 
-            if (ev.Player is null || ev.Player == ev.Target)
+            if (ev.Attacker is null || ev.Attacker == ev.Player)
             {
-                plugin.LOG += $":skull: {Extensions.LogPlayer(ev.Target)} est mort par {DamageString}.\n";
+                plugin.LOG += $":skull: {Extensions.LogPlayer(ev.Player)} est mort par {DamageString}.\n";
                 return;
             }
-            plugin.LOG += $":skull: {Extensions.LogPlayer(ev.Target)} est mort par {Extensions.LogPlayer(ev.Player)} avec {DamageString}.\n";
+            plugin.LOG += $":skull: {Extensions.LogPlayer(ev.Player)} est mort par {Extensions.LogPlayer(ev.Attacker)} avec {DamageString}.\n";
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {

@@ -1,13 +1,9 @@
 ﻿using CommandSystem;
+using Exiled.API.Extensions;
 using Exiled.API.Features;
-using Exiled.Permissions.Extensions;
-using MEC;
 using RemoteAdmin;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DiscordLog.Command.Suggestion
 {
@@ -21,7 +17,7 @@ namespace DiscordLog.Command.Suggestion
 
         public string[] Aliases { get; } = new string[] { "s" };
 
-        public string Description { get; } = "Suggest <Your Suggestion>";
+        public string Description { get; } = "Suggest <> , <Your Suggestion>";
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
@@ -33,8 +29,22 @@ namespace DiscordLog.Command.Suggestion
                 response = $"Vous devez donner une suggestion";
                 return false;
             }
-            Webhook.SugestionAsync(player, Extensions.FormatArguments(arguments, 0));
             response = $"Votre suggestion a été envoyé : \n{Extensions.FormatArguments(arguments, 0)}";
+
+            string text = Extensions.FormatArguments(arguments, 0);
+            if (!text.Contains(','))
+            {
+                response = $"Vous devez utilisé une virgule (,) pour donné un titre";
+                return false;
+            }
+            string title = text.GetBefore(',');
+            if (title.Length > 50)
+            {
+                response = $"réduisé la contité de caractére pour le titre";
+                return false;
+            }
+            Webhook.SugestionAsync(player, title, text.Remove(0, title.Count()));
+
             return true;
         }
     }
