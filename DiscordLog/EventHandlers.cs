@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-
+using Log = Exiled.API.Features.Log;
 using Scp330Pickup = Exiled.API.Features.Pickups.Scp330Pickup;
 
 namespace DiscordLog
@@ -173,6 +173,11 @@ namespace DiscordLog
 
         public void OnPlayerDeath(DiedEventArgs ev)
         {
+            if (ev.DamageHandler.Type is DamageType.Unknown)
+            {
+                Log.Error($"Damage Unknown Trigger {ev.DamageHandler.Base}");
+                plugin.LOG += $":warning::warning: {ev.DamageHandler.Base} :warning::warning:\n";
+            }
             if (!RoundIsStart)
                 return;
 
