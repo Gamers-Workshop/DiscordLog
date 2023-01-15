@@ -155,7 +155,7 @@ namespace DiscordLog
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
-            if (!RoundIsStart || ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart || !ev.IsAllowed) return;
+            if (!RoundIsStart || ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart or SpawnReason.Destroyed || !ev.IsAllowed) return;
             if (ev.Reason is SpawnReason.Escaped)
             {
                 double TimeAlive = RoundStart.RoundStartTimer.Elapsed.TotalSeconds;

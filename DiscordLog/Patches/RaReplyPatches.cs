@@ -103,7 +103,7 @@ namespace DiscordLog.Patches
             {
                 List<string> args = query.Trim().Split(QueryProcessor.SpaceArray, 512, StringSplitOptions.RemoveEmptyEntries).ToList();
                 if (args.IsEmpty()) return;
-                if (query.StartsWith("$7 0"))
+                if (query.StartsWith("$") && query[1] is not '1' or '3')
                     return;
 
                 Player player = sender is PlayerCommandSender playerCommandSender ? Player.Get(playerCommandSender) : Server.Host;

@@ -8,8 +8,6 @@ using InventorySystem.Items;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms.Attachments.Components;
-using InventorySystem.Items.MicroHID;
-using InventorySystem.Items.Radio;
 using NorthwoodLib.Pools;
 using System;
 using System.Collections.Generic;
