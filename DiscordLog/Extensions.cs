@@ -56,10 +56,10 @@ namespace DiscordLog
             }
             return UserID;
         }
-        public static string FormatArguments(ArraySegment<string> sentence, int index)
+        public static string FormatArguments(IEnumerable<string> sentence, int index)
         {
             StringBuilder SB = StringBuilderPool.Shared.Rent();
-            foreach (string word in sentence.Segment(index))
+            foreach (string word in sentence.Skip(index))
             {
                 SB.Append(word);
                 SB.Append(" ");

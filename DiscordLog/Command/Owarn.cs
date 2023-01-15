@@ -3,6 +3,7 @@ using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
 using RemoteAdmin;
 using System;
+using System.Linq;
 
 namespace DiscordLog.Command.Warn
 {
@@ -18,20 +19,25 @@ namespace DiscordLog.Command.Warn
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Player sanctionneur = null;
-            if (sender is PlayerCommandSender playerCommandSender) sanctionneur = Player.Get(playerCommandSender.SenderId);
-            if (sanctionneur is not null && !sanctionneur.CheckPermission("log.warn"))
+            if (!sender.CheckPermission("log.warn"))
             {
                 response = "Permission denied.";
                 return false;
             }
+
             string SanctionedNickname = "Unknown";
-            if (arguments.At(0).EndsWith("@steam"))
+            string UserId = arguments.ElementAtOrDefault(0);
+            if (!UserId.Contains("@"))
+            {
+                response = "You need to put a UserId like '145655965262@steam' .";
+                return false;
+            }
+            if (UserId.EndsWith("@steam"))
             {
                 SanctionedNickname = "Unknown (API Key Not valid)";
                 try
                 {
-                    SanctionedNickname = Extensions.GetUserName(arguments.At(0));
+                    SanctionedNickname = Extensions.GetUserName(UserId.Substring(0,UserId.IndexOf('@')));
                 }
                 catch (Exception ex)
                 {
@@ -44,9 +50,9 @@ namespace DiscordLog.Command.Warn
                 response = $"Vous devez donner une raison a votre warn";
                 return false;
             }
-
-            Webhook.OWarnPlayerAsync(sanctionneur,SanctionedNickname, arguments.At(0), Extensions.FormatArguments(arguments, 1));
-            response = $"Player {arguments.At(0)} Pseudo = {SanctionedNickname} has been warned : {Extensions.FormatArguments(arguments, 1)}";
+            if (!Player.TryGet(sender, out Player player)) player = Server.Host;
+            Webhook.OWarnPlayerAsync(player, SanctionedNickname, arguments.ElementAtOrDefault(0), Extensions.FormatArguments(arguments, 1));
+            response = $"Player {arguments.ElementAtOrDefault(0)} Pseudo = {SanctionedNickname} has been warned : {Extensions.FormatArguments(arguments, 1)}";
             return true;
         }
     }

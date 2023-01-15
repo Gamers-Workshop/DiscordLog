@@ -21,9 +21,6 @@ namespace DiscordLog.Command.Suggestion
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Player player = null;
-            if (sender is PlayerCommandSender playerCommandSender) player = Player.Get(playerCommandSender.SenderId);
-
             if (string.IsNullOrWhiteSpace(Extensions.FormatArguments(arguments, 0)))
             {
                 response = $"Vous devez donner une suggestion";
@@ -43,6 +40,8 @@ namespace DiscordLog.Command.Suggestion
                 response = $"réduisé la contité de caractére pour le titre";
                 return false;
             }
+
+            if (!Player.TryGet(sender, out Player player)) player = Server.Host;
             Webhook.SugestionAsync(player, title, text.Remove(0, title.Count()));
 
             return true;

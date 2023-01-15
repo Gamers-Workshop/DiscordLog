@@ -21,9 +21,6 @@ namespace DiscordLog.Command.Bug
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            Player player = null;
-            if (sender is PlayerCommandSender playerCommandSender) player = Player.Get(playerCommandSender.SenderId);
-
             if (string.IsNullOrWhiteSpace(Extensions.FormatArguments(arguments, 0)))
             {
                 response = $"Vous devez donner signaler un bug";
@@ -41,6 +38,8 @@ namespace DiscordLog.Command.Bug
                 response = $"réduisé la contité de caractére pour le titre";
                 return false;
             }
+
+            if (!Player.TryGet(sender, out Player player)) player = Server.Host;
             Webhook.BugInfoAsync(player, title, text.Remove(0, title.Count()));
             response = $"Votre bug a été envoyé : \n{Extensions.FormatArguments(arguments, 0)}";
             return true;

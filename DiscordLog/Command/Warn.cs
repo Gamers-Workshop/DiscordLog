@@ -3,6 +3,7 @@ using Exiled.API.Features;
 using Exiled.Permissions.Extensions;
 using RemoteAdmin;
 using System;
+using System.Linq;
 
 namespace DiscordLog.Command.Warn
 {
@@ -18,17 +19,15 @@ namespace DiscordLog.Command.Warn
 
 		public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
 		{
-            Player sanctionneur = null;
-            if (sender is PlayerCommandSender playerCommandSender) sanctionneur = Player.Get(playerCommandSender.SenderId);
-            if (sanctionneur is not null && !sanctionneur.CheckPermission("log.warn"))
+            if (!sender.CheckPermission("log.warn"))
             {
                 response = "Permission denied.";
                 return false;
             }
-            Player Sanctioned = Player.Get(arguments.At(0));
+            Player Sanctioned = Player.Get(arguments.ElementAtOrDefault(0));
             if (Sanctioned is null)
             {
-                response = $"Player not found: {arguments.At(0)}";
+                response = $"Player not found: {arguments.ElementAtOrDefault(0)}";
                 return false;
             }
             if (string.IsNullOrWhiteSpace(Extensions.FormatArguments(arguments, 1)))
@@ -36,10 +35,12 @@ namespace DiscordLog.Command.Warn
                 response = $"Vous devez donner une raison a votre warn";
                 return false;
             }
-            if (DiscordLog.Instance.Config.WarnBox)
-                Sanctioned.OpenReportWindow($"Vous avez été warn par {sanctionneur.Nickname} car {Extensions.FormatArguments(arguments, 1)}\n<b>Appuyez sur Esc pour fermer</b>");
+            if (!Player.TryGet(sender, out Player player)) player = Server.Host;
 
-            Webhook.WarnPlayerAsync(sanctionneur, Sanctioned, Extensions.FormatArguments(arguments, 1));
+            if (DiscordLog.Instance.Config.WarnBox)
+                Sanctioned.OpenReportWindow($"Vous avez été warn par {player.Nickname} car {Extensions.FormatArguments(arguments, 1)}\n<b>Appuyez sur Esc pour fermer</b>");
+
+            Webhook.WarnPlayerAsync(player, Sanctioned, Extensions.FormatArguments(arguments, 1));
             response = $"Player {Sanctioned.Nickname} has been warned : {Extensions.FormatArguments(arguments, 1)}";
             return true;
         }
