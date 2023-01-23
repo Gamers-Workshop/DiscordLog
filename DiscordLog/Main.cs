@@ -23,6 +23,7 @@ using FMOD.Studio;
 using PlayerRoles;
 using GameCore;
 using Log = Exiled.API.Features.Log;
+using System.Text;
 
 namespace DiscordLog
 {
@@ -232,16 +233,16 @@ namespace DiscordLog
 					continue;
 				if (LOGError.Length < 2001)
 				{
-					Webhook.SendWebhookMessage(Config.WebhookUrlLogError, LOGError, false);
+					Webhook.SendWebhookMessage(Config.WebhookUrlLogError, LOGError.ToString());
 					LOGError = null;
 				}
 				else
 				{
-					DiscordMessage(LOGError, out List<string> ListString);
+					DiscordMessage(LOGError.ToString(), out List<string> ListString);
 					LOGError = null;
 					foreach (string SendLog in ListString)
 					{
-						Webhook.SendWebhookMessage(Config.WebhookUrlLogError, SendLog, false);
+						Webhook.SendWebhookMessage(Config.WebhookUrlLogError, SendLog);
 						yield return Timing.WaitForSeconds(5f);
 					}
 				}
@@ -302,6 +303,8 @@ namespace DiscordLog
 			ListString = new();
 			foreach (string ligne in message.Split('\n'))
 			{
+				if (string.IsNullOrWhiteSpace(ligne))
+					continue;
 				if (ligne.Count() + Limiteur < 1996)
 				{
 					Limiteur += ligne.Count() + 1;
@@ -430,10 +433,7 @@ namespace DiscordLog
 					NormalisedName.TryGetValue(player, out string PlayerName);
                     DiscordPlayerName.Value += $"{PlayerName}\n";
 					if (player.Role.Team is Team.Dead)
-						if (player.IsOverwatchEnabled)
-                            PlayerRole.Value += $"Overwatch\n";
-						else
-                            PlayerRole.Value += $"{player.Role.Type}\n";
+						PlayerRole.Value += $"{player.Role.Type}\n";
 					else if (player.TryGetSessionVariable("NewRole", out Tuple<string,string> NewRole))
                         PlayerRole.Value += $"{NewRole.Item1}({(player.IsGodModeEnabled ? $"GodMod": $"{(int)player.Health}Hp")})\n";
 					else if (player.Role.Type is RoleTypeId.Scp079)

@@ -98,17 +98,16 @@ namespace DiscordLog.Patches
 
         private static void LogCommand(string query, CommandSender sender)
         {
-            Harmony.DEBUG = true;
             try
             {
                 List<string> args = query.Trim().Split(QueryProcessor.SpaceArray, 512, StringSplitOptions.RemoveEmptyEntries).ToList();
                 if (args.IsEmpty()) return;
-                if (query.StartsWith("$") && query[1] is not '1' or '3')
+                if (query.StartsWith("$") && query.ElementAtOrDefault(1) is not '1' or '3')
                     return;
 
                 Player player = sender is PlayerCommandSender playerCommandSender ? Player.Get(playerCommandSender) : Server.Host;
 
-                switch (args.ElementAtOrDefault(0).ToLower())
+                switch (args.ElementAtOrDefault(0)?.ToLower())
                 {
                     case "jail":
                         DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a jail {Extensions.LogPlayer(Player.Get(args.ElementAtOrDefault(1)))}.\n";
@@ -120,36 +119,31 @@ namespace DiscordLog.Patches
                             {
                                 spawnFlags = (RoleSpawnFlags)b;
                             }
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a changé en {args.ElementAtOrDefault(2)} {spawnFlags}: {LogPlayerFromCommand(args.ElementAtOrDefault(1)?.Split('.'))}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a changé en {args.ElementAtOrDefault(2)} {spawnFlags}: {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
                             return;
                         }
                     case "grantloadout":
                         {
                             if (Enum.TryParse(args.ElementAtOrDefault(2), out RoleTypeId role))
                             {
-                                /*RoleSpawnFlags spawnFlags = RoleSpawnFlags.All;
-                                if (args.Count > 2 && byte.TryParse(args[2], out byte b))
-                                {
-                                    spawnFlags = (RoleSpawnFlags)b;
-                                }*/
-                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a pris l'inventaire d'un {role}: {LogPlayerFromCommand(args.ElementAtOrDefault(1)?.Split('.'))}\n";
+                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a pris l'inventaire d'un {role}: {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
                                 return;
                             }
                         }
                         break;
                     case "give":
                         {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a donné : {ParseEnum<ItemType>(args.ElementAtOrDefault(2))} {LogPlayerFromCommand(args.ElementAtOrDefault(1)?.Split('.'))}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a donné : {ParseEnum<ItemType>(args.ElementAtOrDefault(2))} {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
                             return;
                         }
                     case "removeitem":
                         {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a enlever : {ParseEnum<ItemType>(args.ElementAtOrDefault(2))} {LogPlayerFromCommand(args.ElementAtOrDefault(1)?.Split('.'))}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a enlever : {ParseEnum<ItemType>(args.ElementAtOrDefault(2))} {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
                             return;
                         }
                     case "overwatch":
                         {
-                            string Receiver = LogPlayerFromCommand(args.ElementAtOrDefault(1).Split('.'));
+                            string Receiver = LogPlayerFromCommand(args.ElementAtOrDefault(1));
                             if (args.ElementAtOrDefault(2) is "0")
                             {
                                 DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à enlever l'overwatch : {Receiver}\n";
@@ -164,49 +158,48 @@ namespace DiscordLog.Patches
                         break;
                     case "bring":
                         {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à tp les joueurs sur lui : {LogPlayerFromCommand(args.ElementAtOrDefault(1)?.Split('.'))}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à tp les joueurs sur lui : {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
                         }
                         return;
                     case "goto":
-                        DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} se tp à {Extensions.LogPlayer(Player.Get(args.ElementAtOrDefault(1)))}.\n";
+                        DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} se tp à {LogPlayerFromCommand(args.ElementAtOrDefault(1))}.\n";
                         return;
                     case "$1":
                         {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a demandé les donnée de {LogPlayerFromCommand(args.ElementAtOrDefault(1)?.Split('.'))} : {(args.ElementAtOrDefault(1) is "1" ? "REQUEST" : "REQUEST-IP")}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a demandé les donnée de {LogPlayerFromCommand(args.ElementAtOrDefault(1))} : {(args.ElementAtOrDefault(1) is "1" ? "REQUEST" : "REQUEST-IP")}\n";
                         }
                         return;
                     case "$3":
                         {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a demandé les donnée de {LogPlayerFromCommand(args.ElementAtOrDefault(1)?.Split('.'))} : REQUEST-AUTH\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a demandé les donnée de {LogPlayerFromCommand(args.ElementAtOrDefault(1))} : REQUEST-AUTH\n";
                         }
                         return;
                     case "pfx":
                         {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a donné l'effect {args.ElementAtOrDefault(1)} Intensité {args.ElementAtOrDefault(2)} Durée {args.ElementAtOrDefault(3)} : {LogPlayerFromCommand(args.ElementAtOrDefault(4)?.Split('.'))}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a donné l'effect {args.ElementAtOrDefault(1)} Intensité {args.ElementAtOrDefault(2)} Durée {args.ElementAtOrDefault(3)} : {LogPlayerFromCommand(args.ElementAtOrDefault(4))}\n";
                         }
                         return;
                 }
                 if (args.ElementAtOrDefault(1)?.Contains('.') ?? false)
                 {
-                    DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à {args.ElementAtOrDefault(0)} ``{Regex.Replace(Extensions.FormatArguments(args, 2), "<[^>]*?>", string.Empty)}``: {LogPlayerFromCommand(args.ElementAtOrDefault(1)?.Split('.'))}\n";
+                    DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à {args.ElementAtOrDefault(0)} ``{Regex.Replace(Extensions.FormatArguments(args, 2), "<[^>]*?>", string.Empty)}``: {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
                     return;
                 }
                 DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{Regex.Replace(query, "<[^>]*?>", string.Empty)}``.\n";
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 Exiled.API.Features.Log.Error($"Error In LogCommand by the command ({query}) and the player [{sender?.Nickname}] : {ex}");
             }
-            Harmony.DEBUG = false;
         }
 
-        public static string LogPlayerFromCommand(string[] Users)
+        public static string LogPlayerFromCommand(string Users)
         {
             string Receiver = string.Empty;
             List<Player> PlyList = new();
-            foreach (string s in Users)
+            foreach (string s in Users?.Split('.'))
             {
-                if (int.TryParse(s, out int id) && Player.TryGet(id,out Player player))
+                if (int.TryParse(s, out int id) && Player.TryGet(id, out Player player))
                     PlyList.Add(player);
                 else if (Player.TryGet(s, out player))
                     PlyList.Add(player);
@@ -219,6 +212,7 @@ namespace DiscordLog.Patches
         }
         public static string ParseEnum<TEnum>(string argument) where TEnum : struct, Enum
         {
+            argument ??= string.Empty;
             string[] array = argument.Split(new char[] { '.' });
             List<string> names = new();
             for (int i = 0; i < array.Length; i++)

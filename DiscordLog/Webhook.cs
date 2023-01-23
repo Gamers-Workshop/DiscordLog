@@ -25,7 +25,7 @@ namespace DiscordLog
         {
             NullValueHandling = NullValueHandling.Ignore,
         };
-        public static void SendWebhookMessage(string url, string objcontent, bool islogged = true)
+        public static void SendWebhookMessage(string url, string objcontent)
         {
             EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(url, "POST", JsonConvert.SerializeObject(new DiscordWebhookData.DiscordWebhook()
             {
@@ -33,10 +33,10 @@ namespace DiscordLog
                 Content = objcontent,
                 IsTTS = false,
                 Username = DiscordLog.Instance.Config.WebhookName,
-            }), islogged)));
+            }))));
         }
 
-        public static IEnumerator<float> SendWebhookInformationDiscord(string link, string method, string json, bool islogged = true)
+        public static IEnumerator<float> SendWebhookInformationDiscord(string link, string method, string json)
         {
             if (DiscordLimitter.TryGetValue(link, out DateTime dateTime))
             {

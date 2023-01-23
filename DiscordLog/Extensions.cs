@@ -42,7 +42,7 @@ namespace DiscordLog
             _ => "Unknown",
         };
         public static string LogPlayer(Player player) => player is null ? $"``Unknown`` (Unknown)" :
-            $"``{player.Nickname}`` ({(player.DoNotTrack ? $"||{ConvertID(player.UserId)}||" : ConvertID(player.UserId))})";
+            $"``{player.Nickname.DiscordLightSanitize()}`` ({(player.DoNotTrack ? $"||{ConvertID(player.UserId)}||" : ConvertID(player.UserId))})";
         public static string ConvertID(string UserID)
         {
             if (string.IsNullOrEmpty(UserID)) return string.Empty;
@@ -89,6 +89,23 @@ namespace DiscordLog
 
             return "Unknown (API Key Not valid)";
         }
+        public static string DiscordLightSanitize(this string text) => text.Replace('`', '\'');
+
+        public static string DiscordSanitize(this string text) => Regex.Replace(text, @"(<|>|`|~~|\*|_)",
+                m =>
+                {
+                    return m.Value switch
+                    {
+                        "<" => "(",
+                        ">" => ")",
+                        "`" => "'",
+                        "~~" => "∼∼",
+                        "*" => "★",
+                        "_" => "\uff3f",
+                        _ => m.Value,
+                    };
+                });
+
         public static byte GetMaxAmmo(this ItemType item)
         {
             if (!InventoryItemLoader.AvailableItems.TryGetValue(item, out ItemBase itemBase) || itemBase is not InventorySystem.Items.Firearms.Firearm firearm)
