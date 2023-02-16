@@ -13,6 +13,7 @@ using Exiled.Events.EventArgs.Warhead;
 using GameCore;
 using InventorySystem.Items.Usables.Scp330;
 using MEC;
+using PlayerRoles;
 using PlayerStatsSystem;
 using Respawning;
 using System;
@@ -29,7 +30,6 @@ namespace DiscordLog
         internal readonly DiscordLog plugin;
         public static List<CoroutineHandle> Coroutines = new();
         private static readonly Dictionary<string, string> SteamNickName = new();
-        private bool RoundIsStart;
         private Player IntercomPlayerSpeek;
         public static Player Use914;
         public EventHandlers(DiscordLog plugin) => this.plugin = plugin;
@@ -48,21 +48,14 @@ namespace DiscordLog
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunUpdateWebhook(), Segment.RealtimeUpdate));
             plugin.LOG += ":zzz: En attente de joueurs...\n";
             plugin.LOGStaff += $"Server Start \nExiled Version {Exiled.Loader.Loader.Version} | SCP:SL Version {Server.Version} | Seed {Map.Seed}";
-            RoundIsStart = false;
         }
         public void OnRoundStart()
         {
-            Timing.CallDelayed(0.5f, () =>
+            plugin.LOG += $":triangular_flag_on_post: Démarrage de la partie avec ({Server.PlayerCount}) joueurs.\n";
+            foreach (Player player in Player.List.OrderBy(x => x.Role.Team))
             {
-                string RoundStart = $":triangular_flag_on_post: Démarrage de la partie avec {Player.List.Count()} joueurs.\n";
-                foreach (Player player in Player.List.OrderBy(x => x.Role.Team))
-                    if (player.TryGetSessionVariable("NewRole", out Tuple<string, string> newrole))
-                        RoundStart += $"    - {Extensions.LogPlayer(player)} a spawn en {newrole.Item1}.\n";
-                    else
-                        RoundStart += $"    - {Extensions.LogPlayer(player)} a spawn en {player.Role.Type}.\n";
-                plugin.LOG += RoundStart;
-                RoundIsStart = true;
-            });
+                plugin.LOG += $"    - {Extensions.LogPlayer(player)} a spawn en tant que : {player.Role.Type}.\n";
+            }
         }
         public void OnRoundEnd(RoundEndedEventArgs ev)
         {
@@ -86,10 +79,6 @@ namespace DiscordLog
             else if (ev.NextKnownTeam is SpawnableTeamType.ChaosInsurgency)
                 objcontent = ":articulated_lorry: L’Insurrection du Chaos est arrivée sur le site.\n";
 
-            foreach (Player playerrespawn in ev.Players)
-            {
-                objcontent += $"    - {Extensions.LogPlayer(playerrespawn)}\n";
-            }
             plugin.LOG += objcontent;
         }
         public void OnWarheadStart(StartingEventArgs ev)
@@ -141,7 +130,7 @@ namespace DiscordLog
         }
         public void OnPlayerVerified(VerifiedEventArgs ev)
         {
-            plugin.LOG += $":chart_with_upwards_trend: {Extensions.LogPlayer(ev.Player)} [{ev.Player.Id}] a rejoint le serveur.\n";
+            plugin.LOG += $":chart_with_upwards_trend: {Extensions.LogPlayer(ev.Player)} [{ev.Player.Id}] a rejoint le serveur. ({Server.PlayerCount}/{Server.MaxPlayerCount})\n";
             string PlayerName = ev.Player.Nickname.Normalize(System.Text.NormalizationForm.FormKD);
             if (PlayerName.Length < 18)
               plugin.NormalisedName.Add(ev.Player, $"[{ev.Player.Id}] {PlayerName}");
@@ -150,43 +139,47 @@ namespace DiscordLog
         }
         public void OnPlayerDestroying(DestroyingEventArgs ev)
         {
-            plugin.LOG += $":chart_with_downwards_trend: {Extensions.LogPlayer(ev.Player)} a quitté le serveur.\n";
+            plugin.LOG += $":chart_with_downwards_trend: {Extensions.LogPlayer(ev.Player)} a quitté le serveur. ({Server.PlayerCount - 1}/{Server.MaxPlayerCount})\n";
             plugin.NormalisedName.Remove(ev.Player);
         }
         public void OnChangingRole(ChangingRoleEventArgs ev)
         {
-            if (!RoundIsStart || ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart or SpawnReason.Destroyed || !ev.IsAllowed) return;
-            if (ev.Reason is SpawnReason.Escaped)
+            if (ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart or SpawnReason.Destroyed || !ev.IsAllowed) return;
+            switch (ev.Reason)
             {
-                double TimeAlive = RoundStart.RoundStartTimer.Elapsed.TotalSeconds;
+                case SpawnReason.Escaped:
+                    double TimeAlive = RoundStart.RoundStartTimer.Elapsed.TotalSeconds;
 
-                if (ev.Player.IsCuffed)
-                {
-                    plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Player)} a été escorté en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                    if (ev.Player.IsCuffed)
+                    {
+                        plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Player)} a été escorté en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                        return;
+                    }
+                    plugin.LOG += $":person_running: {Extensions.LogPlayer(ev.Player)} s'est échapé en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
                     return;
-                }
-                plugin.LOG += $":person_running: {Extensions.LogPlayer(ev.Player)} s'est échapé en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
-                return;
+
+                case SpawnReason.Respawn:
+                    plugin.LOG += $"    - {Extensions.LogPlayer(ev.Player)} a spawn en tant que : {ev.NewRole}.\n";
+                    return;
+
             }
-            plugin.LOG += $":new: {Extensions.LogPlayer(ev.Player)} a spawn en tant que : {ev.NewRole}.\n";
+            plugin.LOG += $":new: {Extensions.LogPlayer(ev.Player)} a spawn car {ev.Reason} en tant que : {ev.NewRole}.\n";
         }
 
         public void OnPlayerDeath(DiedEventArgs ev)
         {
             if (ev.DamageHandler.Type is DamageType.Unknown)
             {
-                Log.Error($"Damage Unknown Trigger {ev.DamageHandler.Base}");
+                Log.Error($"Damage Unknown Trigger {ev.DamageHandler.Base} {ev.Attacker?.CurrentItem?.Type}");
                 plugin.LOG += $":warning::warning: {ev.DamageHandler.Base} :warning::warning:\n";
             }
-            if (!RoundIsStart)
-                return;
 
             string DamageString = ev.DamageHandler.Type.ToString();
 
             if (ev.DamageHandler.Type is DamageType.Custom && ev.DamageHandler.Base is CustomReasonDamageHandler customReason)
             {
                 DamageString = customReason.ServerLogsText.Remove(0, 30);
-                if (DamageString == "Disconect")
+                if (DamageString is "Disconect")
                     return;
             }
 
@@ -281,6 +274,7 @@ namespace DiscordLog
                 ItemType.SCP207 => $"<:ContaCola:881985143718445086> {Extensions.LogPlayer(ev.Player)} a utilisé SCP207.\n",
                 ItemType.SCP268 => $"<:Chepeaux:697574292140982313> {Extensions.LogPlayer(ev.Player)} a utilisé SCP268.\n",
                 ItemType.SCP1853 => $"<:Scp1853:963526275216064572> {Extensions.LogPlayer(ev.Player)} a utilisé SCP1853.\n",
+                ItemType.SCP1576 => $"<:SCP1576:1069063548489191568> {Extensions.LogPlayer(ev.Player)} a utilisé SCP1576.\n",
                 _ => $":??: {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n",
             };
         }
@@ -386,7 +380,8 @@ namespace DiscordLog
             if (!ev.IsAllowed) 
                 return;
             plugin.LOGStaff += $":mans_shoe: {Extensions.LogPlayer(ev.Target)} a été kick pour : ``{ev.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
-            Webhook.KickPlayerAsync(ev.Player, ev.Target, ev.Reason);
+            if (ev.Reason.ToLower().RemoveSpaces() is not "afk")
+                Webhook.KickPlayerAsync(ev.Player, ev.Target, ev.Reason);
         }
         public void OnBanned(BannedEventArgs ev)
         {

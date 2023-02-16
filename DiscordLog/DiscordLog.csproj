@@ -135,6 +135,7 @@
     <Compile Include="Main.cs" />
     <Compile Include="Configs.cs" />
     <Compile Include="Patches\ErrorPatches.cs" />
+    <Compile Include="Patches\ReportPatches.cs" />
     <Compile Include="Patches\Scp914Patches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Patches\RaReplyPatches.cs" />

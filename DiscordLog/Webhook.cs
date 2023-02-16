@@ -19,8 +19,6 @@ namespace DiscordLog
 {
     class Webhook
     {
-        public static Dictionary<string, DateTime> DiscordLimitter = new();
-        public static HttpClient http = new();
         public static JsonSerializerSettings SerialiseSetting = new()
         {
             NullValueHandling = NullValueHandling.Ignore,
@@ -38,12 +36,6 @@ namespace DiscordLog
 
         public static IEnumerator<float> SendWebhookInformationDiscord(string link, string method, string json)
         {
-            if (DiscordLimitter.TryGetValue(link, out DateTime dateTime))
-            {
-                float time = (float)(DateTime.Now - dateTime).TotalSeconds;
-                EventHandlers.Coroutines.Add(Timing.CallDelayed(time / 2 + time, () =>
-                EventHandlers.Coroutines.Add(Timing.RunCoroutine(SendWebhookInformationDiscord(link, method, json)))));
-            }
             using UnityWebRequest discordWWW = UnityWebRequest.Put(link, json);
             discordWWW.method = method;
             discordWWW.SetRequestHeader("Content-Type", "application/json");
@@ -88,7 +80,7 @@ namespace DiscordLog
                 },
                 SerialiseSetting))));
         }
-        public static void UpdateServerInfoStaffAsync(DiscordFiels PlayerConnected, DiscordFiels RoundInfo, DiscordFiels PlayerNameList, DiscordFiels PlayerRoleList, DiscordFiels UserIdList)
+        public static void UpdateServerInfoStaffAsync(DiscordFiels PlayerConnected, DiscordFiels RoundInfo, DiscordFiels PlayerNameList, DiscordFiels PlayerRoleList, DiscordFiels FacilityInfo)
         {
             EventHandlers.Coroutines.Add(
                 Timing.RunCoroutine(
@@ -110,7 +102,7 @@ namespace DiscordLog
                                 RoundInfo,
                                 PlayerNameList,
                                 PlayerRoleList,
-                                UserIdList,
+                                FacilityInfo,
                                 PlayerConnected,
                             },
                         Footer = new DiscordFooter
@@ -194,7 +186,7 @@ namespace DiscordLog
                                     new DiscordFiels
                                     {
                                         Name = "OBan",
-                                        Value = $"{sanctionedNickname}({sanctionedUserId})",
+                                        Value = $"{sanctionedNickname}({Extensions.ConvertID(sanctionedUserId)})",
                                     },
                                     new DiscordFiels
                                     {

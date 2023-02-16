@@ -27,18 +27,18 @@ namespace DiscordLog
     {
         public static string LogItem(Item item) => item switch
         {
-            Firearm firearm => $"{item.Type} [{firearm.Ammo}/{firearm.MaxAmmo}]",
-            MicroHid microhid => $"MicroHID [{(int)(microhid.Energy * 100)}%]",
-            Radio radio => $"Radio [{radio.BatteryLevel}%]",
-            not null => $"{item.Type}",
+            Firearm firearm => $"{item.Type} ({item.Serial.IntToBase32()}) [{firearm.Ammo}/{firearm.MaxAmmo}]",
+            MicroHid microhid => $"MicroHID ({item.Serial.IntToBase32()}) [{(int)(microhid.Energy * 100)}%]",
+            Radio radio => $"Radio ({item.Serial.IntToBase32()}) [{radio.BatteryLevel}%]",
+            not null => $"{item.Type} ({item.Serial.IntToBase32()})",
             _ => "Unknown"
         };
         public static string LogPickup(Pickup itemPickup) => itemPickup?.Base switch
         {
-            FirearmPickup firearm => $"{itemPickup.Type} {(firearm.Distributed ? $"[{itemPickup.GetMaxAmmo()}/{itemPickup.GetMaxAmmo()}]" : $"[{firearm.Status.Ammo}/{itemPickup.GetMaxAmmo()}]")}",
-            MicroHIDPickup microhid => $"MicroHID [{(int)(microhid.Energy * 100)}%]",
-            RadioPickup radio => $"Radio [{(int)(radio.SavedBattery * 100)}%]",
-            not null => $"{itemPickup.Type}",
+            FirearmPickup firearm => $"{itemPickup.Type} ({itemPickup.Serial.IntToBase32()}) {(firearm.Distributed ? $"[{itemPickup.GetMaxAmmo()}/{itemPickup.GetMaxAmmo()}]" : $"[{firearm.Status.Ammo}/{itemPickup.GetMaxAmmo()}]")}",
+            MicroHIDPickup microhid => $"MicroHID ({itemPickup.Serial.IntToBase32()}) [{(int)(microhid.Energy * 100)}%]",
+            RadioPickup radio => $"Radio ({itemPickup.Serial.IntToBase32()}) [{(int)(radio.SavedBattery * 100)}%]",
+            not null => $"{itemPickup.Type} ({itemPickup.Serial.IntToBase32()})",
             _ => "Unknown",
         };
         public static string LogPlayer(Player player) => player is null ? $"``Unknown`` (Unknown)" :
@@ -105,7 +105,20 @@ namespace DiscordLog
                         _ => m.Value,
                     };
                 });
+        static string IntToBase32(this ushort input)
+        {
+            const string CrockfordBase32Alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+            string result = string.Empty;
 
+            do
+            {
+                int remainder = input % 32;
+                result = CrockfordBase32Alphabet[remainder] + result;
+                input /= 32;
+            } while (input > 0);
+
+            return result;
+        }
         public static byte GetMaxAmmo(this ItemType item)
         {
             if (!InventoryItemLoader.AvailableItems.TryGetValue(item, out ItemBase itemBase) || itemBase is not InventorySystem.Items.Firearms.Firearm firearm)
@@ -132,7 +145,7 @@ namespace DiscordLog
 
         public static float GetAttachmentsValue(this FirearmPickup firearmPickup, AttachmentParam attachmentParam)
         {
-            if ((uint)firearmPickup.Info.ItemId.GetFirearmType().GetBaseCode() > firearmPickup.Status.Attachments)
+            if (firearmPickup.Info.ItemId.GetFirearmType().GetBaseCode() > firearmPickup.Status.Attachments)
                 return 0;
 
             IEnumerable<AttachmentIdentifier> attachements = firearmPickup.Info.ItemId.GetFirearmType().GetAttachmentIdentifiers(firearmPickup.Status.Attachments);

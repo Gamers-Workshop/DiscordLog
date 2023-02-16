@@ -24,6 +24,9 @@ using PlayerRoles;
 using GameCore;
 using Log = Exiled.API.Features.Log;
 using System.Text;
+using LightContainmentZoneDecontamination;
+using UnityEngine;
+using Respawning;
 
 namespace DiscordLog
 {
@@ -305,17 +308,24 @@ namespace DiscordLog
 			{
 				if (string.IsNullOrWhiteSpace(ligne))
 					continue;
-				if (ligne.Count() + Limiteur < 1996)
+				if (ligne.Count() + Limiteur < 1999)
 				{
 					Limiteur += ligne.Count() + 1;
-					LogLimite += ligne + "\n_ _";
+					LogLimite += ligne + "\n";
+					continue;
 				}
-				else
+
+				ListString.Add(LogLimite);
+				if (ligne[0] is ' ')
 				{
-					ListString.Add(LogLimite);
-					Limiteur = ligne.Count() + 1;
-					LogLimite = ligne + "\n";
+					ligne.Remove(0, 1);
+					LogLimite = "_ _" + ligne + "\n";
+					Limiteur = ligne.Count();
+					continue;
 				}
+
+				Limiteur = ligne.Count() + 1;
+				LogLimite = ligne + "\n";
 			}
 			ListString.Add(LogLimite);
 		}
@@ -331,7 +341,7 @@ namespace DiscordLog
 		}
 		public void UpdateWebhook()
         {
-            int PlayerCount = Player.List.Count();
+            int PlayerCount = Server.PlayerCount;
 
             DiscordFiels RoundInfo = new()
 			{
@@ -407,7 +417,6 @@ namespace DiscordLog
 			Webhook.UpdateServerInfo(PlayerConnected, RoundInfo);
 			DiscordFiels DiscordPlayerName = null;
 			DiscordFiels PlayerRole = null;
-            DiscordFiels UserId = null;
 			if (Player.List.Any())
 			{
                 DiscordPlayerName = new()
@@ -422,12 +431,7 @@ namespace DiscordLog
                     Value = "",
                     Inline = true,
                 };
-                UserId = new()
-                {
-                    Name = "UserID",
-                    Value = "",
-                    Inline = true,
-                };
+                
                 foreach (Player player in Player.List) 
 				{
 					NormalisedName.TryGetValue(player, out string PlayerName);
@@ -440,10 +444,26 @@ namespace DiscordLog
                         PlayerRole.Value += $"Scp079({Generator.Get(GeneratorState.Engaged).Count()}/3 Gen)\n";
 					else
                         PlayerRole.Value += $"{player.Role.Type}({(player.IsGodModeEnabled ? $"GodMod" : $"{(int)player.Health}Hp")})\n";
-                    UserId.Value += $"{player.UserId}\n";
                 }
             }
-			Webhook.UpdateServerInfoStaffAsync(PlayerConnected, RoundInfo, DiscordPlayerName, PlayerRole, UserId);
+			int DécontaminationTime = (int)Math.Truncate(DecontaminationController.Singleton.DecontaminationPhases[DecontaminationController.Singleton.DecontaminationPhases.Length - 1].TimeTrigger - Math.Truncate(DecontaminationController.GetServerTime));
+			int TimeWarhead = Mathf.CeilToInt(Warhead.DetonationTimer);
+            float totalvoltagefloat = 0f;
+            foreach (var i in Generator.Get(GeneratorState.Activating | GeneratorState.Engaged))
+            {
+                totalvoltagefloat += i.CurrentTime;
+            }
+
+            DiscordFiels FacilityInfo = new()
+            {
+                Name = "Facility Info",
+                Value = $"Décontamination : {(Round.IsStarted ? (!DecontaminationController.Singleton._decontaminationBegun ? $"{DécontaminationTime / 60:00}:{DécontaminationTime % 60:00}" : "Effectué") : "En Attente")}\n" +
+                $"Warhead : {(Warhead.IsInProgress ? $"{TimeWarhead / 60:00}:{TimeWarhead % 60:00}" : (AlphaWarheadOutsitePanel.nukeside.Networkenabled ? "PRÊTE" : "DÉSACTIVÉE"))}\n" +
+                $"Générateur : {Mathf.CeilToInt(totalvoltagefloat)}/3\n" +
+                $"Respawn {Respawn.NextKnownTeam} : {Respawn.TimeUntilSpawnWave.Minutes:00}:{Respawn.TimeUntilSpawnWave.Seconds:00}",
+                Inline = false,
+            };
+            Webhook.UpdateServerInfoStaffAsync(PlayerConnected, RoundInfo, DiscordPlayerName, PlayerRole, FacilityInfo);
 		}
 	}
 }
