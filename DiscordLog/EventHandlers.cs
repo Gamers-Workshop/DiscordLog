@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using static System.Net.Mime.MediaTypeNames;
 using Log = Exiled.API.Features.Log;
 using Scp330Pickup = Exiled.API.Features.Pickups.Scp330Pickup;
 
@@ -372,6 +373,18 @@ namespace DiscordLog
         {
             if (!ev.IsAllowed) 
                 return;
+            if (ev.Target != null)
+            {
+                BanHandler.IssueBan(new BanDetails
+                {
+                    OriginalName = ev.Target.Sender.LogName,
+                    Id = ev.Target.Connection.address,
+                    IssuanceTime = TimeBehaviour.CurrentTimestamp(),
+                    Expires = ev.Duration,
+                    Reason = ev.Reason,
+                    Issuer = ev.Player.Sender.LogName
+                }, BanHandler.BanType.IP, false);
+            }
             Webhook.BanPlayerAsync(ev.Player, ev.Target, ev.Reason, ev.Duration);
             plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par {Extensions.LogPlayer(ev.Player)}.\n";
         }
