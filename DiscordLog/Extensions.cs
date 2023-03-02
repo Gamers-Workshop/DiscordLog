@@ -17,9 +17,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using Firearm = Exiled.API.Features.Items.Firearm;
-using FirearmPickup = InventorySystem.Items.Firearms.FirearmPickup;
-using MicroHIDPickup = InventorySystem.Items.MicroHID.MicroHIDPickup;
-using RadioPickup = InventorySystem.Items.Radio.RadioPickup;
+using FirearmPickup = Exiled.API.Features.Pickups.FirearmPickup;
 
 namespace DiscordLog
 {
@@ -33,11 +31,11 @@ namespace DiscordLog
             not null => $"{item.Type} ({item.Serial.IntToBase32()})",
             _ => "Unknown"
         };
-        public static string LogPickup(Pickup itemPickup) => itemPickup?.Base switch
+        public static string LogPickup(Pickup itemPickup) => itemPickup switch
         {
-            FirearmPickup firearm => $"{itemPickup.Type} ({itemPickup.Serial.IntToBase32()}) {(firearm.Distributed ? $"[{itemPickup.GetMaxAmmo()}/{itemPickup.GetMaxAmmo()}]" : $"[{firearm.Status.Ammo}/{itemPickup.GetMaxAmmo()}]")}",
+            FirearmPickup firearm => $"{itemPickup.Type} ({itemPickup.Serial.IntToBase32()}) {(firearm.IsDistributed ? $"[{itemPickup.GetMaxAmmo()}/{itemPickup.GetMaxAmmo()}]" : $"[{firearm.Status.Ammo}/{itemPickup.GetMaxAmmo()}]")}",
             MicroHIDPickup microhid => $"MicroHID ({itemPickup.Serial.IntToBase32()}) [{(int)(microhid.Energy * 100)}%]",
-            RadioPickup radio => $"Radio ({itemPickup.Serial.IntToBase32()}) [{(int)(radio.SavedBattery * 100)}%]",
+            RadioPickup radio => $"Radio ({itemPickup.Serial.IntToBase32()}) [{(int)(radio.BatteryLevel * 100)}%]",
             not null => $"{itemPickup.Type} ({itemPickup.Serial.IntToBase32()})",
             _ => "Unknown",
         };
@@ -133,7 +131,7 @@ namespace DiscordLog
         }
         public static byte GetMaxAmmo(this Pickup pickup)
         {
-            if (pickup.Base is not FirearmPickup firearm)
+            if (pickup is not FirearmPickup firearm)
                 return 0;
             byte ammo = pickup.Type.GetMaxAmmo();
 
