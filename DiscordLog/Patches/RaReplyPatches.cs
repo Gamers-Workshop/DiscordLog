@@ -182,14 +182,14 @@ namespace DiscordLog.Patches
                 }
                 if (args.ElementAtOrDefault(1)?.Contains('.') ?? false)
                 {
-                    DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à {args.ElementAtOrDefault(0)} ``{Regex.Replace(Extensions.FormatArguments(args, 2), "<[^>]*?>", string.Empty)}``: {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
+                    DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à {args.ElementAtOrDefault(0)} ``{Regex.Replace(Extensions.FormatArguments(args, 2), "<[^>]*?>", string.Empty).DiscordSanitize()}``: {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
                     return;
                 }
-                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{Regex.Replace(query, "<[^>]*?>", string.Empty)}``.\n";
+                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{Regex.Replace(query, "<[^>]*?>", string.Empty).DiscordSanitize()}``.\n";
             }
             catch (Exception ex)
             {
-                Exiled.API.Features.Log.Error($"Error In LogCommand by the command ({query}) and the player [{sender?.Nickname}] : {ex}");
+                Exiled.API.Features.Log.Error($"Error In LogCommand by the command ({query.DiscordSanitize()}) and the player [{sender?.Nickname.DiscordSanitize()}] : {ex}");
             }
         }
 
