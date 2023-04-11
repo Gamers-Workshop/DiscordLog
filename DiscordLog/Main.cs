@@ -119,7 +119,7 @@ namespace DiscordLog
 			PlayerEvents.PreAuthenticating += Handlers.OnPlayerAuth;
 			PlayerEvents.Verified += Handlers.OnPlayerVerified;
 			PlayerEvents.Destroying += Handlers.OnPlayerDestroying;
-			PlayerEvents.ChangingRole += Handlers.OnChangingRole;
+			PlayerEvents.Spawned += Handlers.OnSpawned;
 
 			PlayerEvents.Died += Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem += Handlers.OnDroppingItem;
@@ -172,7 +172,7 @@ namespace DiscordLog
 			PlayerEvents.PreAuthenticating -= Handlers.OnPlayerAuth;
 			PlayerEvents.Verified -= Handlers.OnPlayerVerified;
 			PlayerEvents.Destroying -= Handlers.OnPlayerDestroying;
-			PlayerEvents.ChangingRole -= Handlers.OnChangingRole;
+			PlayerEvents.Spawned -= Handlers.OnSpawned;
 			PlayerEvents.Died -= Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem -= Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem -= Handlers.OnPickingUpItem;

@@ -449,7 +449,7 @@ namespace DiscordLog
                                 new DiscordFiels
                                 {
                                     Name = $"Reason",
-                                    Value = $"``{reason}``",
+                                    Value = $"``{reason.DiscordSanitize()}``",
                                 },
                             },
                             Footer = new DiscordFooter

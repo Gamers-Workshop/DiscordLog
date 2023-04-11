@@ -143,9 +143,13 @@ namespace DiscordLog
             plugin.LOG += $":chart_with_downwards_trend: {Extensions.LogPlayer(ev.Player)} a quitté le serveur. ({Server.PlayerCount - 1}/{Server.MaxPlayerCount})\n";
             plugin.NormalisedName.Remove(ev.Player);
         }
-        public void OnChangingRole(ChangingRoleEventArgs ev)
+        public void OnSpawned(SpawnedEventArgs ev)
         {
-            if (ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart or SpawnReason.Destroyed || !ev.IsAllowed) return;
+            if (ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart or SpawnReason.Destroyed) return;
+            string NewRole = ev.Player.Role.Type.ToString();
+            if (ev.Player.TryGetSessionVariable("NewRole", out Tuple<string, string> NewCustomRole))
+                NewRole = NewCustomRole.Item1;
+
             switch (ev.Reason)
             {
                 case SpawnReason.Escaped:
@@ -153,18 +157,18 @@ namespace DiscordLog
 
                     if (ev.Player.IsCuffed)
                     {
-                        plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Player)} a été escorté en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                        plugin.LOG += $":chains: {Extensions.LogPlayer(ev.Player)} a été escorté en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {NewRole}.\n";
                         return;
                     }
-                    plugin.LOG += $":person_running: {Extensions.LogPlayer(ev.Player)} s'est échapé en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {ev.NewRole}.\n";
+                    plugin.LOG += $":person_running: {Extensions.LogPlayer(ev.Player)} s'est échapé en {TimeAlive / 60:00}:{TimeAlive % 60:00}. Il est devenu : {NewRole}.\n";
                     return;
 
                 case SpawnReason.Respawn:
-                    plugin.LOG += $"    - {Extensions.LogPlayer(ev.Player)} a spawn en tant que : {ev.NewRole}.\n";
+                    plugin.LOG += $"    - {Extensions.LogPlayer(ev.Player)} a spawn en tant que : {NewRole}.\n";
                     return;
 
             }
-            plugin.LOG += $":new: {Extensions.LogPlayer(ev.Player)} a spawn car {ev.Reason} en tant que : {ev.NewRole}.\n";
+            plugin.LOG += $":new: {Extensions.LogPlayer(ev.Player)} a spawn car {ev.Reason} en tant que : {NewRole}.\n";
         }
 
         public void OnPlayerDeath(DiedEventArgs ev)
