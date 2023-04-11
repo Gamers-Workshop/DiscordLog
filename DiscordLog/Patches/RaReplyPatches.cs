@@ -156,6 +156,21 @@ namespace DiscordLog.Patches
                             }
                         }
                         break;
+                    case "god":
+                        {
+                            string Receiver = LogPlayerFromCommand(args.ElementAtOrDefault(1));
+                            if (args.ElementAtOrDefault(2) is "0")
+                            {
+                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à enlever le godmod : {Receiver}\n";
+                                return;
+                            }
+                            if (args.ElementAtOrDefault(2) is "1")
+                            {
+                                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à mis le godmod : {Receiver}\n";
+                                return;
+                            }
+                        }
+                        break;
                     case "bring":
                         {
                             DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à tp les joueurs sur lui : {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
