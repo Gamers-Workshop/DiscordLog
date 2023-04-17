@@ -27,6 +27,7 @@ using System.Text;
 using LightContainmentZoneDecontamination;
 using UnityEngine;
 using Respawning;
+using Interactables.Interobjects;
 
 namespace DiscordLog
 {
@@ -124,7 +125,8 @@ namespace DiscordLog
 			PlayerEvents.Died += Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem += Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem += Handlers.OnPickingUpItem;
-			Scp330Events.DroppingScp330 += Handlers.OnDroppingUpScp330;
+            PlayerEvents.InteractingElevator += Handlers.OnInteractingElevator;
+            Scp330Events.DroppingScp330 += Handlers.OnDroppingUpScp330;
 			Scp330Events.EatenScp330 += Handlers.OnEatenScp330;
 			Scp330Events.InteractingScp330 += Handlers.OnInteractingScp330;
 			Scp244Events.OpeningScp244 += Handlers.OnOpeningScp244;
@@ -143,7 +145,9 @@ namespace DiscordLog
 
 			PlayerEvents.EnteringPocketDimension += Handlers.OnEnteringPocketDimension;
 			PlayerEvents.EscapingPocketDimension += Handlers.OnEscapingPocketDimension;
-			Scp914Events.Activating += Handlers.On914Activating;
+			ElevatorChamber.OnElevatorMoved += Handlers.OnElevatorMoved;
+
+            Scp914Events.Activating += Handlers.On914Activating;
 			Scp049Events.FinishingRecall += Handlers.OnFinishingRecall;
 
 			//LogStaff
@@ -176,6 +180,7 @@ namespace DiscordLog
 			PlayerEvents.Died -= Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem -= Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem -= Handlers.OnPickingUpItem;
+			PlayerEvents.InteractingElevator -= Handlers.OnInteractingElevator;
 			Scp330Events.DroppingScp330 -= Handlers.OnDroppingUpScp330;
 			Scp330Events.EatenScp330 -= Handlers.OnEatenScp330;
 			Scp330Events.InteractingScp330 -= Handlers.OnInteractingScp330;

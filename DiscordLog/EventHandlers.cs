@@ -11,6 +11,7 @@ using Exiled.Events.EventArgs.Scp914;
 using Exiled.Events.EventArgs.Server;
 using Exiled.Events.EventArgs.Warhead;
 using GameCore;
+using Interactables.Interobjects;
 using InventorySystem.Items.Usables.Scp330;
 using MEC;
 using PlayerRoles;
@@ -20,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using UnityEngine;
 using static System.Net.Mime.MediaTypeNames;
 using Log = Exiled.API.Features.Log;
 using Scp330Pickup = Exiled.API.Features.Pickups.Scp330Pickup;
@@ -33,12 +35,15 @@ namespace DiscordLog
         private static readonly Dictionary<string, string> SteamNickName = new();
         private Player IntercomPlayerSpeek;
         public static Player Use914;
+        public static Dictionary<Lift,Player> UseElevator = new();
+
         public EventHandlers(DiscordLog plugin) => this.plugin = plugin;
         public void OnWaintingForPlayers()
         {
             foreach (CoroutineHandle handle in Coroutines)
                 Timing.KillCoroutines(handle);
             plugin.NormalisedName.Clear();
+            UseElevator.Clear();
             if (!string.IsNullOrWhiteSpace(DiscordLog.Instance.Config.WebhookUrlLogError))
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunSendLogError()));
             if (!string.IsNullOrWhiteSpace(DiscordLog.Instance.Config.WebhookUrlLogJoueur))
@@ -229,6 +234,12 @@ namespace DiscordLog
         
             plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré {Extensions.LogPickup(ev.Pickup)}.\n";
         }
+        public void OnInteractingElevator(InteractingElevatorEventArgs ev)
+        {
+            if (!ev.IsAllowed)
+                return;
+            UseElevator.Add(ev.Lift, ev.Player);
+        }
         public void OnDroppingUpScp330(DroppingScp330EventArgs ev)
         {
             if (!ev.IsAllowed)
@@ -361,6 +372,19 @@ namespace DiscordLog
         {
             if (ev.IsAllowed)
                 plugin.LOG += $":hole: {Extensions.LogPlayer(ev.Player)} a échappé a la dimension de poche.\n";
+        }
+        public void OnElevatorMoved(Bounds elevatorBounds, ElevatorChamber chamb, Vector3 deltaPos, Quaternion deltaRot)
+        {
+            Lift lift = Lift.Get(chamb);
+            if (!UseElevator.TryGetValue(lift, out Player User))
+                return;
+
+            plugin.LOG += $":elevator: {Extensions.LogPlayer(User)} a activé l'ascenseur {lift.Type} :\n";
+            foreach (Player player in Player.List.Where(x => elevatorBounds.Contains(x.Position)))
+            {
+                plugin.LOG += $"    - {Extensions.LogPlayer(player)}\n";
+            }
+            UseElevator.Remove(lift);
         }
         public void On914Activating(ActivatingEventArgs ev)
         {
