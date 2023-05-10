@@ -19,7 +19,6 @@ using System.IO;
 using MEC;
 using System.Linq;
 using DiscordWebhookData;
-using FMOD.Studio;
 using PlayerRoles;
 using GameCore;
 using Log = Exiled.API.Features.Log;
