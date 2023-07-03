@@ -53,14 +53,14 @@ namespace DiscordLog
             if (!string.IsNullOrWhiteSpace(DiscordLog.Instance.Config.WebhookSi) && !string.IsNullOrWhiteSpace(DiscordLog.Instance.Config.IdMessage))
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunUpdateWebhook(), Segment.RealtimeUpdate));
             plugin.LOG += ":zzz: En attente de joueurs...\n";
-            plugin.LOGStaff += $"Server Start \nExiled Version {Exiled.Loader.Loader.Version} | SCP:SL Version {Server.Version} | Seed {Map.Seed}";
+            plugin.LOGStaff += $"Server Start \nExiled Version {Exiled.Loader.Loader.Version} | SCP:SL Version {Server.Version} | Seed {Map.Seed}\n";
         }
         public void OnRoundStart()
         {
             plugin.LOG += $":triangular_flag_on_post: Démarrage de la partie avec ({Server.PlayerCount}) joueurs.\n";
             foreach (Player player in Player.List.OrderBy(x => x.Role.Team))
             {
-                plugin.LOG += $"    - {Extensions.LogPlayer(player)} a spawn en tant que : {player.Role.Type}.\n";
+                plugin.LOG += $"- {Extensions.LogPlayer(player)} a spawn en tant que : {player.Role.Type}.\n";
             }
         }
         public void OnRoundEnd(RoundEndedEventArgs ev)
@@ -169,7 +169,7 @@ namespace DiscordLog
                     return;
 
                 case SpawnReason.Respawn:
-                    plugin.LOG += $"    - {Extensions.LogPlayer(ev.Player)} a spawn en tant que : {NewRole}.\n";
+                    plugin.LOG += $"- {Extensions.LogPlayer(ev.Player)} a spawn en tant que : {NewRole}.\n";
                     return;
 
             }
@@ -210,7 +210,7 @@ namespace DiscordLog
                 string objcontent = $":outbox_tray: {Extensions.LogPlayer(ev.Player)} a jeté SCP330:\n";
                 foreach (CandyKindID candy in scp330.Candies)
                 {
-                    objcontent += $"  - {candy}\n";
+                    objcontent += $"- {candy}\n";
                 }
                 plugin.LOG += objcontent;
                 return;
@@ -227,7 +227,7 @@ namespace DiscordLog
                 plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a récupéré ses bonbon :\n";
                 foreach (CandyKindID Candy in scp330.Candies)
                 {
-                    plugin.LOG += $"  - {Candy}\n";
+                    plugin.LOG += $"- {Candy}\n";
                 }
                 return;
             }
@@ -291,6 +291,7 @@ namespace DiscordLog
                 ItemType.SCP268 => $"<:Chepeaux:697574292140982313> {Extensions.LogPlayer(ev.Player)} a utilisé SCP268.\n",
                 ItemType.SCP1853 => $"<:Scp1853:963526275216064572> {Extensions.LogPlayer(ev.Player)} a utilisé SCP1853.\n",
                 ItemType.SCP1576 => $"<:SCP1576:1069063548489191568> {Extensions.LogPlayer(ev.Player)} a utilisé SCP1576.\n",
+                ItemType.AntiSCP207 => $"<:AntiScp207:1105995358523363370> {Extensions.LogPlayer(ev.Player)} a utilisé AntiSCP207.\n",
                 _ => $":??: {Extensions.LogPlayer(ev.Player)} a utilisé {ev.Item.Type}.\n",
             };
         }
@@ -382,7 +383,7 @@ namespace DiscordLog
             plugin.LOG += $":elevator: {Extensions.LogPlayer(User)} a activé l'ascenseur {lift.Type} :\n";
             foreach (Player player in Player.List.Where(x => elevatorBounds.Contains(x.Position)))
             {
-                plugin.LOG += $"    - {Extensions.LogPlayer(player)}\n";
+                plugin.LOG += $"- {Extensions.LogPlayer(player)}\n";
             }
             UseElevator.Remove(lift);
         }

@@ -40,7 +40,7 @@ namespace DiscordLog
             discordWWW.method = method;
             discordWWW.SetRequestHeader("Content-Type", "application/json");
             yield return Timing.WaitUntilDone(discordWWW.SendWebRequest());
-            if (discordWWW.isHttpError || discordWWW.isNetworkError)
+            if (discordWWW.result is UnityWebRequest.Result.ProtocolError or UnityWebRequest.Result.DataProcessingError)
             {
                 Log.Warn(
                 $"link {link}\n" +
@@ -449,7 +449,7 @@ namespace DiscordLog
                                 new DiscordFiels
                                 {
                                     Name = $"Reason",
-                                    Value = $"``{reason.DiscordSanitize()}``",
+                                    Value = $"``{reason.DiscordLightSanitize()}``",
                                 },
                             },
                             Footer = new DiscordFooter

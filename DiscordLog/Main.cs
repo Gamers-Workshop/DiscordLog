@@ -38,8 +38,6 @@ namespace DiscordLog
 		public override PluginPriority Priority => PluginPriority.Lowest;
 		public static DiscordLog Instance { get; private set; }
 		public EventHandlers Handlers { get; private set; }
-
-		public DiscordLog() => Instance = this;
 		public Harmony Harmony { get; private set; }
 		public string LOG = null;
 		public string LOGStaff = null;
@@ -53,9 +51,9 @@ namespace DiscordLog
 
 		public override void OnEnabled()
 		{
-			if (!Config.IsEnabled) return;
+            Instance = this;
 
-			base.OnEnabled();
+            base.OnEnabled();
 
 			RegistEvents();
 
@@ -200,7 +198,8 @@ namespace DiscordLog
 
 			PlayerEvents.EnteringPocketDimension -= Handlers.OnEnteringPocketDimension;
 			PlayerEvents.EscapingPocketDimension -= Handlers.OnEscapingPocketDimension;
-			Scp914Events.Activating -= Handlers.On914Activating;
+            ElevatorChamber.OnElevatorMoved -= Handlers.OnElevatorMoved;
+            Scp914Events.Activating -= Handlers.On914Activating;
 
 			Scp049Events.FinishingRecall -= Handlers.OnFinishingRecall;
 
@@ -464,7 +463,9 @@ namespace DiscordLog
                 Value = $"Décontamination : {(Round.IsStarted ? (!DecontaminationController.Singleton._decontaminationBegun ? $"{DécontaminationTime / 60:00}:{DécontaminationTime % 60:00}" : "Effectué") : "En Attente")}\n" +
                 $"Warhead : {(Warhead.IsInProgress ? $"{TimeWarhead / 60:00}:{TimeWarhead % 60:00}" : (AlphaWarheadOutsitePanel.nukeside.Networkenabled ? "PRÊTE" : "DÉSACTIVÉE"))}\n" +
                 $"Générateur : {Mathf.CeilToInt(totalvoltagefloat)}/3\n" +
-                $"Respawn {Respawn.NextKnownTeam} : {Respawn.TimeUntilSpawnWave.Minutes:00}:{Respawn.TimeUntilSpawnWave.Seconds:00}",
+                $"Respawn {Respawn.NextKnownTeam} : {Respawn.TimeUntilSpawnWave.Minutes:00}:{Respawn.TimeUntilSpawnWave.Seconds:00}\n" +
+				$"TPS: {Server.Tps}\n" +
+				$"Ping: {Player.List.OrderBy(x => x.Ping).FirstOrDefault()?.Ping * 2}",
                 Inline = false,
             };
             Webhook.UpdateServerInfoStaffAsync(PlayerConnected, RoundInfo, DiscordPlayerName, PlayerRole, FacilityInfo);

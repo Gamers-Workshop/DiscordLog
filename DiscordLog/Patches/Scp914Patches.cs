@@ -80,15 +80,15 @@ namespace DiscordLog.Patches
                         str += $"**Item{((PickupTypes.Count() + ItemTypes.Count()) > 1 ? "s" : "")}**\n";
                         foreach (var item in PickupTypes.OrderBy(x => x.Type))
                             if (!ItemExtensions.IsAmmo(item.Type))
-                                str += $"   - {Extensions.LogPickup(item)}\n";
+                                str += $"- {Extensions.LogPickup(item)}\n";
                         foreach (var item in ItemTypes)
-                            str += $"   - {Extensions.LogItem(item)}\n";
+                            str += $"- {Extensions.LogItem(item)}\n";
                     }
                     if (Players.Any())
                     {
                         str += $"**Joueur{(Players.Count() > 1 ? "s" : "")}**\n";
                         foreach (Player player in Players)
-                            str += $"   - {Extensions.LogPlayer(player)}\n";
+                            str += $"- {Extensions.LogPlayer(player)}\n";
                     }
                     EventHandlers.Use914 = null;
                     DiscordLog.Instance.LOG += str;

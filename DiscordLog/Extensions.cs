@@ -16,6 +16,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 using Firearm = Exiled.API.Features.Items.Firearm;
 using FirearmPickup = Exiled.API.Features.Pickups.FirearmPickup;
 
@@ -25,22 +26,22 @@ namespace DiscordLog
     {
         public static string LogItem(Item item) => item switch
         {
-            Firearm firearm => $"{item.Type} ({item.Serial.IntToBase32()}) [{firearm.Ammo}/{firearm.MaxAmmo}]",
-            MicroHid microhid => $"MicroHID ({item.Serial.IntToBase32()}) [{(int)(microhid.Energy * 100)}%]",
-            Radio radio => $"Radio ({item.Serial.IntToBase32()}) [{radio.BatteryLevel}%]",
-            not null => $"{item.Type} ({item.Serial.IntToBase32()})",
+            Firearm firearm => $"{item.Type} ({item.SerialToBase32()}) [{firearm.Ammo}/{firearm.MaxAmmo}]",
+            MicroHid microhid => $"MicroHID ({item.SerialToBase32()}) [{(int)(microhid.Energy * 100)}%]",
+            Radio radio => $"Radio ({item.SerialToBase32()}) [{radio.BatteryLevel}%]",
+            not null => $"{item.Type} ({item.SerialToBase32()})",
             _ => "Unknown"
         };
         public static string LogPickup(Pickup itemPickup) => itemPickup switch
         {
-            FirearmPickup firearm => $"{itemPickup.Type} ({itemPickup.Serial.IntToBase32()}) {(firearm.IsDistributed ? $"[{itemPickup.GetMaxAmmo()}/{itemPickup.GetMaxAmmo()}]" : $"[{firearm.Status.Ammo}/{itemPickup.GetMaxAmmo()}]")}",
-            MicroHIDPickup microhid => $"MicroHID ({itemPickup.Serial.IntToBase32()}) [{(int)(microhid.Energy * 100)}%]",
-            RadioPickup radio => $"Radio ({itemPickup.Serial.IntToBase32()}) [{(int)(radio.BatteryLevel * 100)}%]",
-            not null => $"{itemPickup.Type} ({itemPickup.Serial.IntToBase32()})",
+            FirearmPickup firearm => $"{itemPickup.Type} ({itemPickup.SerialToBase32()}) {(firearm.IsDistributed ? $"[{itemPickup.GetMaxAmmo()}/{itemPickup.GetMaxAmmo()}]" : $"[{firearm.Status.Ammo}/{itemPickup.GetMaxAmmo()}]")}",
+            MicroHIDPickup microhid => $"MicroHID ({itemPickup.SerialToBase32()}) [{(int)(microhid.Energy * 100)}%]",
+            RadioPickup radio => $"Radio ({itemPickup.SerialToBase32()}) [{(int)(radio.BatteryLevel * 100)}%]",
+            not null => $"{itemPickup.Type} ({itemPickup.SerialToBase32()})",
             _ => "Unknown",
         };
         public static string LogPlayer(Player player) => player is null ? $"``Unknown`` (Unknown)" :
-            $"``{player.Nickname.DiscordSanitize()}`` ({(player.DoNotTrack ? $"||{ConvertID(player.UserId)}||" : ConvertID(player.UserId))})";
+            $"``{player.Nickname.DiscordLightSanitize()}`` ({(player.DoNotTrack ? $"||{ConvertID(player.UserId)}||" : ConvertID(player.UserId))})";
         public static string ConvertID(string UserID)
         {
             if (string.IsNullOrEmpty(UserID)) return string.Empty;
@@ -87,10 +88,21 @@ namespace DiscordLog
 
             return "Unknown (API Key Not valid)";
         }
-        public static string DiscordSanitize(this string text) => Regex.Replace(text, @"(<|>|`|~~|\*|_)", m => "\\" + m.Value);
+        public static string SecureRegex(string input, string patern, MatchEvaluator evaluator) => !string.IsNullOrWhiteSpace(input) ? Regex.Replace(input, patern, evaluator) : string.Empty;
+        public static string SecureRegex(string input, string patern, string replacement) => !string.IsNullOrWhiteSpace(input) ? Regex.Replace(input, patern, replacement) : string.Empty;
 
-        static string IntToBase32(this ushort input)
+        public static string DiscordSanitize(this string text) => SecureRegex(text, @"(<|>|`|~~|\*|_)", m => "\\" + m.Value);
+        public static string DiscordLightSanitize(this string text) => SecureRegex(text, @"(`)", m => string.Empty);
+
+        static string SerialToBase32(this object custom)
         {
+            ushort input = custom switch
+            {
+                ushort @ushort => @ushort,
+                Item item => item.Serial is 0 ? (item.Serial = ItemSerialGenerator.GenerateNext()) : item.Serial,
+                Pickup pickup => pickup.Serial is 0 ? (pickup.Serial = ItemSerialGenerator.GenerateNext()) : pickup.Serial,
+                _ => 0
+            };
             const string CrockfordBase32Alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
             string result = string.Empty;
 

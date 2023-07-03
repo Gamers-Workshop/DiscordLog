@@ -197,10 +197,10 @@ namespace DiscordLog.Patches
                 }
                 if (args.ElementAtOrDefault(1)?.Contains('.') ?? false)
                 {
-                    DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à {args.ElementAtOrDefault(0)} ``{Regex.Replace(Extensions.FormatArguments(args, 2), "<[^>]*?>", string.Empty).DiscordSanitize()}``: {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
+                    DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à {args.ElementAtOrDefault(0)} ``{Extensions.SecureRegex(Extensions.FormatArguments(args, 2), "<[^>]*?>", string.Empty).DiscordLightSanitize()}``: {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
                     return;
                 }
-                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{Regex.Replace(query, "<[^>]*?>", string.Empty).DiscordSanitize()}``.\n";
+                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{Extensions.SecureRegex(query, "<[^>]*?>", string.Empty).DiscordLightSanitize()}``.\n";
             }
             catch (Exception ex)
             {
@@ -212,16 +212,19 @@ namespace DiscordLog.Patches
         {
             string Receiver = string.Empty;
             List<Player> PlyList = new();
-            foreach (string s in Users?.Split('.'))
+            if (!string.IsNullOrWhiteSpace(Users))
             {
-                if (int.TryParse(s, out int id) && Player.TryGet(id, out Player player))
-                    PlyList.Add(player);
-                else if (Player.TryGet(s, out player))
-                    PlyList.Add(player);
-            }
-            foreach (Player ply in PlyList)
-            {
-                Receiver += $"\n - {Extensions.LogPlayer(ply)}";
+                foreach (string s in Users.Split('.'))
+                {
+                    if (int.TryParse(s, out int id) && Player.TryGet(id, out Player player))
+                        PlyList.Add(player);
+                    else if (Player.TryGet(s, out player))
+                        PlyList.Add(player);
+                }
+                foreach (Player ply in PlyList)
+                {
+                    Receiver += $"\n- {Extensions.LogPlayer(ply)}";
+                }
             }
             return Receiver;
         }
