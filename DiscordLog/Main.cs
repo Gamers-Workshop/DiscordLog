@@ -148,7 +148,6 @@ namespace DiscordLog
 			Scp049Events.FinishingRecall += Handlers.OnFinishingRecall;
 
 			//LogStaff
-			PlayerEvents.Banning += Handlers.OnBanning;
 			PlayerEvents.Kicking += Handlers.OnKicking;
 			PlayerEvents.Banned += Handlers.OnBanned;
 			//PingStaff
@@ -204,7 +203,6 @@ namespace DiscordLog
 			Scp049Events.FinishingRecall -= Handlers.OnFinishingRecall;
 
 			//LogStaff
-			PlayerEvents.Banning -= Handlers.OnBanning;
 			PlayerEvents.Kicking -= Handlers.OnKicking;
 			PlayerEvents.Banned -= Handlers.OnBanned;
 

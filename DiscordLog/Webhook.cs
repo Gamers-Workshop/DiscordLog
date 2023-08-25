@@ -115,8 +115,9 @@ namespace DiscordLog
                 },
                 SerialiseSetting).Replace("null,", string.Empty))));
         }
-        public static void BanPlayerAsync(Player player, Player sanctioned, string reason, long Duration)
+        public static void BanPlayerAsync(Player player, Player sanctioned, BanDetails banDetails)
         {
+            var duration = new DateTime(banDetails.Expires) - new DateTime(banDetails.IssuanceTime);
             EventHandlers.Coroutines.Add(
                 Timing.RunCoroutine(
                 SendWebhookInformationDiscord(
@@ -143,14 +144,14 @@ namespace DiscordLog
                                     new DiscordFiels
                                     {
                                         Name = $"Raison",
-                                        Value = $"``{reason}``",
+                                        Value = $"``{banDetails.Reason}``",
                                     },
                                     new DiscordFiels
                                     {
                                         Name = $"Détail sanction",
-                                        Value = $"Le    : <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}>\n" +
-                                                $"Durée : {(Duration < 31536000 ? TimeSpan.FromSeconds(Duration).ToString("%d'd. '%h'h. '%m'min.'") : $"{Duration/31536000} ans")}\n" +
-                                                $"Unban : <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}> -> <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}:R>",
+                                        Value = $"Le    : <t:{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}>\n" +
+                                                $"Durée : {((int)(duration.TotalDays / 365) > 0 ? $"{(int)(duration.TotalDays / 365)}y " : "")}{((int)(duration.TotalDays % 365) > 0 ? $"{(int)(duration.TotalDays % 365)}d " : "")}{((int)(duration).TotalHours % 24 > 0 ? $"{(int)duration.TotalHours % 24}h " : "")}{((int)(duration).TotalMinutes % 60 > 0 ? $"{(int)duration.TotalMinutes % 60}min" : "")}\n" +
+                                                $"Unban : <t:{banDetails.Expires / 10000000L - 62135596800L}> -> <t:{banDetails.Expires / 10000000L - 62135596800L}:R>",
                                     },
                                 },
                                 Footer = new DiscordFooter
@@ -163,8 +164,14 @@ namespace DiscordLog
                         }
                     },SerialiseSetting))));
         }
-        public static void OBanPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, string reason, long Duration)
+        public static IEnumerator<float> OBanPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, BanDetails banDetails)
         {
+            if (sanctionedUserId.EndsWith("@steam"))
+            {
+                sanctionedNickname = Extensions.GetUserName(sanctionedUserId);
+            }
+
+            var duration = new DateTime(banDetails.Expires) - new DateTime(banDetails.IssuanceTime);
             EventHandlers.Coroutines.Add(
                 Timing.RunCoroutine(
                 SendWebhookInformationDiscord(
@@ -191,14 +198,14 @@ namespace DiscordLog
                                     new DiscordFiels
                                     {
                                         Name = $"Raison",
-                                        Value = $"``{reason}``",
+                                        Value = $"``{banDetails.Reason}``",
                                     },
                                     new DiscordFiels
                                     {
                                         Name = $"Détail sanction",
-                                        Value = $"Le    : <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}>\n" +
-                                                $"Durée : {(Duration < 31536000 ? TimeSpan.FromSeconds(Duration).ToString("%d'd. '%h'h. '%m'min.'") : $"{Duration/31536000} ans")}\n" +
-                                                $"Unban : <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}> -> <t:{DateTimeOffset.Now.AddSeconds(Duration).ToUnixTimeSeconds()}:R>",
+                                        Value = $"Le    : <t:{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}>\n" +
+                                                $"Durée : {((int)(duration.TotalDays / 365) > 0 ? $"{(int)(duration.TotalDays / 365)}y " : "")}{((int)(duration.TotalDays % 365) > 0 ? $"{(int)(duration.TotalDays % 365)}d " : "")}{((int)(duration).TotalHours % 24 > 0 ? $"{(int)duration.TotalHours % 24}h " : "")}{((int)(duration).TotalMinutes % 60 > 0 ? $"{(int)duration.TotalMinutes % 60}min" : "")}\n" +
+                                                $"Unban : <t:{banDetails.Expires / 10000000L - 62135596800L}> -> <t:{banDetails.Expires / 10000000L - 62135596800L}:R>",
                                     },
                                 },
                                 Footer = new DiscordFooter
@@ -209,7 +216,8 @@ namespace DiscordLog
                                 Timestamp = DateTime.Now,
                             },
                         }
-                    },SerialiseSetting))));
+                    }, SerialiseSetting))));
+            yield return Timing.WaitForOneFrame;
         }
         public static void KickPlayerAsync(Player player, Player sanctioned, string reason)
         {

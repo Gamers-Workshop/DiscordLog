@@ -1,4 +1,5 @@
-﻿using Exiled.API.Enums;
+﻿using DiscordLog.Command.Warn;
+using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
@@ -32,7 +33,7 @@ namespace DiscordLog
     {
         internal readonly DiscordLog plugin;
         public static List<CoroutineHandle> Coroutines = new();
-        private static readonly Dictionary<string, string> SteamNickName = new();
+        internal static readonly Dictionary<string, string> SteamNickName = new();
         private Player IntercomPlayerSpeek;
         public static Player Use914;
         public static Dictionary<Lift,Player> UseElevator = new();
@@ -117,22 +118,18 @@ namespace DiscordLog
         }
         public void OnPlayerAuth(PreAuthenticatingEventArgs ev)
         {
-            if (ev.UserId.EndsWith("@steam"))
+            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
             {
-                if (SteamNickName.TryGetValue(ev.UserId, out string NickName))
+                if (ev.UserId.EndsWith("@steam"))
                 {
+                    string NickName = Extensions.GetUserName(ev.UserId.Replace("@steam", string.Empty));
                     plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: ``{NickName}`` ({Extensions.ConvertID(ev.UserId)}) ||{ev.IpAddress}|| tente une connexion sur le serveur.\n";
                     plugin.LOG += $":flag_{ev.Country.ToLower()}: ``{NickName}`` ({Extensions.ConvertID(ev.UserId)}) tente une connexion sur le serveur.\n";
                     return;
                 }
-                NickName = Extensions.GetUserName(ev.UserId.Replace("@steam", string.Empty));
-                SteamNickName.Add(ev.UserId, NickName);
-                plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: ``{NickName}`` ({Extensions.ConvertID(ev.UserId)}) ||{ev.IpAddress}|| tente une connexion sur le serveur.\n";
-                plugin.LOG += $":flag_{ev.Country.ToLower()}: ``{NickName}`` ({Extensions.ConvertID(ev.UserId)}) tente une connexion sur le serveur.\n";
-                return;
-            }
-            plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: ({Extensions.ConvertID(ev.UserId)}) ||{ev.IpAddress}|| tente une connexion sur le serveur.\n";
-            plugin.LOG += $":flag_{ev.Country.ToLower()}: ({Extensions.ConvertID(ev.UserId)}) tente une connexion sur le serveur.\n";
+                plugin.LOGStaff += $":flag_{ev.Country.ToLower()}: ({Extensions.ConvertID(ev.UserId)}) ||{ev.IpAddress}|| tente une connexion sur le serveur.\n";
+                plugin.LOG += $":flag_{ev.Country.ToLower()}: ({Extensions.ConvertID(ev.UserId)}) tente une connexion sur le serveur.\n";
+            });
         }
         public void OnPlayerVerified(VerifiedEventArgs ev)
         {
@@ -150,7 +147,7 @@ namespace DiscordLog
         }
         public void OnSpawned(SpawnedEventArgs ev)
         {
-            if (ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart or SpawnReason.Destroyed) return;
+            if (ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart or SpawnReason.Destroyed || Round.IsLobby) return;
             string NewRole = ev.Player.Role.Type.ToString();
             if (ev.Player.TryGetSessionVariable("NewRole", out Tuple<string, string> NewCustomRole))
                 NewRole = NewCustomRole.Item1;
@@ -174,10 +171,17 @@ namespace DiscordLog
 
             }
             plugin.LOG += $":new: {Extensions.LogPlayer(ev.Player)} a spawn car {ev.Reason} en tant que : {NewRole}.\n";
+            
+            if (ev.Reason is SpawnReason.LateJoin && ev.Player.Role.Type is RoleTypeId.Scp0492)
+            {
+                Webhook.WarnPlayerAsync(Server.Host, ev.Player, "AutoWarn - Déco rejoin en Scp-049-2");
+            }
         }
 
         public void OnPlayerDeath(DiedEventArgs ev)
         {
+            if (Round.IsLobby)
+                return;
             if (ev.DamageHandler.Type is DamageType.Unknown)
             {
                 Log.Error($"Damage Unknown Trigger {ev.DamageHandler.Base} {ev.Attacker?.CurrentItem?.Type}");
@@ -189,7 +193,7 @@ namespace DiscordLog
             if (ev.DamageHandler.Type is DamageType.Custom && ev.DamageHandler.Base is CustomReasonDamageHandler customReason)
             {
                 DamageString = customReason.ServerLogsText.Remove(0, 30);
-                if (DamageString is "Disconect")
+                if (DamageString is "Disconnect")
                     return;
             }
 
@@ -202,7 +206,7 @@ namespace DiscordLog
         }
         public void OnDroppingItem(DroppingItemEventArgs ev)
         {
-            if (!ev.IsAllowed)
+            if (!ev.IsAllowed || Round.IsLobby)
                 return;
 
             if (ev.Item is Scp330 scp330)
@@ -219,7 +223,7 @@ namespace DiscordLog
         }
         public void OnPickingUpItem(PickingUpItemEventArgs ev)
         {
-            if (!ev.IsAllowed || ev.Pickup.Type.IsAmmo())
+            if (!ev.IsAllowed || ev.Pickup.Type.IsAmmo() || Round.IsLobby)
                 return;
 
             if (ev.Pickup is Scp330Pickup scp330)
@@ -242,7 +246,7 @@ namespace DiscordLog
         }
         public void OnDroppingUpScp330(DroppingScp330EventArgs ev)
         {
-            if (!ev.IsAllowed)
+            if (!ev.IsAllowed || Round.IsLobby)
                 return;
 
             plugin.LOG += $":inbox_tray: {Extensions.LogPlayer(ev.Player)} a jeté un bonbon : {ev.Candy}\n";
@@ -280,6 +284,8 @@ namespace DiscordLog
         }
         public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
+            if (Round.IsLobby)
+                return;
             if (ItemExtensions.IsMedical(ev.Item.Type))
             {
                 plugin.LOG += $":adhesive_bandage: {Extensions.LogPlayer(ev.Player)} s'est soigné avec {ev.Item.Type}.\n";
@@ -398,25 +404,6 @@ namespace DiscordLog
             if (ev.IsAllowed)
                 plugin.LOG += $":zombie: {Extensions.LogPlayer(ev.Target)} a été ressuscité en Scp049-2 par {Extensions.LogPlayer(ev.Player)}.\n";
         }
-        public void OnBanning(BanningEventArgs ev)
-        {
-            if (!ev.IsAllowed) 
-                return;
-            if (ev.Target != null)
-            {
-                BanHandler.IssueBan(new BanDetails
-                {
-                    OriginalName = ev.Target.Sender.LogName,
-                    Id = ev.Target.Connection.address,
-                    IssuanceTime = TimeBehaviour.CurrentTimestamp(),
-                    Expires = ev.Duration,
-                    Reason = ev.Reason,
-                    Issuer = ev.Player.Sender.LogName
-                }, BanHandler.BanType.IP, false);
-            }
-            Webhook.BanPlayerAsync(ev.Player, ev.Target, ev.Reason, ev.Duration);
-            plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Reason}`` ; pendant {ev.Duration} secondes par {Extensions.LogPlayer(ev.Player)}.\n";
-        }
         public void OnKicking(KickingEventArgs ev)
         {
             if (!ev.IsAllowed) 
@@ -427,18 +414,19 @@ namespace DiscordLog
         }
         public void OnBanned(BannedEventArgs ev)
         {
-            if (ev.Details.OriginalName != "Unknown - offline ban") 
+            if (!ev.Details.Id.Contains('@'))
                 return;
 
-            string TargetNick = "Unknown";
-            if (ev.Details.Id.EndsWith("@steam"))
+            if (ev.Details.OriginalName != "Unknown - offline ban")
             {
-                TargetNick = Extensions.GetUserName(ev.Details.Id);
+                Webhook.BanPlayerAsync(ev.Player, ev.Target, ev.Details);
+                plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
+                return;
             }
-            plugin.LOGStaff += $":hammer: ``{TargetNick}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
 
-            Webhook.OBanPlayerAsync(ev.Player, TargetNick, ev.Details.Id, ev.Details.Reason,
-            long.TryParse(TimeSpan.FromTicks(ev.Details.Expires - ev.Details.IssuanceTime).TotalSeconds.ToString(CultureInfo.InvariantCulture), out long timelong) ? timelong : -1);
+            plugin.LOGStaff += $":hammer: ``{ev.Details.OriginalName}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
+
+            Coroutines.Add(Timing.RunCoroutine(Webhook.OBanPlayerAsync(ev.Player, ev.Details.OriginalName, ev.Details.Id, ev.Details)));
         }
     }
 }

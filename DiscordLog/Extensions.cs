@@ -69,6 +69,9 @@ namespace DiscordLog
         }
         public static string GetUserName(string userid)
         {
+            if (EventHandlers.SteamNickName.TryGetValue(userid, out string NickName))
+                return NickName;
+        
             try
             {
                 //013D09D43A87F1D90ED3BEAA19BFCF98 -> Steam Api key to get the nickname of obanned users (Get your api key in https://steamcommunity.com/dev/apikey)
@@ -79,7 +82,9 @@ namespace DiscordLog
 
                 using StreamReader streamReader = new(httpResponse.GetResponseStream());
                 string result = streamReader.ReadToEnd();
-                return Regex.Match(result, @"\x22personaname\x22:\x22(.+?)\x22").Groups[1].Value;
+                result = Regex.Match(result, @"\x22personaname\x22:\x22(.+?)\x22").Groups[1].Value;
+                EventHandlers.SteamNickName.Add(userid, result);
+                return result;
             }
             catch (Exception)
             {
