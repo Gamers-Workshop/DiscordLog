@@ -112,7 +112,7 @@ namespace DiscordLog
 			WarheadEvents.Detonated += Handlers.OnDetonated;
 
 			MapEvents.Decontaminating += Handlers.OnDecontaminating;
-			MapEvents.GeneratorActivated += Handlers.OnGeneratorFinish;
+			MapEvents.GeneratorActivating += Handlers.OnGeneratorFinish;
 
 			PlayerEvents.PreAuthenticating += Handlers.OnPlayerAuth;
 			PlayerEvents.Verified += Handlers.OnPlayerVerified;
@@ -167,7 +167,7 @@ namespace DiscordLog
 			WarheadEvents.Detonated -= Handlers.OnDetonated;
 
 			MapEvents.Decontaminating -= Handlers.OnDecontaminating;
-			MapEvents.GeneratorActivated -= Handlers.OnGeneratorFinish;
+			MapEvents.GeneratorActivating -= Handlers.OnGeneratorFinish;
 
 			PlayerEvents.PreAuthenticating -= Handlers.OnPlayerAuth;
 			PlayerEvents.Verified -= Handlers.OnPlayerVerified;

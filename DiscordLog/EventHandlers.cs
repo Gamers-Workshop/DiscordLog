@@ -110,7 +110,7 @@ namespace DiscordLog
                 return;
             plugin.LOG += ":biohazard: Décontamination de la LCZ.\n";
         }
-        public void OnGeneratorFinish(GeneratorActivatedEventArgs ev)
+        public void OnGeneratorFinish(GeneratorActivatingEventArgs ev)
         {
             if (!ev.IsAllowed)
                 return;
@@ -284,9 +284,9 @@ namespace DiscordLog
         }
         public void OnPlayerUsedItem(UsedItemEventArgs ev)
         {
-            if (Round.IsLobby)
+            if (Round.IsLobby || ev.Item.Type is ItemType.SCP330 or ItemType.SCP244a or ItemType.SCP244b)
                 return;
-            if (ItemExtensions.IsMedical(ev.Item.Type))
+            if (ItemExtensions.IsMedical(ev.Item.Type) || ev.Item.Type is ItemType.SCP500)
             {
                 plugin.LOG += $":adhesive_bandage: {Extensions.LogPlayer(ev.Player)} s'est soigné avec {ev.Item.Type}.\n";
                 return;
