@@ -3,6 +3,7 @@ using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Pickups;
 using Exiled.API.Structs;
+using Footprinting;
 using InventorySystem;
 using InventorySystem.Items;
 using InventorySystem.Items.Firearms;
@@ -40,8 +41,17 @@ namespace DiscordLog
             not null => $"{itemPickup.Type} ({itemPickup.SerialToBase32()})",
             _ => "Unknown",
         };
-        public static string LogPlayer(Player player) => player is null ? $"``Unknown`` (Unknown)" :
-            $"``{player.Nickname.DiscordLightSanitize()}`` ({(player.DoNotTrack ? $"||{ConvertID(player.UserId)}||" : ConvertID(player.UserId))})";
+        public static string LogPlayer(Player player, Footprint footprint = default)
+        {
+            if (player is null)
+            {
+                if (footprint.IsSet)
+                    return $"``{footprint.LogUserID}`` ({footprint.Nickname})";
+                return $"``Unknown`` (Unknown)";
+            }
+
+            return $"``{player.Nickname.DiscordLightSanitize()}`` ({(player.DoNotTrack ? $"||{ConvertID(player.UserId)}||" : ConvertID(player.UserId))})";
+        }
         public static string ConvertID(string UserID)
         {
             if (string.IsNullOrEmpty(UserID)) return string.Empty;

@@ -13,6 +13,7 @@ using Scp096Events = Exiled.Events.Handlers.Scp096;
 using Scp049Events = Exiled.Events.Handlers.Scp049;
 using Scp330Events = Exiled.Events.Handlers.Scp330;
 using Scp244Events = Exiled.Events.Handlers.Scp244;
+using Scp3114Events = Exiled.Events.Handlers.Scp3114;
 
 using System.Collections.Generic;
 using System.IO;
@@ -146,9 +147,10 @@ namespace DiscordLog
 
             Scp914Events.Activating += Handlers.On914Activating;
 			Scp049Events.FinishingRecall += Handlers.OnFinishingRecall;
-
-			//LogStaff
-			PlayerEvents.Kicking += Handlers.OnKicking;
+			Scp3114Events.Revealed += Handlers.OnRevealed;
+            Scp3114Events.Disguised += Handlers.OnDisguised;
+            //LogStaff
+            PlayerEvents.Kicking += Handlers.OnKicking;
 			PlayerEvents.Banned += Handlers.OnBanned;
 			//PingStaff
 			ServerEvents.LocalReporting += Handlers.OnLocalReporting;
@@ -201,9 +203,11 @@ namespace DiscordLog
             Scp914Events.Activating -= Handlers.On914Activating;
 
 			Scp049Events.FinishingRecall -= Handlers.OnFinishingRecall;
+            Scp3114Events.Revealed -= Handlers.OnRevealed;
+            Scp3114Events.Disguised -= Handlers.OnDisguised;
 
-			//LogStaff
-			PlayerEvents.Kicking -= Handlers.OnKicking;
+            //LogStaff
+            PlayerEvents.Kicking -= Handlers.OnKicking;
 			PlayerEvents.Banned -= Handlers.OnBanned;
 
 			//PingStaff

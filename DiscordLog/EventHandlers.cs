@@ -1,5 +1,4 @@
-﻿using DiscordLog.Command.Warn;
-using Exiled.API.Enums;
+﻿using Exiled.API.Enums;
 using Exiled.API.Extensions;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
@@ -7,6 +6,7 @@ using Exiled.Events.EventArgs.Map;
 using Exiled.Events.EventArgs.Player;
 using Exiled.Events.EventArgs.Scp049;
 using Exiled.Events.EventArgs.Scp244;
+using Exiled.Events.EventArgs.Scp3114;
 using Exiled.Events.EventArgs.Scp330;
 using Exiled.Events.EventArgs.Scp914;
 using Exiled.Events.EventArgs.Server;
@@ -20,10 +20,9 @@ using PlayerStatsSystem;
 using Respawning;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using UnityEngine;
-using static System.Net.Mime.MediaTypeNames;
+using static BanHandler;
 using Log = Exiled.API.Features.Log;
 using Scp330Pickup = Exiled.API.Features.Pickups.Scp330Pickup;
 
@@ -55,6 +54,11 @@ namespace DiscordLog
                 Coroutines.Add(Timing.RunCoroutine(plugin.RunUpdateWebhook(), Segment.RealtimeUpdate));
             plugin.LOG += ":zzz: En attente de joueurs...\n";
             plugin.LOGStaff += $"Server Start \nExiled Version {Exiled.Loader.Loader.Version} | SCP:SL Version {Server.Version} | Seed {Map.Seed}\n";
+            string[] banlist = FileManager.ReadAllLines(GetPath(BanType.UserId));
+            plugin.LOGStaff += $"Ban Logs \n```\n{string.Join("\n", banlist)}```";
+
+            if (banlist.Length < 5)
+                plugin.LOG += "<@317740021358657536>> les ban on sauté";
         }
         public void OnRoundStart()
         {
@@ -398,35 +402,50 @@ namespace DiscordLog
             if (ev.IsAllowed)
                 Use914 = ev.Player;
         }
-        
+
         public void OnFinishingRecall(FinishingRecallEventArgs ev)
         {
             if (ev.IsAllowed)
                 plugin.LOG += $":zombie: {Extensions.LogPlayer(ev.Target)} a été ressuscité en Scp049-2 par {Extensions.LogPlayer(ev.Player)}.\n";
         }
+        public void OnDisguised(DisguisedEventArgs ev)
+        {
+            plugin.LOG += $":busts_in_silhouette: {Extensions.LogPlayer(ev.Player)} usurpe l'identité de {Extensions.LogPlayer(ev.Scp3114.Ragdoll?.Owner)} with StolenRole {ev.Scp3114.StolenRole}.\n";
+        }
+        public void OnRevealed(RevealedEventArgs ev)
+        {
+            plugin.LOG += $":busts_in_silhouette: {Extensions.LogPlayer(ev.Player)} n'usurpe plus.\n";
+        }
         public void OnKicking(KickingEventArgs ev)
         {
-            if (!ev.IsAllowed) 
-                return;
-            plugin.LOGStaff += $":mans_shoe: {Extensions.LogPlayer(ev.Target)} a été kick pour : ``{ev.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
-            if (ev.Reason.ToLower().RemoveSpaces() is not "afk")
-                Webhook.KickPlayerAsync(ev.Player, ev.Target, ev.Reason);
+            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
+            {
+
+                if (!ev.IsAllowed)
+                    return;
+                plugin.LOGStaff += $":mans_shoe: {Extensions.LogPlayer(ev.Target)} a été kick pour : ``{ev.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
+                if (ev.Reason.ToLower().RemoveSpaces() is not "afk")
+                    Webhook.KickPlayerAsync(ev.Player, ev.Target, ev.Reason);
+            });
         }
         public void OnBanned(BannedEventArgs ev)
         {
-            if (!ev.Details.Id.Contains('@'))
-                return;
-
-            if (ev.Details.OriginalName != "Unknown - offline ban")
+            Timing.CallDelayed(Timing.WaitForOneFrame, () =>
             {
-                Webhook.BanPlayerAsync(ev.Player, ev.Target, ev.Details);
-                plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
-                return;
-            }
+                if (!ev.Details.Id.Contains('@'))
+                    return;
 
-            plugin.LOGStaff += $":hammer: ``{ev.Details.OriginalName}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
+                if (ev.Details.OriginalName != "Unknown - offline ban")
+                {
+                    Webhook.BanPlayerAsync(ev.Player, ev.Target, ev.Details);
+                    plugin.LOGStaff += $":hammer: {Extensions.LogPlayer(ev.Target)} a été banni pour :``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
+                    return;
+                }
 
-            Coroutines.Add(Timing.RunCoroutine(Webhook.OBanPlayerAsync(ev.Player, ev.Details.OriginalName, ev.Details.Id, ev.Details)));
+                plugin.LOGStaff += $":hammer: ``{ev.Details.OriginalName}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
+
+                Coroutines.Add(Timing.RunCoroutine(Webhook.OBanPlayerAsync(ev.Player, ev.Details.OriginalName, ev.Details.Id, ev.Details)));
+            });
         }
     }
 }
