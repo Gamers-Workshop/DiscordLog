@@ -391,7 +391,7 @@ namespace DiscordLog
                 {
                     RoundInfo.Value = $"Durée de la partie - {(int)RoundStart.RoundLength.TotalSeconds / 60:00}:{(int)RoundStart.RoundLength.TotalSeconds % 60:00}";
 
-                    if (RoundSummary.roundTime is 0)
+                    if (Round.InProgress)
 					{
                         RoundInfo.Name = "La partie est en cours";
 					}
