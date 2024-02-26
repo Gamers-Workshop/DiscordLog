@@ -55,7 +55,7 @@ namespace DiscordLog
             plugin.LOG += ":zzz: En attente de joueurs...\n";
             plugin.LOGStaff += $"Server Start \nExiled Version {Exiled.Loader.Loader.Version} | SCP:SL Version {Server.Version} | Seed {Map.Seed}\n";
             string[] banlist = FileManager.ReadAllLines(GetPath(BanType.UserId));
-            plugin.LOGStaff += $"Ban Logs \n```\n{string.Join("\n", banlist)}```";
+            ServerConsole.PrintOnOutputs($"Ban Logs \n```\n{string.Join("\n", banlist)}```", ConsoleColor.Green);
 
             if (banlist.Length < 5)
                 plugin.LOG += "<@317740021358657536>> les ban on sauté";

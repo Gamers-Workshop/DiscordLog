@@ -43,7 +43,6 @@ namespace DiscordLog
 		public string LOG = null;
 		public string LOGStaff = null;
 		public string LOGError = null;
-		public int DiscordPreventSpamming;
 
 		public Dictionary<Player, string> NormalisedName = new();
 
@@ -92,7 +91,7 @@ namespace DiscordLog
 
 			foreach (Player p in Player.List)
 			{
-				string PlayerName = p.Nickname.Normalize(System.Text.NormalizationForm.FormKD);
+				string PlayerName = p.Nickname.Normalize(NormalizationForm.FormKD);
 				if (PlayerName.Length < 17)
 					NormalisedName.Add(p, $"[{p.Id}] {PlayerName}");
 				else
@@ -239,14 +238,16 @@ namespace DiscordLog
 				yield return Timing.WaitForSeconds(10f);
 				if (LOGError is null)
 					continue;
-				if (LOGError.Length < 2001)
+
+				LOGError = Extensions.ConvertUnityTagToDiscord(LOGError);
+                if (LOGError.Length < 2001)
 				{
-					Webhook.SendWebhookMessage(Config.WebhookUrlLogError, LOGError.ToString());
+					Webhook.SendWebhookMessage(Config.WebhookUrlLogError, LOGError);
 					LOGError = null;
 				}
 				else
 				{
-					DiscordMessage(LOGError.ToString(), out List<string> ListString);
+					DiscordMessage(LOGError, out List<string> ListString);
 					LOGError = null;
 					foreach (string SendLog in ListString)
 					{
@@ -263,7 +264,9 @@ namespace DiscordLog
 				yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 4f : 1.5f);
 				if (LOG is null)
 					continue;
-				if (LOG.Length < 2001)
+
+                LOG = Extensions.ConvertUnityTagToDiscord(LOG);
+                if (LOG.Length < 2001)
 				{
 					Webhook.SendWebhookMessage(Config.WebhookUrlLogJoueur, LOG);
 					LOG = null;
@@ -287,7 +290,9 @@ namespace DiscordLog
 				yield return Timing.WaitForSeconds(IdleMode.IdleModeActive ? 4f : 1.5f);
                 if (LOGStaff is null)
 					continue;
-				if (LOGStaff.Length < 2001)
+
+                LOGStaff = Extensions.ConvertUnityTagToDiscord(LOGStaff);
+                if (LOGStaff.Length < 2001)
 				{
 					Webhook.SendWebhookMessage(Config.WebhookUrlLogStaff, LOGStaff);
 					LOGStaff = null;

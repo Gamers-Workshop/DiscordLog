@@ -4,16 +4,9 @@ using MEC;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Routing;
-using System.Web.UI.WebControls;
-using UnityEngine;
 using UnityEngine.Networking;
+#pragma warning disable IDE0090 // Utiliser 'new(...)'
 
 namespace DiscordLog
 {

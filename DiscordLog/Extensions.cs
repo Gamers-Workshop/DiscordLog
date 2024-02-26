@@ -17,6 +17,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using UnityEngine;
 using static System.Net.Mime.MediaTypeNames;
 using Firearm = Exiled.API.Features.Items.Firearm;
 using FirearmPickup = Exiled.API.Features.Pickups.FirearmPickup;
@@ -25,6 +26,27 @@ namespace DiscordLog
 {
     public static class Extensions
     {
+        public static readonly Regex TagDetector = new(@"<([a-z]+)(?:=([""'][^""']*[""']|[^'"">]+))?>(.*?)<\/\1>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static string ConvertUnityTagToDiscord(string text)
+        {
+            text = TagDetector.Replace(text, match =>
+            {
+                string tag = match.Groups[1].Value.ToLower();
+                string value = match.Groups[2].Value;
+                string content = match.Groups[3].Value;
+
+                return content = tag switch
+                {
+                    "b" => $"**{content}**",
+                    "i" => $"*{content}*",
+                    "u" => $"__{content}__",
+                    "s" => $"~~{content}~~",
+                    _ => content,
+                };
+            });
+
+            return text;
+        }
         public static string LogItem(Item item) => item switch
         {
             Firearm firearm => $"{item.Type} ({item.SerialToBase32()}) [{firearm.Ammo}/{firearm.MaxAmmo}]",

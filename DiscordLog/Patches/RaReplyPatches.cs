@@ -11,67 +11,29 @@ using System.Linq;
 using static HarmonyLib.AccessTools;
 using System.Text.RegularExpressions;
 using PlayerRoles;
+using UnityEngine;
 
 namespace DiscordLog.Patches
 {
     [HarmonyPatch(typeof(PlayerCommandSender), nameof(PlayerCommandSender.RaReply))]
     public class RaReplyPatches
     {
-        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        private static void Postfix(PlayerCommandSender __instance, string text, bool success, bool logToConsole, string overrideDisplay)
         {
-            List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent(instructions);
-            const int index = 0;
-
-            Label returnLabel = generator.DefineLabel();
-
-            newInstructions.InsertRange(index, new[]
-            {
-                new (OpCodes.Ldarg_1),
-                new (OpCodes.Ldstr, "$"),
-                new (OpCodes.Callvirt, Method(typeof(string), nameof(string.StartsWith),new[] { typeof(string) })),
-                new (OpCodes.Brtrue_S, returnLabel),
-                new (OpCodes.Call, PropertyGetter(typeof(DiscordLog), nameof(DiscordLog.Instance))),
-                new (OpCodes.Dup),
-                new (OpCodes.Ldfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
-                new (OpCodes.Ldarg_1),
-                new (OpCodes.Ldstr, "\n"),
-                new (OpCodes.Call, Method(typeof(string), nameof(string.Concat),new[] { typeof(string),typeof(string),typeof(string) })),
-                new (OpCodes.Stfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
-                new CodeInstruction(OpCodes.Nop).WithLabels(returnLabel),
-            });
-
-            for (int z = 0; z < newInstructions.Count; z++)
-                yield return newInstructions[z];
-
-            ListPool<CodeInstruction>.Shared.Return(newInstructions);
+            if (!text.StartsWith("$") || text.Count() < 500)
+                return;
+            DiscordLog.Instance.LOGStaff += $"{text}\n";
         }
     }
 
     [HarmonyPatch(typeof(ServerConsoleSender), nameof(ServerConsoleSender.RaReply))]
     public class GamCoreReplyPAtches
     {
-        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        private static void Postfix(ServerConsoleSender __instance, string text, bool success, bool logToConsole, string overrideDisplay)
         {
-            List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent(instructions);
-            const int index = 0;
-
-            newInstructions.InsertRange(index, new[]
-            {
-                new (OpCodes.Nop),
-                new (OpCodes.Call, PropertyGetter(typeof(DiscordLog), nameof(DiscordLog.Instance))),
-                new (OpCodes.Dup),
-                new (OpCodes.Ldfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
-                new (OpCodes.Ldarg_1),
-                new (OpCodes.Ldstr, "\n"),
-                new (OpCodes.Call, Method(typeof(string), nameof(string.Concat),new[] { typeof(string),typeof(string),typeof(string) })),
-                new (OpCodes.Stfld, Field(typeof(DiscordLog), nameof(DiscordLog.Instance.LOGStaff))),
-                new CodeInstruction(OpCodes.Nop),
-            });
-
-            for (int z = 0; z < newInstructions.Count; z++)
-                yield return newInstructions[z];
-
-            ListPool<CodeInstruction>.Shared.Return(newInstructions);
+            if (!text.StartsWith("$") || text.Count() < 500)
+                return;
+            DiscordLog.Instance.LOGStaff += $"{text}\n";
         }
     }
 
@@ -197,10 +159,10 @@ namespace DiscordLog.Patches
                 }
                 if (args.ElementAtOrDefault(1)?.Contains('.') ?? false)
                 {
-                    DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à {args.ElementAtOrDefault(0)} ``{Extensions.SecureRegex(Extensions.FormatArguments(args, 2), "<[^>]*?>", string.Empty).DiscordLightSanitize()}``: {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
+                    DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} à {args.ElementAtOrDefault(0)} ``{Extensions.ConvertUnityTagToDiscord(Extensions.FormatArguments(args, 2)).DiscordLightSanitize()}``: {LogPlayerFromCommand(args.ElementAtOrDefault(1))}\n";
                     return;
                 }
-                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{Extensions.SecureRegex(query, "<[^>]*?>", string.Empty).DiscordLightSanitize()}``.\n";
+                DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a envoyé ``{Extensions.ConvertUnityTagToDiscord(query).DiscordLightSanitize()}``.\n";
             }
             catch (Exception ex)
             {
@@ -211,20 +173,9 @@ namespace DiscordLog.Patches
         public static string LogPlayerFromCommand(string Users)
         {
             string Receiver = string.Empty;
-            List<Player> PlyList = new();
-            if (!string.IsNullOrWhiteSpace(Users))
+            foreach (Player ply in Player.GetProcessedData(new(new[] { Users, }, 0, 1)))
             {
-                foreach (string s in Users.Split('.'))
-                {
-                    if (int.TryParse(s, out int id) && Player.TryGet(id, out Player player))
-                        PlyList.Add(player);
-                    else if (Player.TryGet(s, out player))
-                        PlyList.Add(player);
-                }
-                foreach (Player ply in PlyList)
-                {
-                    Receiver += $"\n- {Extensions.LogPlayer(ply)}";
-                }
+                Receiver += $"\n- {Extensions.LogPlayer(ply)}";
             }
             return Receiver;
         }
