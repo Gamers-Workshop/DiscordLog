@@ -29,21 +29,28 @@ namespace DiscordLog
         public static readonly Regex TagDetector = new(@"<([a-z]+)(?:=([""'][^""']*[""']|[^'"">]+))?>(.*?)<\/\1>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         public static string ConvertUnityTagToDiscord(string text)
         {
-            text = TagDetector.Replace(text, match =>
-            {
-                string tag = match.Groups[1].Value.ToLower();
-                string value = match.Groups[2].Value;
-                string content = match.Groups[3].Value;
+            bool Find = true;
 
-                return content = tag switch
+            while (Find)
+            {
+                Find = false;
+                text = TagDetector.Replace(text, match =>
                 {
-                    "b" => $"**{content}**",
-                    "i" => $"*{content}*",
-                    "u" => $"__{content}__",
-                    "s" => $"~~{content}~~",
-                    _ => content,
-                };
-            });
+                    Find = true;
+                    string tag = match.Groups[1].Value.ToLower();
+                    string value = match.Groups[2].Value;
+                    string content = match.Groups[3].Value;
+
+                    return content = tag switch
+                    {
+                        "b" => $"**{content}**",
+                        "i" => $"*{content}*",
+                        "u" => $"__{content}__",
+                        "s" => $"~~{content}~~",
+                        _ => content,
+                    };
+                });
+            }
 
             return text;
         }
