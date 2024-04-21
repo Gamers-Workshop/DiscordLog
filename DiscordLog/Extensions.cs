@@ -17,8 +17,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using UnityEngine;
-using static System.Net.Mime.MediaTypeNames;
+
 using Firearm = Exiled.API.Features.Items.Firearm;
 using FirearmPickup = Exiled.API.Features.Pickups.FirearmPickup;
 
@@ -86,11 +85,11 @@ namespace DiscordLog
             if (string.IsNullOrEmpty(UserID)) return string.Empty;
             if (UserID.EndsWith("@discord"))
             {
-                return $"<@{UserID.Replace("@discord", string.Empty)}>";
+                return $"<@{UserID.GetRawUserId()}>";
             }
             else if (UserID.EndsWith("@steam"))
             {
-                return $"{UserID}[:link:](<https://steamidfinder.com/lookup/{UserID.Replace("@steam", string.Empty)}\"SteamFinder\">)";
+                return $"{UserID}[:link:](<https://steamidfinder.com/lookup/{UserID.GetRawUserId()}\"SteamFinder\">)";
             }
             return UserID;
         }
