@@ -89,7 +89,7 @@ namespace DiscordLog
             }
             else if (UserID.EndsWith("@steam"))
             {
-                return $"{UserID}[:link:](<https://steamidfinder.com/lookup/{UserID.GetRawUserId()}\"SteamFinder\">)";
+                return $"{UserID}[:link:](<https://findsteamid.com/steamid/{UserID.GetRawUserId()}?\"SteamFinder\">)";
             }
             return UserID;
         }
