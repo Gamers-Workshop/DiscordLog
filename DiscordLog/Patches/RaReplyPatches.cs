@@ -64,7 +64,7 @@ namespace DiscordLog.Patches
             {
                 List<string> args = query.Trim().Split(QueryProcessor.SpaceArray, 512, StringSplitOptions.RemoveEmptyEntries).ToList();
                 if (args.IsEmpty()) return;
-                if (query.StartsWith("$") && query.ElementAtOrDefault(1) is not '1' or '3')
+                if (query.StartsWith("$") && query.ElementAtOrDefault(1) is not '0' or '7' or '8')
                     return;
 
                 Player player = sender is PlayerCommandSender playerCommandSender ? Player.Get(playerCommandSender) : Server.Host;
@@ -143,7 +143,7 @@ namespace DiscordLog.Patches
                         return;
                     case "$1":
                         {
-                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a demandé les donnée de {LogPlayerFromCommand(args.ElementAtOrDefault(1))} : {(args.ElementAtOrDefault(1) is "1" ? "REQUEST" : "REQUEST-IP")}\n";
+                            DiscordLog.Instance.LOGStaff += $":keyboard: {Extensions.LogPlayer(player)} a demandé les donnée de {LogPlayerFromCommand(args.ElementAtOrDefault(2))} : {(args.ElementAtOrDefault(1) is "1" ? "REQUEST" : "REQUEST-IP")}\n";
                         }
                         return;
                     case "$3":

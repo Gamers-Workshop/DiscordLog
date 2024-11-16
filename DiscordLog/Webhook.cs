@@ -155,9 +155,40 @@ namespace DiscordLog
                                 Timestamp = DateTime.Now,
                             },
                         }
-                    },SerialiseSetting))));
+                    }, SerialiseSetting))));
         }
-        public static IEnumerator<float> OBanPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, BanDetails banDetails)
+        public static void UnBanPlayerAsync(string userid)
+        {
+            EventHandlers.Coroutines.Add(
+                Timing.RunCoroutine(
+                SendWebhookInformationDiscord(
+                DiscordLog.Instance.Config.WebhookUrlLogSanction,
+                "POST",
+                JsonConvert.SerializeObject(
+                    new DiscordWebhookData.DiscordWebhook()
+                    {
+                        Username = "SCP:SL",
+                        Embeds = new DiscordWebhookData.DiscordEmbed[]
+                        {
+                            new DiscordWebhookData.DiscordEmbed()
+                            {
+                                Title = DiscordLog.Instance.Config.SIName,
+                                Description = "",
+                                Color = 1231912,
+                                Fields = new DiscordFiels[]
+                                {
+                                    new DiscordFiels
+                                    {
+                                        Name = "UnBan",
+                                        Value = $"{Extensions.GetUserName(userid.Replace("@steam", string.Empty))} ({userid})",
+                                    },
+                                },
+                                Timestamp = DateTime.Now,
+                            },
+                        }
+                    }, SerialiseSetting))));
+        }
+        public static void OBanPlayerAsync(Player player, string sanctionedNickname, string sanctionedUserId, BanDetails banDetails)
         {
             if (sanctionedUserId.EndsWith("@steam"))
             {
@@ -210,7 +241,6 @@ namespace DiscordLog
                             },
                         }
                     }, SerialiseSetting))));
-            yield return Timing.WaitForOneFrame;
         }
         public static void KickPlayerAsync(Player player, Player sanctioned, string reason)
         {

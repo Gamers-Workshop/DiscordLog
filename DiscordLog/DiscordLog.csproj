@@ -33,6 +33,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp-firstpass">
@@ -86,8 +87,8 @@
     <Compile Include="Webhook.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EXILED">
-      <Version>8.8.0</Version>
+    <PackageReference Include="ExMod.Exiled">
+      <Version>8.14.1</Version>
     </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <Version>2.2.2</Version>

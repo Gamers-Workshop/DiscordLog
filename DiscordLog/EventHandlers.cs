@@ -444,9 +444,14 @@ namespace DiscordLog
 
                 plugin.LOGStaff += $":hammer: ``{ev.Details.OriginalName}`` ({Extensions.ConvertID(ev.Details.Id)}) a été Oban pour : ``{ev.Details.Reason}`` ; par {Extensions.LogPlayer(ev.Player)}.\n";
 
-                Coroutines.Add(Timing.RunCoroutine(Webhook.OBanPlayerAsync(ev.Player, ev.Details.OriginalName, ev.Details.Id, ev.Details)));
+                Webhook.OBanPlayerAsync(ev.Player, ev.Details.OriginalName, ev.Details.Id, ev.Details);
             });
         }
+        public void OnUnbanned(UnbannedEventArgs ev)
+        {
+            Webhook.UnBanPlayerAsync(ev.TargetId);
+        }
+
     }
 }
 

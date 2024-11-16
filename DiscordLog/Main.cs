@@ -151,8 +151,10 @@ namespace DiscordLog
             //LogStaff
             PlayerEvents.Kicking += Handlers.OnKicking;
 			PlayerEvents.Banned += Handlers.OnBanned;
-			//PingStaff
-			ServerEvents.LocalReporting += Handlers.OnLocalReporting;
+            ServerEvents.Unbanned += Handlers.OnUnbanned;
+
+            //PingStaff
+            ServerEvents.LocalReporting += Handlers.OnLocalReporting;
 		}
 
 		private void UnRegistEvents()
@@ -207,10 +209,11 @@ namespace DiscordLog
 
             //LogStaff
             PlayerEvents.Kicking -= Handlers.OnKicking;
-			PlayerEvents.Banned -= Handlers.OnBanned;
+            PlayerEvents.Banned -= Handlers.OnBanned;
+            ServerEvents.Unbanned -= Handlers.OnUnbanned;
 
-			//PingStaff
-			ServerEvents.LocalReporting -= Handlers.OnLocalReporting;
+            //PingStaff
+            ServerEvents.LocalReporting -= Handlers.OnLocalReporting;
 			Handlers = null;
 		}
 
