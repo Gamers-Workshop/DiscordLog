@@ -9,6 +9,7 @@ using InventorySystem.Items;
 using InventorySystem.Items.Firearms;
 using InventorySystem.Items.Firearms.Attachments;
 using InventorySystem.Items.Firearms.Attachments.Components;
+using InventorySystem.Items.Firearms.Modules;
 using NorthwoodLib.Pools;
 using System;
 using System.Collections.Generic;
@@ -63,7 +64,7 @@ namespace DiscordLog
         };
         public static string LogPickup(Pickup itemPickup) => itemPickup switch
         {
-            FirearmPickup firearm => $"{itemPickup.Type} ({itemPickup.SerialToBase32()}) {(firearm.IsDistributed ? $"[{itemPickup.GetMaxAmmo()}/{itemPickup.GetMaxAmmo()}]" : $"[{firearm.Status.Ammo}/{itemPickup.GetMaxAmmo()}]")}",
+            FirearmPickup firearm => $"{itemPickup.Type} ({itemPickup.SerialToBase32()}) {(firearm.IsDistributed ? $"[{itemPickup.GetMaxAmmo()}/{itemPickup.GetMaxAmmo()}]" : $"[{firearm.Ammo}/{itemPickup.GetMaxAmmo()}]")}",
             MicroHIDPickup microhid => $"MicroHID ({itemPickup.SerialToBase32()}) [{(int)(microhid.Energy * 100)}%]",
             RadioPickup radio => $"Radio ({itemPickup.SerialToBase32()}) [{(int)(radio.BatteryLevel * 100)}%]",
             not null => $"{itemPickup.Type} ({itemPickup.SerialToBase32()})",
@@ -158,44 +159,31 @@ namespace DiscordLog
 
             return result;
         }
-        public static byte GetMaxAmmo(this ItemType item)
+        public static int GetMaxAmmo(this ItemType item)
         {
             if (!InventoryItemLoader.AvailableItems.TryGetValue(item, out ItemBase itemBase) || itemBase is not InventorySystem.Items.Firearms.Firearm firearm)
                 return 0;
-            return firearm switch
-            {
-                AutomaticFirearm auto => auto._baseMaxAmmo,
-                Shotgun shotgun => shotgun._ammoCapacity,
-                ParticleDisruptor => 5,
-                _ => 6,
-            };
+            return firearm.GetTotalMaxAmmo();
         }
-        public static byte GetMaxAmmo(this Pickup pickup)
+        public static int GetMaxAmmo(this Pickup pickup)
         {
-            if (pickup is not FirearmPickup firearm)
-                return 0;
-            byte ammo = pickup.Type.GetMaxAmmo();
-
-            if (firearm.Status.Flags.HasFlag(FirearmStatusFlags.Chambered))
-                ammo++;
-
-            return ammo += (byte)UnityEngine.Mathf.Clamp(GetAttachmentsValue(firearm, AttachmentParam.MagazineCapacityModifier), byte.MinValue, byte.MaxValue);
+            return pickup.Type.GetMaxAmmo();
         }
 
         public static float GetAttachmentsValue(this FirearmPickup firearmPickup, AttachmentParam attachmentParam)
         {
-            if (firearmPickup.Info.ItemId.GetFirearmType().GetBaseCode() > firearmPickup.Status.Attachments)
+            if (firearmPickup.Info.ItemId.GetFirearmType().GetBaseCode() > firearmPickup.Attachments)
                 return 0;
 
-            IEnumerable<AttachmentIdentifier> attachements = firearmPickup.Info.ItemId.GetFirearmType().GetAttachmentIdentifiers(firearmPickup.Status.Attachments);
+            IEnumerable<AttachmentIdentifier> attachements = firearmPickup.Info.ItemId.GetFirearmType().GetAttachmentIdentifiers(firearmPickup.Attachments);
 
-            AttachmentParameterDefinition definitionOfParam = AttachmentsUtils.GetDefinitionOfParam((int)attachmentParam);
+            AttachmentParameterDefinition definitionOfParam = AttachmentsUtils.GetDefinitionOfParam(attachmentParam);
             float num = definitionOfParam.DefaultValue;
 
             foreach (AttachmentIdentifier attachement in attachements)
             {
                 Attachment attachment = AttachmentsList.FirstOrDefault(x => x.Name == attachement.Name);
-                if (attachment is null || !attachment.TryGetValue((int)attachmentParam, out float paraValue))
+                if (attachment is null || !attachment.TryGetActiveValue(attachmentParam, out float paraValue))
                     continue;
 
                 num = AttachmentsUtils.MixValue(num, paraValue, definitionOfParam.MixingMode);

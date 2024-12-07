@@ -28,6 +28,7 @@ using LightContainmentZoneDecontamination;
 using UnityEngine;
 using Respawning;
 using Interactables.Interobjects;
+using Respawning.Waves;
 
 namespace DiscordLog
 {
@@ -473,7 +474,7 @@ namespace DiscordLog
                 Value = $"Décontamination : {(Round.IsStarted ? (!DecontaminationController.Singleton._decontaminationBegun ? $"{DécontaminationTime / 60:00}:{DécontaminationTime % 60:00}" : "Effectué") : "En Attente")}\n" +
                 $"Warhead : {(Warhead.IsInProgress ? $"{TimeWarhead / 60:00}:{TimeWarhead % 60:00}" : (AlphaWarheadOutsitePanel.nukeside.Networkenabled ? "PRÊTE" : "DÉSACTIVÉE"))}\n" +
                 $"Générateur : {Mathf.CeilToInt(totalvoltagefloat)}/3\n" +
-                $"Respawn {Respawn.NextKnownTeam} : {Respawn.TimeUntilSpawnWave.Minutes:00}:{Respawn.TimeUntilSpawnWave.Seconds:00}\n" +
+                // $"Respawn {Respawn.NextKnownTeam} : {(Respawn.TryGetWaveBase(Respawn.NextKnownFaction, out SpawnableWaveBase spawnableWaveBase) && spawnableWaveBase is TimeBasedWave timeBasedWave ? ($"{timeBasedWave.Timer.TimeLeft / 60:00}:{timeBasedWave.Timer.TimeLeft % 60:00}") : "Unknown")}\n" +
 				$"TPS: {Server.Tps}\n" +
 				$"Ping: {Player.List.OrderBy(x => x.Ping).FirstOrDefault()?.Ping * 2}",
                 Inline = false,

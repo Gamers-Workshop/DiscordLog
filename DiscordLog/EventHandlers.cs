@@ -410,7 +410,7 @@ namespace DiscordLog
         }
         public void OnDisguised(DisguisedEventArgs ev)
         {
-            plugin.LOG += $":busts_in_silhouette: {Extensions.LogPlayer(ev.Player)} usurpe l'identité de {Extensions.LogPlayer(ev.Scp3114.Ragdoll?.Owner)} avec : {ev.Scp3114.StolenRole}.\n";
+            plugin.LOG += $":busts_in_silhouette: {Extensions.LogPlayer(ev.Player)} usurpe l'identité de {Extensions.LogPlayer(Player.Get(ev.Scp3114.Ragdoll?.NetworkInfo.OwnerHub))} avec : {ev.Scp3114.StolenRole}.\n";
         }
         public void OnRevealed(RevealedEventArgs ev)
         {
