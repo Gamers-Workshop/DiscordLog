@@ -56,7 +56,7 @@ namespace DiscordLog
         }
         public static string LogItem(Item item) => item switch
         {
-            Firearm firearm => $"{item.Type} ({item.SerialToBase32()}) [{firearm.Ammo}/{firearm.MaxAmmo}]",
+            Firearm firearm => $"{item.Type} ({item.SerialToBase32()}) [{firearm.TotalAmmo}/{firearm.TotalMaxAmmo}]",
             MicroHid microhid => $"MicroHID ({item.SerialToBase32()}) [{(int)(microhid.Energy * 100)}%]",
             Radio radio => $"Radio ({item.SerialToBase32()}) [{radio.BatteryLevel}%]",
             not null => $"{item.Type} ({item.SerialToBase32()})",

@@ -5,9 +5,12 @@ using Exiled.API.Features.Items;
 using Exiled.Events.EventArgs.Map;
 using Exiled.Events.EventArgs.Player;
 using Exiled.Events.EventArgs.Scp049;
+using Exiled.Events.EventArgs.Scp1507;
 using Exiled.Events.EventArgs.Scp244;
+using Exiled.Events.EventArgs.Scp2536;
 using Exiled.Events.EventArgs.Scp3114;
 using Exiled.Events.EventArgs.Scp330;
+using Exiled.Events.EventArgs.Scp559;
 using Exiled.Events.EventArgs.Scp914;
 using Exiled.Events.EventArgs.Server;
 using Exiled.Events.EventArgs.Warhead;
@@ -85,10 +88,15 @@ namespace DiscordLog
             if (!ev.IsAllowed || !ev.Players.Any()) return;
             string objcontent = ":snake: La Main du Serpent est arrivée sur le site.\n";
 
-            if (ev.NextKnownTeam is SpawnableTeamType.NineTailedFox)
+            if (ev.NextKnownTeam is Faction.FoundationStaff)
                 objcontent = ":helicopter: L’équipe Epsilon est arrivée sur le site.\n";
-            else if (ev.NextKnownTeam is SpawnableTeamType.ChaosInsurgency)
+            else if (ev.NextKnownTeam is Faction.FoundationEnemy)
                 objcontent = ":articulated_lorry: L’Insurrection du Chaos est arrivée sur le site.\n";
+            else if (ev.NextKnownTeam is Faction.Flamingos)
+                objcontent = ":flamingo: Les Flammant Rose sont spawn.\n";
+            else if (ev.NextKnownTeam is Faction.Flamingos)
+                objcontent = ":??: QuelqueChose Respawn.\n";
+
 
             plugin.LOG += objcontent;
         }
@@ -151,7 +159,7 @@ namespace DiscordLog
         }
         public void OnSpawned(SpawnedEventArgs ev)
         {
-            if (ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart or SpawnReason.Destroyed || Round.IsLobby) return;
+            if (ev.Reason is SpawnReason.Died or SpawnReason.Revived or SpawnReason.RoundStart or SpawnReason.Destroyed or SpawnReason.ItemUsage || Round.IsLobby) return;
             string NewRole = ev.Player.Role.Type.ToString();
             if (ev.Player.TryGetSessionVariable("NewRole", out Tuple<string, string> NewCustomRole))
                 NewRole = NewCustomRole.Item1;
@@ -246,7 +254,8 @@ namespace DiscordLog
         {
             if (!ev.IsAllowed)
                 return;
-            UseElevator.Add(ev.Lift, ev.Player);
+
+            UseElevator[ev.Lift] = ev.Player;
         }
         public void OnDroppingUpScp330(DroppingScp330EventArgs ev)
         {
@@ -452,6 +461,29 @@ namespace DiscordLog
             Webhook.UnBanPlayerAsync(ev.TargetId);
         }
 
+        public void OnOpeningGift(OpeningGiftEventArgs ev)
+        {
+            plugin.LOG += $":gift: {Extensions.LogPlayer(ev.Player)} à obtenue des cadeaux.\n";
+        }
+
+        public void OnUsingTape(UsingTapeEventArgs ev)
+        {
+            plugin.LOG += $":flamingo: {Extensions.LogPlayer(ev.Player)} a utilisé Tape.\n";
+        }
+
+        public void OnSpawningFlamingos(SpawningFlamingosEventArgs ev)
+        {
+            plugin.LOG += $":flamingo: le Flammingo Alpha {Extensions.LogPlayer(ev.Player)} et les autre spawn.\n";
+            foreach (Player player in ev.SpawnablePlayers)
+            {
+                plugin.LOG += $"- {Extensions.LogPlayer(player)}\n";
+            }
+        }
+
+        public void OnScp559Interacting(InteractingScp559EventArgs ev)
+        {
+            plugin.LOG += $":birthday: {Extensions.LogPlayer(ev.Player)} n'usurpe plus.\n";
+        }
     }
 }
 

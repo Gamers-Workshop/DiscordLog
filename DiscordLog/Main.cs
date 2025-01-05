@@ -14,6 +14,9 @@ using Scp049Events = Exiled.Events.Handlers.Scp049;
 using Scp330Events = Exiled.Events.Handlers.Scp330;
 using Scp244Events = Exiled.Events.Handlers.Scp244;
 using Scp3114Events = Exiled.Events.Handlers.Scp3114;
+using Scp1507Events = Exiled.Events.Handlers.Scp1507;
+using Scp2536Events = Exiled.Events.Handlers.Scp2536;
+using Scp559Events = Exiled.Events.Handlers.Scp559;
 
 using System.Collections.Generic;
 using System.IO;
@@ -123,8 +126,8 @@ namespace DiscordLog
 			PlayerEvents.Died += Handlers.OnPlayerDeath;
 			PlayerEvents.DroppingItem += Handlers.OnDroppingItem;
 			PlayerEvents.PickingUpItem += Handlers.OnPickingUpItem;
-            PlayerEvents.InteractingElevator += Handlers.OnInteractingElevator;
-            Scp330Events.DroppingScp330 += Handlers.OnDroppingUpScp330;
+			PlayerEvents.InteractingElevator += Handlers.OnInteractingElevator;
+			Scp330Events.DroppingScp330 += Handlers.OnDroppingUpScp330;
 			Scp330Events.EatenScp330 += Handlers.OnEatenScp330;
 			Scp330Events.InteractingScp330 += Handlers.OnInteractingScp330;
 			Scp244Events.OpeningScp244 += Handlers.OnOpeningScp244;
@@ -145,20 +148,26 @@ namespace DiscordLog
 			PlayerEvents.EscapingPocketDimension += Handlers.OnEscapingPocketDimension;
 			ElevatorChamber.OnElevatorMoved += Handlers.OnElevatorMoved;
 
-            Scp914Events.Activating += Handlers.On914Activating;
+			Scp914Events.Activating += Handlers.On914Activating;
 			Scp049Events.FinishingRecall += Handlers.OnFinishingRecall;
 			Scp3114Events.Revealed += Handlers.OnRevealed;
-            Scp3114Events.Disguised += Handlers.OnDisguised;
-            //LogStaff
-            PlayerEvents.Kicking += Handlers.OnKicking;
+			Scp3114Events.Disguised += Handlers.OnDisguised;
+			//LogStaff
+			PlayerEvents.Kicking += Handlers.OnKicking;
 			PlayerEvents.Banned += Handlers.OnBanned;
-            ServerEvents.Unbanned += Handlers.OnUnbanned;
+			ServerEvents.Unbanned += Handlers.OnUnbanned;
 
-            //PingStaff
-            ServerEvents.LocalReporting += Handlers.OnLocalReporting;
-		}
+			//PingStaff
+			ServerEvents.LocalReporting += Handlers.OnLocalReporting;
 
-		private void UnRegistEvents()
+            // Noël
+            Scp2536Events.OpeningGift -= Handlers.OnOpeningGift;
+            Scp1507Events.UsingTape -= Handlers.OnUsingTape;
+            Scp1507Events.SpawningFlamingos -= Handlers.OnSpawningFlamingos;
+            Scp559Events.Interacting -= Handlers.OnScp559Interacting;
+        }
+
+        private void UnRegistEvents()
 		{
 			ServerEvents.WaitingForPlayers -= Handlers.OnWaintingForPlayers;
 			ServerEvents.RoundStarted -= Handlers.OnRoundStart;
@@ -213,9 +222,15 @@ namespace DiscordLog
             PlayerEvents.Banned -= Handlers.OnBanned;
             ServerEvents.Unbanned -= Handlers.OnUnbanned;
 
-            //PingStaff
-            ServerEvents.LocalReporting -= Handlers.OnLocalReporting;
-			Handlers = null;
+			//PingStaff
+			ServerEvents.LocalReporting -= Handlers.OnLocalReporting;
+
+			// Noël
+            Scp2536Events.OpeningGift -= Handlers.OnOpeningGift;
+			Scp1507Events.UsingTape -= Handlers.OnUsingTape;
+            Scp1507Events.SpawningFlamingos -= Handlers.OnSpawningFlamingos;
+            Scp559Events.Interacting -= Handlers.OnScp559Interacting;
+            Handlers = null;
 		}
 
 		private void RegistPatch()
